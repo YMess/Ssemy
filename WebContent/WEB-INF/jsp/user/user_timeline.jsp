@@ -37,8 +37,8 @@ display: inline-block;"
 		<div class="usercenter">
 		
 						
-						<div> <!-- class="pure-menu pure-menu-open" -->
-						    <!-- <a class="pure-menu-heading">Timeline</a> -->
+						<div class="pure-menu pure-menu-open">
+						    <a class="pure-menu-heading">Timeline</a>
 						 	<ul style="padding-left: 10px;">
 								<c:forEach items="${userTimeline}" var="userTimeline">
 								

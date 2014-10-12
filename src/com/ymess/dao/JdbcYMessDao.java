@@ -48,9 +48,9 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 	
 	private static final String ADD_USER = "insert into users(username,password,authority,enabled) values (?,?,?,?) ";
 	
-	private static final String INSERT_QUESTION = "insert into questions (question_id,author_email_id,question_desc,created_date,updated_date,keywords,author_first_name,author_last_name,topics) values (?,?,?,?,?,?,?,?,?)";
+	private static final String INSERT_QUESTION = "insert into questions (question_id,author_email_id,question_title,question_desc,created_date,updated_date,keywords,author_first_name,author_last_name,topics) values (?,?,?,?,?,?,?,?,?,?)";
 	
-	private static final String GET_USER_QUESTIONS = "select question_id,question_desc,updated_date,last_answer,author_email_id,author_first_name,author_last_name,is_image_attached,topics from questions where author_email_id=?";
+	private static final String GET_USER_QUESTIONS = "select question_id,question_title,question_desc,updated_date,last_answer,author_email_id,author_first_name,author_last_name,is_image_attached,topics from questions where author_email_id=?";
 	
 	private static final String CHECK_IF_KEYWORD_EXISTS = "select count(*) from question_keywords where keyword = ?";
 	
@@ -72,7 +72,7 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 	
 	private static final String UPDATE_USER_PROFILE_TIMELINE = "insert into user_timeline(user_email_id, user_timestamp, activity, user_first_name, user_last_name, profile_updated_first_name, profile_updated_last_name, profile_updated_organization, profile_updated_designation, profile_updated_previous_organizations, profile_updated_interests, is_updated_profile) values(?,?,?,?,?,?,?,?,?,?,?,?)";
 	
-	private static final String ADD_QUESTION_TIMELINE = "insert into user_timeline(user_email_id, user_timestamp, activity, user_first_name, user_last_name,question_posted_id, question_posted_desc,question_is_image_attached, question_topics, question_updated_date, is_posted_question) values(?,?,?,?,?,?,?,?,?,?,?)";
+	private static final String ADD_QUESTION_TIMELINE = "insert into user_timeline(user_email_id, user_timestamp, activity, user_first_name, user_last_name,question_posted_id,question_posted_title ,question_posted_desc,question_is_image_attached, question_topics, question_updated_date, is_posted_question) values(?,?,?,?,?,?,?,?,?,?,?,?)";
 	
 	private static final String ADD_ANSWER_TIMELINE = "insert into user_timeline(user_email_id, user_timestamp, activity, user_first_name, user_last_name, answered_question_id, answered_question_desc, answered_question_email_id, answered_answered_id, answered_answered_desc, is_answered_question) values(?,?,?,?,?,?,?,?,?,?,?)";	
 	
@@ -135,11 +135,12 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 				byte[] originalImage = question.getQuestionImage().getBytes();
 				byte[] compressedImage = YMessCommonUtility.returnCompressedImage(originalImage);
 				
-				final String INSERT_QUESTION_WITH_IMAGE = "insert into questions (question_id,author_email_id,question_desc,created_date,updated_date,keywords,author_first_name,author_last_name,is_image_attached,image_data,image_name,topics) values (?,?,?,?,?,?,?,?,?,?,?,?)";
+				final String INSERT_QUESTION_WITH_IMAGE = "insert into questions (question_id,author_email_id,question_title,question_desc,created_date,updated_date,keywords,author_first_name,author_last_name,is_image_attached,image_data,image_name,topics) values (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 						getJdbcTemplate().update(INSERT_QUESTION_WITH_IMAGE,
 								new Object[]{
 								currentQuestionId,
 								question.getAuthorEmailId(),
+								question.getQuestionTitle(),
 								question.getQuestionDescription(),
 								currentTime,
 								currentTime,
@@ -155,6 +156,7 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 								Types.BIGINT,
 								Types.VARCHAR,
 								Types.VARCHAR,
+								Types.VARCHAR,
 								Types.TIMESTAMP,
 								Types.TIMESTAMP,
 								Types.ARRAY,
@@ -167,8 +169,8 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 								
 						});
 						
-						getJdbcTemplate().update(ADD_QUESTION_TIMELINE, new Object[]{question.getAuthorEmailId(),new Date(),ActivityConstants.POSTED_QUESTION,userDetails.getFirstName(),userDetails.getLastName(),currentQuestionId,question.getQuestionDescription(),true,question.getTopics(),currentTime ,YMessCommonUtility.IS_POSTED_QUESTIONS},
-								new int[]{Types.VARCHAR,Types.TIMESTAMP,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR, Types.BIGINT,Types.VARCHAR,Types.BOOLEAN,Types.ARRAY,Types.TIMESTAMP,Types.BOOLEAN}
+						getJdbcTemplate().update(ADD_QUESTION_TIMELINE, new Object[]{question.getAuthorEmailId(),new Date(),ActivityConstants.POSTED_QUESTION,userDetails.getFirstName(),userDetails.getLastName(),currentQuestionId,question.getQuestionTitle(),question.getQuestionDescription(),true,question.getTopics(),currentTime ,YMessCommonUtility.IS_POSTED_QUESTIONS},
+								new int[]{Types.VARCHAR,Types.TIMESTAMP,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR, Types.BIGINT,Types.VARCHAR,Types.VARCHAR,Types.BOOLEAN,Types.ARRAY,Types.TIMESTAMP,Types.BOOLEAN}
 						);
 						
 			} catch (IOException e) {
@@ -179,19 +181,20 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 		else /** Only Text Question */
 		{
 			getJdbcTemplate().update(INSERT_QUESTION,
-					new Object[]{currentQuestionId,question.getAuthorEmailId(),question.getQuestionDescription(),
+					new Object[]{currentQuestionId,question.getAuthorEmailId(),question.getQuestionTitle(),question.getQuestionDescription(),
 					currentTime,currentTime,question.getKeywords(),userDetails.getFirstName(),userDetails.getLastName(),question.getTopics()},
-					new int[]{Types.BIGINT,Types.VARCHAR,Types.VARCHAR,Types.TIMESTAMP,Types.TIMESTAMP,Types.ARRAY,Types.VARCHAR,Types.VARCHAR,Types.ARRAY}
+					new int[]{Types.BIGINT,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.TIMESTAMP,Types.TIMESTAMP,Types.ARRAY,Types.VARCHAR,Types.VARCHAR,Types.ARRAY}
 					);
+			getJdbcTemplate().update(ADD_QUESTION_TIMELINE, new Object[]{question.getAuthorEmailId(),new Date(),ActivityConstants.POSTED_QUESTION,userDetails.getFirstName(),userDetails.getLastName(),currentQuestionId,question.getQuestionTitle(),question.getQuestionDescription(),false,question.getTopics(),currentTime ,YMessCommonUtility.IS_POSTED_QUESTIONS},
+					new int[]{Types.VARCHAR,Types.TIMESTAMP,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR, Types.BIGINT,Types.VARCHAR,Types.VARCHAR,Types.BOOLEAN,Types.ARRAY,Types.TIMESTAMP,Types.BOOLEAN}
+			);
 		
 		}
 		addQuestionToKeywords(question);
 		
 		addQuestionTopics(question.getTopics(),currentQuestionId);
 		
-		getJdbcTemplate().update(ADD_QUESTION_TIMELINE, new Object[]{question.getAuthorEmailId(),new Date(),ActivityConstants.POSTED_QUESTION,userDetails.getFirstName(),userDetails.getLastName(),currentQuestionId,question.getQuestionDescription(),false,question.getTopics(),currentTime ,YMessCommonUtility.IS_POSTED_QUESTIONS},
-				new int[]{Types.VARCHAR,Types.TIMESTAMP,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR, Types.BIGINT,Types.VARCHAR,Types.BOOLEAN,Types.ARRAY,Types.TIMESTAMP,Types.BOOLEAN}
-		);
+		
 		
 	}
 
@@ -401,6 +404,7 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 		public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 			Question question = new Question();
 			question.setQuestionId(rs.getLong("question_id"));
+			question.setQuestionTitle(rs.getString("question_title"));
 			question.setQuestionDescription(rs.getString("question_desc"));
 			question.setUpdatedDate(rs.getDate("updated_date"));
 			question.setLastAnswer(rs.getString("last_answer"));
@@ -490,7 +494,7 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 		List<Question> questions = new ArrayList<Question>();
 		try
 		{
-			final String GET_DASHBOARD_QUESTIONS = "select question_id,question_desc,author_email_id,last_answer,updated_date,author_first_name,author_last_name,is_image_attached from questions where question_id in ("+finalQuestionIds+") allow filtering";
+			final String GET_DASHBOARD_QUESTIONS = "select question_id,question_title,question_desc,author_email_id,last_answer,updated_date,author_first_name,author_last_name,is_image_attached from questions where question_id in ("+finalQuestionIds+") allow filtering";
 			questions = getJdbcTemplate().query(GET_DASHBOARD_QUESTIONS,new QuestionMapper());
 		}
 		catch(EmptyResultDataAccessException emptyResultSet)
@@ -532,6 +536,7 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 			
 			Long questionIdLong = Long.parseLong(questionId);
 			User userDetails = getUserDetailsByEmailId(loggedInUserEmailId);
+
 			
 			getJdbcTemplate().update(ADD_ANSWER,
 				new Object[]{questionIdLong,newAnswerId,new Date(),answer,loggedInUserEmailId,userDetails.getFirstName(),userDetails.getLastName()},
@@ -1362,12 +1367,20 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 			timeLine.setHasUpdatedProfile(rs.getBoolean("is_updated_profile"));
 			
 			timeLine.setQuestionPostedId(rs.getLong("question_posted_id"));
+			timeLine.setQuestionPostedTitle(rs.getString("question_posted_title"));
 			timeLine.setQuestionPostedDesc(rs.getString("question_posted_desc"));
+			timeLine.setQuestionIsImageAttached(rs.getBoolean("question_is_image_attached"));
+			timeLine.setQuestionTopics((Set<String>)rs.getObject("question_topics"));
+			timeLine.setQuestionUpdatedDate(rs.getDate("question_updated_date"));
+			timeLine.setQuestionLastAnswer(rs.getString("question_last_answer"));
 			timeLine.setHasPostedQuestion(rs.getBoolean("is_posted_question"));
 			
-			timeLine.setAnsweredQuestionEmailId(rs.getString("answered_question_id"));
+			timeLine.setAnsweredQuestionId(rs.getLong("answered_question_id"));
+			timeLine.setAnsweredQuestionTitle(rs.getString("answered_question_title"));
 			timeLine.setAnsweredQuestionDesc(rs.getString("answered_question_desc"));
 			timeLine.setAnsweredQuestionEmailId(rs.getString("answered_question_email_id"));
+			timeLine.setAnsweredQuestionIsImageAttached(rs.getBoolean("answered_question_is_image_attached"));
+			timeLine.setAnsweredQuestionTopics((Set<String>)rs.getObject("answered_question_topics"));
 			timeLine.setAnsweredAnsweredId(rs.getLong("answered_answered_id"));
 			timeLine.setAnsweredAnsweredDesc(rs.getString("answered_answered_desc"));
 			timeLine.setHasAnsweredQuestion(rs.getBoolean("is_answered_question"));

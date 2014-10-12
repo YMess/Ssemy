@@ -48,7 +48,14 @@ else
 						    <a class="pure-menu-heading">Post Question</a>
 		
 				<form:form action="user_post_question.htm" modelAttribute="question" enctype="multipart/form-data" id="postQuestionForm">
-					<form:textarea style="width: 70%;height: 200px;" path="questionDescription" placeholder="Your Question?"></form:textarea>
+				
+				    <form:textarea style="width: 70%;height: 30px;" path="questionTitle" placeholder="Your Question Title?"></form:textarea>
+			        <br/>
+			        <br/>	
+			        <form:errors path="questionTitle"></form:errors>
+			        <br/>
+			        <br/>
+					<form:textarea style="width: 70%;height: 200px;" path="questionDescription" placeholder="Your Question Description?"></form:textarea>
 					<br>
 					<br>
 					<form:errors path="questionDescription"></form:errors>

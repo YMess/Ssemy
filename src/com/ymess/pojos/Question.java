@@ -22,6 +22,9 @@ public class Question {
 
 	@NotEmpty(message="Please Add Question Details")
 	private String questionDescription;
+	@NotEmpty(message="Please Add Question Title")
+	private String questionTitle;
+	
 	
 	private String authorEmailId;
 	private Date createdDate;
@@ -171,6 +174,12 @@ public class Question {
 		this.lastName = lastName;
 	}
 	
-	
+	public String getQuestionTitle() {
+		return questionTitle;
+	}
+
+	public void setQuestionTitle(String questionTitle) {
+		this.questionTitle = questionTitle;
+	}
 
 }

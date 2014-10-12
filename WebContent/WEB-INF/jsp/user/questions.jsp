@@ -49,10 +49,12 @@ function editQuestionDesc(questionId)
 				<c:forEach items="${questions}" var="question">
 					<li>
 					<c:set var="questionId" value="${question.questionId}"/>
-					 <a href="user_question_responses.htm?qId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("questionId")).getBytes()))%>"><c:out value="${question.questionDescription }"></c:out></a>	
+					 <a href="user_question_responses.htm?qId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("questionId")).getBytes()))%>"><c:out value="${question.questionTitle }"></c:out></a>	
 						  <c:if test="${question.isImageAttached eq true }">
 						  	<img height="60%" width="50%" src="user_question_image.htm?qId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("questionId")).getBytes()))%>">
 						 <br>
+						 <c:out value="${question.questionDescription }"></c:out>
+						 <br/>
 						  </c:if>
 						  
 						  

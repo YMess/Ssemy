@@ -113,12 +113,14 @@ $().ready(function(){
 								 	<c:set var="emailId" value="${question.authorEmailId }"></c:set>
 								 	
 									<a class="pure-menu-heading" href="user_question_responses.htm?qId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("questionId")).getBytes()))%>">
-									<span><c:out value="${question.questionDescription }"></c:out></span></a>
+									<span><c:out value="${question.questionTitle }"></c:out></span></a>
 									
 									 <c:if test="${question.isImageAttached eq true }">
 						  				<img height="60%" width="50%" src="user_question_image.htm?qId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("questionId")).getBytes()))%>">
 						 				 <br>
 						 			 </c:if>
+						 			<c:out value="${question.questionDescription }"></c:out>
+						 			<br/>
 									<span>Posted By :</span> <a class="pure-menu-heading" href="user_view_profile.htm?aId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("emailId")).getBytes()))%>">
 									<c:out value="${question.firstName }"></c:out>&nbsp;<c:out value="${question.lastName }"></c:out></a>
 									

@@ -28,6 +28,7 @@ public class TimeLine {
 	private boolean hasUpdatedProfile;
 	
 	private Long questionPostedId;
+	private String questionPostedTitle;
 	private String questionPostedDesc;
 	private boolean questionIsImageAttached;
 	private Set<String> questionTopics;
@@ -36,8 +37,36 @@ public class TimeLine {
 	private boolean hasPostedQuestion;
 
 	private Long answeredQuestionId;
+	private String answeredQuestionTitle;
 	private String answeredQuestionDesc;
 	private String answeredQuestionEmailId;
+	private boolean answeredQuestionIsImageAttached;
+	private Set<String> answeredQuestionTopics;
+	public String getQuestionPostedTitle() {
+		return questionPostedTitle;
+	}
+	public void setQuestionPostedTitle(String questionPostedTitle) {
+		this.questionPostedTitle = questionPostedTitle;
+	}
+	public String getAnsweredQuestionTitle() {
+		return answeredQuestionTitle;
+	}
+	public void setAnsweredQuestionTitle(String answeredQuestionTitle) {
+		this.answeredQuestionTitle = answeredQuestionTitle;
+	}
+	public boolean isAnsweredQuestionIsImageAttached() {
+		return answeredQuestionIsImageAttached;
+	}
+	public void setAnsweredQuestionIsImageAttached(
+			boolean answeredQuestionIsImageAttached) {
+		this.answeredQuestionIsImageAttached = answeredQuestionIsImageAttached;
+	}
+	public Set<String> getAnsweredQuestionTopics() {
+		return answeredQuestionTopics;
+	}
+	public void setAnsweredQuestionTopics(Set<String> answeredQuestionTopics) {
+		this.answeredQuestionTopics = answeredQuestionTopics;
+	}
 	private Long answeredAnsweredId;
 	private String answeredAnsweredDesc;
 	private boolean hasAnsweredQuestion;
