@@ -1,0 +1,197 @@
+@CHARSET "ISO-8859-1";
+#text
+{
+float:left;
+width:100px;
+}
+
+/*CSS for dropdown box*/
+select
+{
+width: 200px;
+height: 29px;
+border-radius: 3px;
+border: 1px solid #CCC;
+font-weight: 200;
+font-size: 15px;
+font-family: Verdana;
+box-shadow: 1px 1px 5px #CCC;
+}
+select: hover
+{
+width: 200px;
+height: 29px;
+border-radius: 3px;
+border: 1px solid #CCC;
+font-weight: 200;
+font-size: 15px;
+font-family: Verdana;
+box-shadow: 1px 1px 5px #CCC;
+}
+
+/*CSS for input textbox and password*/
+
+input[type='text'], input[type='password'],input[type='email']
+{
+width: 200px;
+height: 29px;
+border-radius: 3px;
+border: 1px solid #CCC;
+padding: 8px;
+font-weight: 200;
+font-size: 15px;
+font-family: Verdana;
+box-shadow: 1px 1px 5px #CCC;
+}
+
+input[type='text']:hover, input[type='password']:hover,input[type='email']:hover
+{
+width: 200px;
+height: 29px;
+border-radius: 3px;
+border: 1px solid #aaa;
+padding: 8px;
+font-weight: 200;
+font-size: 15px;
+font-family: Verdana;
+box-shadow: 1px 1px 5px #CCC;
+}
+
+/*CSS for textarea*/
+
+textarea
+{
+width: 200px;
+height: 90px;
+border-radius: 3px;
+border: 1px solid #CCC;
+padding: 8px;
+font-weight: 200;
+font-size: 15px;
+font-family: Verdana;
+box-shadow: 1px 1px 5px #CCC;
+}
+textarea:hover
+{
+width: 200px;
+height: 90px;
+border-radius: 3px;
+border: 1px solid #aaa;
+padding: 8px;
+font-weight: 200;
+font-size: 15px;
+font-family: Verdana;
+box-shadow: 1px 1px 5px #CCC;
+}
+
+/*input type for submit button*/
+
+input[type='submit']
+{
+width: 150px;
+height: 34px;
+border: 2px solid white;
+background-color:#E02D2D;
+}
+input[type='submit']:hover
+{
+width: 150px;
+height: 34px;
+border: 2px solid white;
+background-color:#6AB110;
+color:#fff;
+}
+
+form input:valid {
+  background: white;
+}
+
+form.go-bottom label {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  transition: 0.2s;
+}
+form.go-bottom input:focus + label
+  top: 100%;
+  margin-top: -16px;
+}
+
+a, a:link, a:active, a:visited {
+    color: #00f;
+    cursor: pointer;
+}
+a:hover {
+    color: #0ff;
+}
+
+
+div.header{
+	height:15%;
+	float:left;
+}
+ 
+h2 {
+  font: 400 40px/1.5 Helvetica, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+ 
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+ 
+li {
+  font: 200 20px/1.5 Helvetica, Verdana, sans-serif;
+  border-bottom: 1px solid #ccc;
+}
+ 
+li:last-child {
+  border: none;
+}
+ 
+li a {
+  text-decoration: none;
+  color: #1582D8;
+  display: block;
+ 
+  -webkit-transition: font-size 0.3s ease, background-color 0.3s ease;
+  -moz-transition: font-size 0.3s ease, background-color 0.3s ease;
+  -o-transition: font-size 0.3s ease, background-color 0.3s ease;
+  -ms-transition: font-size 0.3s ease, background-color 0.3s ease;
+  transition: font-size 0.3s ease, background-color 0.3s ease;
+}
+ 
+li a:hover {
+  font-size: 30px;
+  background: #E41F1F;
+}
+
+.clear { clear:both; }
+
+.width80 {
+	width: 80%;
+}
+
+.ptop20 {
+	padding-top: 20px;
+}
+
+div.userright{
+	float:right;
+	width:15%;
+}
+div.usercenter{
+	float:left;
+	width:65%;
+	padding-left: 20px;
+}
+div.userleft{
+	float:left;
+	width:15%;
+}
+

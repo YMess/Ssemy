@@ -1,4 +1,4 @@
-Ssemy
+YMess
 =====
 
-Organize your Digital Collection
+YMess is where we organize your digital collection.
