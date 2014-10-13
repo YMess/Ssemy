@@ -12,4 +12,10 @@
 hs_err_pid*
 
 build/
-
+.svn/
+bin/
+.class
+.settings/
+.classpath
+.project
+.metadata/
