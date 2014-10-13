@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.ymess.exceptions.EmptyResultSetException;
 import com.ymess.pojos.Question;
+import com.ymess.pojos.SearchParameters;
 import com.ymess.service.interfaces.YMessService;
 import com.ymess.util.JSPMappings;
 import com.ymess.util.LoggerConstants;
@@ -99,7 +100,7 @@ public class LoginController
 		{
 			logger.error(ex.getLocalizedMessage());
 		}
-		
+		model.addAttribute("searchParameters",new SearchParameters());
 		model.addAttribute("questions",questions);
 		logger.info(LoggerConstants.DASHBOARD_PAGE);
 		return JSPMappings.DASHBOARD_PAGE;

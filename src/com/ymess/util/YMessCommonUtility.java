@@ -6,6 +6,7 @@ package com.ymess.util;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -49,6 +50,12 @@ public class YMessCommonUtility {
 	public static final String EQUAL_SET = "equalSet";
 	public static final String DELETED_ITEMS = "deletedItems";
 	public static final String ADDED_ITEMS = "addedItems";
+	
+	public static final String INDEX_LOCATION = "F://Ssemy//Indexes";
+	
+	public static final String QUESTION_IDENTIFIER_INDEXING = "Questions";
+	public static final String PEOPLE_IDENTIFIER_INDEXING = "People";
+	public static final String FILE_IDENTIFIER_INDEXING = "Files";
 	
 	/**
 	 * Returns MD5 hashed password

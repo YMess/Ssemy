@@ -54,6 +54,8 @@ public class URLMappings {
 	public static final String REDIRECT_SUCCESS_FILE_UPLOAD = "redirect:"+FILES+"?success='File Uploaded Successfully'"; //FileActivitiesController
 	public static final String DOWNLOAD_FILE = "download_file.htm"; //FileActivitiesController
 	
+	public static final String SEARCH = "search.htm"; //SearchController
+	
 
 
 }

@@ -87,7 +87,7 @@ $().ready(function(){
 		<%@ include file="/WEB-INF/jsp/include/header.jsp" %>
 	</div>
 	
-	
+	 <div class="clear"></div>
 	<div>
 		<div class="userleft"><%@include file="/WEB-INF/jsp/include/left.jsp" %></div>
 		<div class="usercenter">
