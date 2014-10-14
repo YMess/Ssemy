@@ -399,7 +399,6 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 	private static class QuestionMapper
 			implements
 				ParameterizedRowMapper<Question> {
-		@SuppressWarnings("unchecked")
 		@Override
 		public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 			Question question = new Question();
@@ -565,6 +564,7 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 
 	private class AnswerMapper implements ParameterizedRowMapper<Answer>
 	{
+		@SuppressWarnings("unchecked")
 		@Override
 		public Answer mapRow(ResultSet rs, int arg1) throws SQLException {
 			Answer answer = new Answer();
@@ -760,11 +760,12 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 	 * @author rvishwakarma
 	 * @param user
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public void updateUserProfile(User user) {
 
 		final String GET_USER_PREVIOUS_INTERESTS = "select interests from users_data where email_id=?";
-		Set<String> previousInterests = getJdbcTemplate().queryForObject(GET_USER_PREVIOUS_INTERESTS, Set.class,user.getUserEmailId());
+		Set<String> previousInterests = (Set<String>) getJdbcTemplate().queryForObject(GET_USER_PREVIOUS_INTERESTS, Set.class,user.getUserEmailId());
 		
 		Set<String> previousOrganizations = new HashSet<String>();
 		Set<String> interests = new HashSet<String>();
@@ -1332,7 +1333,7 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 	public List<TimeLine> getUserTimeLine(String loggedInUserEmail) throws EmptyResultSetException {
 		
 		final String GET_USER_TIMELINE = "select * from user_timeline where user_email_id=? order by user_timestamp asc";
-		Map<String,Date> timelineMap = new HashMap<String, Date>();
+
 		List<TimeLine> timeline = new ArrayList<TimeLine>();
 		try{
 		timeline = getJdbcTemplate().query(GET_USER_TIMELINE,new UserTimeLineMapper(),loggedInUserEmail);
@@ -1346,6 +1347,7 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 	
 	private class UserTimeLineMapper implements ParameterizedRowMapper<TimeLine>
 	{
+		@SuppressWarnings("unchecked")
 		@Override
 		public TimeLine mapRow(ResultSet rs, int arg1) throws SQLException {
 			TimeLine timeLine = new TimeLine();
@@ -1429,11 +1431,12 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 	 * @return  List<Question> (questions in a topic)
 	 * @throws EmptyResultSetException 
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<Question> getQuestionsInTopic(String topicName) throws EmptyResultSetException {
 
 		String GET_QUESTION_IDS_IN_TOPIC = "select question_ids from topics where topic=?";
-		Set<Long> questionIds = getJdbcTemplate().queryForObject(GET_QUESTION_IDS_IN_TOPIC, HashSet.class,topicName);
+		Set<Long> questionIds = (Set<Long>) getJdbcTemplate().queryForObject(GET_QUESTION_IDS_IN_TOPIC, HashSet.class,topicName);
 		
 		StringBuilder questionIdsSB = new StringBuilder();
 		String questionIdsString = "";
@@ -1586,6 +1589,7 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 	
 	private class FileDetailsMapper implements ParameterizedRowMapper<File>
 	{
+		@SuppressWarnings("unchecked")
 		@Override
 		public File mapRow(ResultSet rs, int arg1) throws SQLException {
 			File fileDetails = new File();

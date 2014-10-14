@@ -36,7 +36,12 @@ public class LuceneIndexer
 		private static final String INDEX_USER_DETAILS = "select email_id,first_name,last_name,profile_last_updated from users_data";
 		private static final String INDEX_FILE_DETAILS = "select file_id,user_email_id,filename,topics,upload_time from files";
 		
-		public static void main(String[] args) throws Exception 
+		/*public static void main(String[] args) throws Exception 
+		{
+					
+		}*/
+		
+		public static void invokeIndexing()
 		{
 			File indexDir = new File(INDEX_DIR);
 			
@@ -86,7 +91,7 @@ public class LuceneIndexer
 			catch (Exception e) 
 			{  
 			  e.printStackTrace();  
-			} 		
+			} 
 		}
 		
 		@SuppressWarnings("deprecation")

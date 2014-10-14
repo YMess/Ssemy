@@ -19,7 +19,6 @@ import com.ymess.service.interfaces.YMessService;
 import com.ymess.util.JSPMappings;
 import com.ymess.util.LoggerConstants;
 import com.ymess.util.URLMappings;
-import com.ymess.validators.UserValidator;
 
 /**
  * Contains all the methods of User registration
