@@ -56,6 +56,9 @@ public class YMessCommonUtility {
 	public static final String PEOPLE_IDENTIFIER_INDEXING = "People";
 	public static final String FILE_IDENTIFIER_INDEXING = "Files";
 	
+	public static final String KEYWORD_INDEXES = "F://Ssemy//Indexes//Keywords";
+	public static final String SUGGESTER_INDEXES = "F://Ssemy//Indexes//Suggester";
+	
 	/**
 	 * Returns MD5 hashed password
 	 * @author balaji i
