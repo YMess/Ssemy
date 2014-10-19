@@ -22,6 +22,7 @@ public class Question {
 
 	@NotEmpty(message="Please Add Question Details")
 	private String questionDescription;
+	
 	@NotEmpty(message="Please Add Question Title")
 	private String questionTitle;
 	

@@ -6,15 +6,20 @@ package com.ymess.util;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.imageio.IIOImage;
@@ -25,6 +30,11 @@ import javax.imageio.stream.ImageOutputStream;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
 
 /**
  * @author balaji i
@@ -52,12 +62,17 @@ public class YMessCommonUtility {
 	
 	public static final String INDEX_LOCATION = "F://Ssemy//Indexes";
 	
+	public static final String INDEX_LOCATION_QUESTIONS = INDEX_LOCATION + "//Questions";
+	public static final String INDEX_LOCATION_PEOPLE = INDEX_LOCATION + "//People";
+	public static final String INDEX_LOCATION_FILES = INDEX_LOCATION  + "//Files";
+	public static final String INDEX_LOCATION_TOPICS = INDEX_LOCATION + "//Topics";
+	public static final String SUGGESTER_INDEXES = INDEX_LOCATION + "//Suggester";
+	
 	public static final String QUESTION_IDENTIFIER_INDEXING = "Questions";
 	public static final String PEOPLE_IDENTIFIER_INDEXING = "People";
 	public static final String FILE_IDENTIFIER_INDEXING = "Files";
+	public static final String TOPIC_IDENTIFIER_INDEXING = "Topics";
 	
-	public static final String KEYWORD_INDEXES = "F://Ssemy//Indexes//Keywords";
-	public static final String SUGGESTER_INDEXES = "F://Ssemy//Indexes//Suggester";
 	
 	/**
 	 * Returns MD5 hashed password
@@ -248,6 +263,67 @@ public class YMessCommonUtility {
 				mergedItems.put(DELETED_ITEMS, deletedItems);
 			}
 		return mergedItems;
+	}
+		
+		/**
+		 * Returns all the popular topics with highest number of files
+		 * @author balaji i
+		 * @param indexLocation
+		 * @return List<String>(Popular Topics)
+		 * @throws FileNotFoundException
+		 * @throws ParseException
+		 * @throws IOException
+		 */
+		public static List<String> findPopularTopics(File indexLocation)  throws FileNotFoundException, ParseException, IOException  {
+	    	Directory directory = null;
+			try
+			{
+				directory = FSDirectory.open(indexLocation);
+			}
+			catch(Exception exception)
+			{
+				throw new FileNotFoundException("Indexes not found at "+indexLocation);
+			}
+	    	
+	    	IndexReader indexReader = IndexReader.open(directory);
+			
+	    	long documentCount = indexReader.numDocs();
+	    	Map<String,Long> topicWithFileCount = new HashMap<String, Long>();
+	    	
+	    	for ( int i = 0; i < documentCount; i++)
+	    	{
+	    			Document document = indexReader.document(i);
+
+	    			if(document.get("file_count") != null)
+	    		    	topicWithFileCount.put(document.get("topic"), Long.parseLong(document.get("file_count")));
+	    		    
+	    	}
+	    	indexReader.close();
+	    	
+	    	List<String> keys = new ArrayList<String>();
+	    	
+	    	int maxCounter = 0;
+	    	
+	    	if(topicWithFileCount.size() < 10)
+	    		maxCounter = topicWithFileCount.size();
+	    	else
+	    		maxCounter = 10;
+	    	
+	    	for(int i = 0; i < maxCounter; i++)
+	    	{
+	    		String key = Collections.max(topicWithFileCount.entrySet(), new Comparator<Entry<String,Long>>(){
+	                    @Override
+	                    public int compare(Entry<String, Long> o1, Entry<String, Long> o2) {
+	                        return o1.getValue() > o2.getValue()? 1:-1;
+	                    }
+	                }).getKey() ;
+	    		
+	    		if(!keys.contains(key)) 
+	    			keys.add(key); 
+	    		topicWithFileCount.remove(key);
+	    	}
+	    	
+	    	return keys;
 		}
 		
 }

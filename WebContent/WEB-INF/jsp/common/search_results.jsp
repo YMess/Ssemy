@@ -27,6 +27,33 @@
 	<div>
 		<div class="userleft"><%@include file="/WEB-INF/jsp/include/left.jsp" %></div>
 		<div class="usercenter">
+		<ul>
+			<c:if test="${not empty questions }">
+			Questions Fetched : <c:out value="${questionCount }"/>
+			<br>
+				<c:forEach var="question" items="${questions}"> 
+				
+					<li>
+						<div><c:out value="${question.value.questionTitle }"/></div>
+						<div><c:out value="${question.value.questionDescription }"/></div>
+						<div><c:out value="${question.value.authorEmailId }" /></div>
+					</li>
+				
+				</c:forEach>
+			
+			</c:if>
+			
+			<c:if test="${not empty users }">
+					<li>
+					</li>
+			</c:if>
+			
+			<c:if test="${not empty files }">
+					<li>
+					</li>
+			</c:if>
+		</ul>
+		
 		</div>
 		<div class="userright"><%@include file="/WEB-INF/jsp/include/right.jsp" %></div>
 	</div>

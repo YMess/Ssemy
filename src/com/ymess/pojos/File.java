@@ -92,7 +92,10 @@ public class File {
 	}
 	
 	
-	
+	@Override
+	public int hashCode() {
+		return Integer.parseInt(this.fileId.toString());
+	}
 	
 
 }

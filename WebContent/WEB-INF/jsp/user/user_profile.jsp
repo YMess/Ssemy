@@ -18,74 +18,13 @@
 <script src="js/jquery-ui.js" type="text/javascript"></script>
 <LINK REL=Stylesheet TYPE="text/css" HREF="css/style.css">
 <LINK REL=Stylesheet TYPE="text/css" HREF="css/pure-min.css">
-
-<script type="text/javascript">
-    $('#textarea').textext({
-        plugins : 'tags prompt focus autocomplete ajax arrow',
-        tagsItems : [ 'Basic', 'JavaScript', 'PHP', 'Scala' ],
-        prompt : 'Add one...',
-        ajax : {
-            url : '/manual/examples/data.json',
-            dataType : 'json',
-            cacheResults : true
-        }
-    });
-</script>
   
 <script type="text/javascript">
 	$().ready(function() {
-		 var availableTags = [];
-		  $.ajax({
-			  url:"get_topics.htm",
-			  async:false,
-			  success:function(result){
-	    
-	    for (i = 0; i < result.length; i++) { 
-	        availableTags.push(result[i]);
-	    	}
-	  	}
-	}); 
-		  function split( val ) {
-		      return val.split( /,\s*/ );
-		    }
-		    function extractLast( term ) {
-		      return split( term ).pop();
-		    }
-		 
-		    $( "#interests" )
-		      // don't navigate away from the field on tab when selecting an item
-		      .bind( "keydown", function( event ) {
-		        if ( event.keyCode === $.ui.keyCode.TAB &&
-		            $( this ).autocomplete( "instance" ).menu.active ) {
-		          event.preventDefault();
-		        }
-		      })
-		      .autocomplete({
-		        minLength: 0,
-		        source: function( request, response ) {
-		          // delegate back to autocomplete, but extract the last term
-		          response( $.ui.autocomplete.filter(
-		            availableTags, extractLast( request.term ) ) );
-		        },
-		        focus: function() {
-		          // prevent value inserted on focus
-		          return false;
-		        },
-		        select: function( event, ui ) {
-		          var terms = split( this.value );
-		          // remove the current input
-		          terms.pop();
-		          // add the selected item
-		          terms.push( ui.item.value );
-		          // add placeholder to get the comma-and-space at the end
-		          terms.push( "" );
-		          this.value = terms.join( ", " );
-		          return false;
-		        }
-		      });
+		 $("#suggest").on('change keyup paste',function(){
+		  		suggestTopics();
+		 	}); 
 		  
-		  
-		
 		$('.btnOpenDialog').click(fnOpenNormalDialog);
 		function fnOpenNormalDialog() {
 
@@ -125,6 +64,30 @@
 
 	});
 </script>
+<script type="text/javascript">
+function suggestTopics()
+{
+	alert("Suggested Topics");
+	var topic = $("#suggest").val();
+	alert(topic);
+	var successFlag = false;
+	$.ajax({
+		url : "get_related_topics.htm",
+		data : 'topic=' + topic,
+		async:false,
+		cache:false,
+		success : function(result) {
+			alert(result);
+			successFlag = true;
+		},
+    error:function(data,status,er) { 
+        alert("error: "+data+" status: "+status+" er:"+er);
+    }
+	});
+	
+}
+</script>
+
 </head>
 <body>
 	<c:if test="${ not empty successfullyPostedQuestion }">
@@ -243,6 +206,8 @@
 												id="interests" type="text" class="width80 ptop20"
 												name="interests" value="${userInterests}">
 												
+												
+												<input type="text" id="suggest">
 												<!-- <label for="tags">Tag programming languages: </label>
   												<input id="tags" size="50"> -->
 										</div>

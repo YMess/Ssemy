@@ -344,4 +344,25 @@ public class YMessServiceManager implements YMessService {
 	public File downloadFile(String encodedFileId, String encodedAuthorEmailId) {
 		return yMessDao.downloadFile(encodedFileId,encodedAuthorEmailId);
 	}
+
+	/**
+	 * Gets all the Files uploaded by an User
+	 * @param loggedInUserEmail
+	 * @return List<File>(Files uploaded by an User)
+	 * @throws EmptyResultSetException 
+	 */
+	@Override
+	public List<File> getUserFiles(String loggedInUserEmail) throws EmptyResultSetException {
+		return yMessDao.getUserFiles(loggedInUserEmail);
+	}
+
+	/***
+	 * Gets the popular topics with fileIds
+	 * @author balaji i
+	 * @return Map<String, List<File>>(Popular Topic with files)
+	 */
+	@Override
+	public Map<String, List<File>> getPopularTopicsWithFiles() {
+		return yMessDao.getPopularTopicsWithFiles();
+	}
 }

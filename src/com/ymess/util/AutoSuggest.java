@@ -23,7 +23,7 @@ public class AutoSuggest
 	public List<LookupResult> returnSuggestedWords(String enteredText)
 	{
 		//File containing Indexes for Searched Keywords and their Frequency
-		 File indexDirectory = new File(YMessCommonUtility.KEYWORD_INDEXES);
+		 File indexDirectory = new File(YMessCommonUtility.INDEX_LOCATION_TOPICS);
 		 
 		 //File created for AnalysingInfixSuggester containing it's own version of Indexes used to suggest Keywords
 		 File suggesterDirectory = new File(YMessCommonUtility.SUGGESTER_INDEXES);
@@ -33,12 +33,11 @@ public class AutoSuggest
 		
 		try
 		{
-		
 			   //Used to read pre-generated Indexes from indexDirectory
 				FSDirectory topicDirectory = FSDirectory.open(indexDirectory); 
 				
 				//Creating DocumentDictionary to read Indexes
-				DocumentDictionary documentDictionary = new DocumentDictionary(IndexReader.open(topicDirectory), "topics", "topic_count");
+				DocumentDictionary documentDictionary = new DocumentDictionary(IndexReader.open(topicDirectory), "topic","topic");
 				
 				//Open Suggester Directory
 				FSDirectory fsDirectoryForSuggesterIndexes= FSDirectory.open(suggesterDirectory);
@@ -66,7 +65,7 @@ public class AutoSuggest
 		{
 			e.printStackTrace();
 		}
-		if(null != results || results.size() != 0)
+		if(null != results)
 			return results;
 		
 		else throw new EmptyResultDataAccessException(1);

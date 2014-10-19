@@ -6,7 +6,9 @@ package com.ymess.controllers;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -45,16 +47,25 @@ public class FileActivitiesController {
 	@RequestMapping(value = URLMappings.FILES)
 	String loadFilesPage(Model model)
 	{
-		List<File> files = new ArrayList<File>();
+		String loggedInUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+		
+		List<File> userFiles = new ArrayList<File>();
+		List<File> sharedFiles = new ArrayList<File>();
+		Map<String, List<File>> popularFiles = new HashMap<String, List<File>>();
 		try {
-			
-			files = yMessService.getAllSharedFiles();
+			if(null != loggedInUserEmail && !loggedInUserEmail.isEmpty())
+				userFiles = yMessService.getUserFiles(loggedInUserEmail);
+		popularFiles = yMessService.getPopularTopicsWithFiles();
+		sharedFiles = yMessService.getAllSharedFiles();
+		
 		} catch (EmptyResultSetException e) {
 			logger.error(e.getMessage());
 			e.printStackTrace();
 		}
+		model.addAttribute("userFiles",userFiles);
 		model.addAttribute("file",new File());
-		model.addAttribute("files",files);
+		model.addAttribute("sharedFiles",sharedFiles);
+		model.addAttribute("popularFiles",popularFiles);
 		return JSPMappings.FILES;
 	}
 	

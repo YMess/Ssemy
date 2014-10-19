@@ -12,6 +12,14 @@
 <title>Files</title>
 
 <style>
+
+li.main
+{
+	display: inline;
+	list-style-type: none;
+	padding-left:20px;
+	float:left;
+}
 .height30{
 float:left;
 height:30%;
@@ -64,12 +72,13 @@ border: medium;
 				<div class="clear"></div>
 		</div>
 		
-		
 		<div style="float:left;width:100%;padding-top:30px;">
+						<p style="float:left;padding-left: 45%;">	MyFiles</p>
 		<form>
 	<fieldset>
 		<table class="width100">
 			<thead>
+			
 				<tr>
 					<th style="width:35%;">FileName</th>
 					<th style="width:20%;">FileSize</th>
@@ -77,15 +86,15 @@ border: medium;
 				</tr>
 			</thead>
 			<tbody>
-			<c:forEach items="${files}" var="file">
+			<c:forEach items="${userFiles}" var="userFile">
 				<tr>
-				<c:set var="fileId"  value="${file.fileId }"/>
-				<c:set var="author"  value="${file.authorEmailId }"/>
+				<c:set var="fileId"  value="${userFile.fileId }"/>
+				<c:set var="author"  value="${userFile.authorEmailId }"/>
 					<td style="padding-left:70px;"> 
-						<a href="download_file.htm?fileId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("fileId")).getBytes()))%>&author=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("author")).getBytes()))%>"><c:out value="${file.filename}" /></a>
+						<a href="download_file.htm?fileId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("fileId")).getBytes()))%>&author=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("author")).getBytes()))%>"><c:out value="${userFile.filename}" /></a>
 					</td>
 					<td style="padding-left:80px;">
-							<c:out value="${file.fileSize}" />
+							<c:out value="${userFile.fileSize}" />
 					</td>
 					<td style="padding-left:110px;">
 						<div style="float:left;"><a href="delete_file.htm?fileId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("fileId")).getBytes()))%>&author=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("author")).getBytes()))%>">Delete</a></div>
@@ -97,6 +106,34 @@ border: medium;
 		</table>
 	</fieldset>
 </form>
+		</div>
+		<div class="clear"></div>
+		<div style="width:100%;float:left;">
+				<p style="padding-left: 45%;padding-top: 20px;">	Popular Topics</p>
+				<div id="navcontainer">
+					<ul id="navlist">
+					
+					<c:forEach var="popularFile" items="${popularFiles}">
+					
+					<li id="active" class="main"><a href="#" id="current"><c:out value="${popularFile.key }"/></a>
+					   <ul>
+					  
+					   <c:forEach var="popularFileDetails" items="${popularFile.value}">
+					  
+					       <li>
+					       	<a href="view_file_details.htm"><c:out value="${popularFileDetails.filename}"/></a><br>
+					       	<c:out value="${popularFileDetails.fileSize }"/>
+					       </li>
+					    </c:forEach>    
+					    
+					    </ul>
+					    
+					    </li>
+				 </c:forEach>	    
+					</ul>
+				</div>
+									
+				
 		</div>
 		
 		</div>

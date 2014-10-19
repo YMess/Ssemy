@@ -13,11 +13,7 @@ public class RunScheduler {
 	@Scheduled(cron="0 0/1 * * * ?") 
 	public void execute() { 
 		System.out.println("Creating Indexes "+new Date()); 
-		
-		//Lucene Indexes to be Invoked
-		
-		System.out.println("Indexing ");
-		 LuceneIndexer.invokeIndexing();
-		 System.out.println("Indexed");
+		//LuceneIndexer.invokeIndexing();
+		System.out.println("Successfully Indexed "+ new Date());
 	}
 }

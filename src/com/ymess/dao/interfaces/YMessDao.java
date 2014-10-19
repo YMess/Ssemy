@@ -245,4 +245,19 @@ public interface YMessDao {
 	 */
 	File downloadFile(String encodedFileId, String encodedAuthorEmailId);
 
+	/**
+	 * Gets all the Files uploaded by an User
+	 * @param loggedInUserEmail
+	 * @return List<File>(Files uploaded by an User)
+	 * @throws EmptyResultSetException 
+	 */
+	List<File> getUserFiles(String loggedInUserEmail) throws EmptyResultSetException;
+
+	/***
+	 * Gets the popular topics with fileIds
+	 * @author balaji i
+	 * @return Map<String, List<File>>(Popular Topic with files)
+	 */
+	Map<String, List<File>> getPopularTopicsWithFiles();
+
 }

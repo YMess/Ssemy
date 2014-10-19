@@ -3,6 +3,7 @@
  */
 package com.ymess.dao;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,6 +18,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
@@ -29,6 +31,7 @@ import com.ymess.pojos.File;
 import com.ymess.pojos.Keyword;
 import com.ymess.pojos.Question;
 import com.ymess.pojos.TimeLine;
+import com.ymess.pojos.Topic;
 import com.ymess.pojos.User;
 import com.ymess.util.ActivityConstants;
 import com.ymess.util.MessageConstants;
@@ -1536,31 +1539,33 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 				new int[]{Types.BIGINT,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.BOOLEAN,Types.ARRAY,Types.BINARY,Types.TIMESTAMP,Types.VARCHAR}
 				);
 		
-		
-		for (String fileTopic : fileTopics) {
-			fileTopic = fileTopic.trim().toLowerCase();
-			
-			String CHECK_IF_TOPIC_EXISTS = "select count(1) from topics where topic=?";
-			Long topicCount = getJdbcTemplate().queryForLong(CHECK_IF_TOPIC_EXISTS,fileTopic);
-			
-			if(topicCount > 0)
+		if(file.getShared())
+		{
+			for (String fileTopic : fileTopics) 
 			{
-				final String PREVIOUS_FILE_COUNT = "select file_count from topics where topic=?";
-				Long previousFileCount = getJdbcTemplate().queryForLong(PREVIOUS_FILE_COUNT,fileTopic);
+				fileTopic = fileTopic.trim().toLowerCase();
+				String CHECK_IF_TOPIC_EXISTS = "select count(1) from topics where topic=?";
+				Long topicCount = getJdbcTemplate().queryForLong(CHECK_IF_TOPIC_EXISTS,fileTopic);
+				if(topicCount > 0)
+				{
+					final String PREVIOUS_FILE_COUNT = "select file_count from topics where topic=?";
+					Long previousFileCount = getJdbcTemplate().queryForLong(PREVIOUS_FILE_COUNT,fileTopic);
+					
+					String UPDATE_TOPIC_WITH_FILE_DETAILS = "update topics set file_ids = file_ids + {"+newFileId+":'"+file.getAuthorEmailId() +"'}, file_count = "+ (previousFileCount+1) +" where topic=?";
+					getJdbcTemplate().update(UPDATE_TOPIC_WITH_FILE_DETAILS,fileTopic);
+				}
+				else
+				{
+					Map<Long,String> fileIdAndAuthorEmailId = new HashMap<Long, String>();
+					fileIdAndAuthorEmailId.put(newFileId,file.getAuthorEmailId());
+					
+					String INSERT_INTO_TOPICS = "insert into topics(topic,file_ids,file_count) values(?,?,?)";
+					getJdbcTemplate().update(INSERT_INTO_TOPICS,
+							new Object[]{fileTopic,fileIdAndAuthorEmailId,1},
+							new int[]{Types.VARCHAR,Types.OTHER,Types.BIGINT}
+							);
+				}	
 				
-				String UPDATE_TOPIC_WITH_FILE_DETAILS = "update topics set file_ids = file_ids + {"+newFileId+":'"+file.getAuthorEmailId() +"'}, file_count = "+ (previousFileCount+1) +" where topic=?";
-				getJdbcTemplate().update(UPDATE_TOPIC_WITH_FILE_DETAILS,fileTopic);
-			}
-			else
-			{
-				Map<Long,String> fileIdAndAuthorEmailId = new HashMap<Long, String>();
-				fileIdAndAuthorEmailId.put(newFileId,file.getAuthorEmailId());
-				
-				String INSERT_INTO_TOPICS = "insert into topics(topic,file_ids,file_count) values(?,?,?)";
-				getJdbcTemplate().update(INSERT_INTO_TOPICS,
-						new Object[]{fileTopic,fileIdAndAuthorEmailId,1},
-						new int[]{Types.VARCHAR,Types.OTHER,Types.BIGINT}
-						);
 			}
 		}
 		
@@ -1618,7 +1623,7 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 	@Override
 	public List<File> getAllSharedFiles() throws EmptyResultSetException {
 		List<File> files = new ArrayList<File>();
-		String GET_SHARED_FILES = "select file_id,user_email_id,file_type,filename,share_flag,topics,filedata,upload_time,file_size from files where share_flag=true"; 
+		final String GET_SHARED_FILES = "select file_id,user_email_id,file_type,filename,share_flag,topics,upload_time,file_size from files where share_flag=true"; 
 		try{
 			files = getJdbcTemplate().query(GET_SHARED_FILES,new FileDetailsMapper());
 		}
@@ -1653,5 +1658,114 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 		final String GET_FILE_DETAILS = "select filename,filedata from files where file_id="+encodedFileId+" and user_email_id=?";
 		File fileDetails = getJdbcTemplate().queryForObject(GET_FILE_DETAILS,new FileDownloadMapper(),encodedAuthorEmailId);
 		return fileDetails;
+	}
+	/**
+	 * Gets all the Files uploaded by an User
+	 * @param loggedInUserEmail
+	 * @return List<File>(Files uploaded by an User)
+	 * @throws EmptyResultSetException 
+	 */
+	@Override
+	public List<File> getUserFiles(String loggedInUserEmail) throws EmptyResultSetException {
+		List<File> userFiles = new ArrayList<File>();
+		final String GET_USER_FILES = "select file_id,user_email_id,file_type,filename,share_flag,topics,upload_time,file_size from files where user_email_id = ?"; 
+		try{
+			userFiles = getJdbcTemplate().query(GET_USER_FILES,new FileDetailsMapper(),loggedInUserEmail);
+		}
+		catch(EmptyResultDataAccessException emptyRs)
+		{
+			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+		}
+		return userFiles;
+	}
+
+	private class PopularTopicFileMapper implements ParameterizedRowMapper<Topic>
+	{
+		@Override
+		public Topic mapRow(ResultSet rs, int arg1) throws SQLException {
+			Topic topic = new Topic();
+			topic.setTopicName(rs.getString("topic"));
+			topic.setFileCount(rs.getLong("file_count"));
+			return topic;
+		}
+	}
+	
+	private class TopicFileIdsMapper implements ParameterizedRowMapper<Topic>
+	{
+		@SuppressWarnings("unchecked")
+		@Override
+		public Topic mapRow(ResultSet rs, int arg1) throws SQLException {
+			Topic topic = new Topic();
+			topic.setFileIdsAndAuthorEmails((Map<Long,String>) rs.getObject("file_ids"));
+			topic.setTopicName(rs.getString("topic"));
+		
+			return topic;
+		}
+		
+	}
+	
+	/***
+	 * Gets the popular topics with fileIds
+	 * @author balaji i
+	 * @return Map<String, List<File>>(Popular Topic with files)
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public Map<String,List<File>> getPopularTopicsWithFiles()
+	{
+		StringBuilder topics = new StringBuilder();
+		String topicsStr = "";
+		
+		List<String> popularTopics = new ArrayList<String>();
+		try {
+			popularTopics = YMessCommonUtility.findPopularTopics(new java.io.File(YMessCommonUtility.INDEX_LOCATION_TOPICS));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		Map<String,List<File>> sharedFiles = new HashMap<String,List<File>>();
+		for (String topic : popularTopics)
+		{
+			topics.append("'").append(topic).append("',");
+		}
+		if(topics.length() > 0)
+		{
+			topicsStr = topics.substring(0,topics.lastIndexOf(","));
+			
+			String GET_POPULAR_TOPIC_DETAILS = "select topic,file_ids from topics where topic in ("+ topicsStr +")";
+			List<Topic> fileAndAuthorEmails = getJdbcTemplate().query(GET_POPULAR_TOPIC_DETAILS, new TopicFileIdsMapper());
+		
+			if( null != fileAndAuthorEmails )
+			{
+				for (Topic topic : fileAndAuthorEmails) {
+				
+				StringBuilder userEmailIds = new StringBuilder();
+				StringBuilder fileIds = new StringBuilder();
+				String fileIdStr = "";
+				String userEmailIdStr = "";
+				
+				for ( Long key : topic.getFileIdsAndAuthorEmails().keySet() ) {
+					fileIds.append(key).append(",");
+					userEmailIds.append("'").append(topic.getFileIdsAndAuthorEmails().get(key)).append("',");
+				}
+
+				if(fileIds.length() > 0)
+					fileIdStr = fileIds.substring(0,fileIds.lastIndexOf(","));
+				
+				if(userEmailIds.length() > 0)
+					userEmailIdStr = userEmailIds.substring(0,userEmailIds.lastIndexOf(","));
+				
+				
+				final String GET_FILE_DETAILS = "select file_id,user_email_id,file_type,filename,share_flag,topics,upload_time,file_size from files where user_email_id in ("+ userEmailIdStr +") and file_id in ("+fileIdStr+")"; 
+				sharedFiles.put(topic.getTopicName(),getJdbcTemplate().query(GET_FILE_DETAILS,new FileDetailsMapper()));
+				
+				}
+			}
+		}
+		return sharedFiles;
 	}
 }

@@ -13,6 +13,7 @@ import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.DateTools.Resolution;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.LongField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
@@ -29,40 +30,22 @@ public class LuceneIndexer
 		public static final String INDEX_DIR = YMessCommonUtility.INDEX_LOCATION;
 		private static final String JDBC_DRIVER = "org.apache.cassandra.cql.jdbc.CassandraDriver";
 		private static final String CONNECTION_URL = "jdbc:cassandra://localhost/ymess?version=3.0.0";
-		private static final String USER_NAME = "select user_email_id,";
+		private static final String USER_NAME = "";
 		private static final String PASSWORD = "";
 		
 		private final static String INDEX_QUESTION_DETAILS ="select author_email_id,question_id,updated_date,question_title,question_desc,topics from questions";
-		private static final String INDEX_USER_DETAILS = "select email_id,first_name,last_name,profile_last_updated from users_data";
+		private static final String INDEX_USER_DETAILS = "select email_id,first_name,last_name,profile_last_updated,user_image_name from users_data";
 		private static final String INDEX_FILE_DETAILS = "select file_id,user_email_id,filename,topics,upload_time from files";
+		private static final String INDEX_TOPICS = "select topic,file_count from topics";
 		
-		/*public static void main(String[] args) throws Exception 
+		public static void main(String[] args) throws Exception 
 		{
-					
-		}*/
+			invokeIndexing();		
+		}
 		
 		public static void invokeIndexing()
 		{
-			File indexDir = new File(INDEX_DIR);
-			
-			if (!indexDir.exists()) 
-			{
-				System.out.println("Creating Directory...");
-				indexDir.mkdir(); 
-			}		
-			String[] myFiles= indexDir.list();
-					
-			if(myFiles.length > 0)
-			{
-			System.out.println("Deleting files...");
-							
-			for (String fileName : myFiles) 
-			{
-				File myFile = new File(indexDir, fileName);
-				System.out.println(myFile);
-				myFile.delete();
-			}
-		}
+			DeleteDirectory.main(null);
 			try
 			{  
 				   Class.forName(JDBC_DRIVER).newInstance();  
@@ -73,20 +56,21 @@ public class LuceneIndexer
 				   @SuppressWarnings("deprecation")
 				  
 				   IndexWriterConfig indexWriterConfig = new IndexWriterConfig(Version.LUCENE_CURRENT, standardAnalyzer);
-				   IndexWriter indexWriter = new IndexWriter(FSDirectory.open(indexDir), indexWriterConfig);
-				   System.out.println("Indexing to directory '" + indexDir + "'...");  
 				  
 				   /** Creating indexes*/
-				   int indexedQuestionDocumentCount = createIndexes(indexWriter, conn, YMessCommonUtility.QUESTION_IDENTIFIER_INDEXING); 
+				   
+				   int indexedQuestionDocumentCount = createIndexes( indexWriterConfig.clone(), conn, YMessCommonUtility.QUESTION_IDENTIFIER_INDEXING); 
 
-				   int indexedPeopleDocumentCount = createIndexes(indexWriter, conn, YMessCommonUtility.PEOPLE_IDENTIFIER_INDEXING); 
+				   int indexedPeopleDocumentCount = createIndexes(indexWriterConfig.clone(),  conn, YMessCommonUtility.PEOPLE_IDENTIFIER_INDEXING); 
 				   
-				   int indexedFileDocumentCount = createIndexes(indexWriter, conn, YMessCommonUtility.FILE_IDENTIFIER_INDEXING); 
+				   int indexedFileDocumentCount = createIndexes(indexWriterConfig.clone() , conn, YMessCommonUtility.FILE_IDENTIFIER_INDEXING); 
 				   
-				   indexWriter.close();  
+				   int indexedTopicsCount = createIndexes(indexWriterConfig.clone(), conn, YMessCommonUtility.TOPIC_IDENTIFIER_INDEXING);
+				   
 				   System.out.println(indexedQuestionDocumentCount + " Questions have been indexed successfully");
 				   System.out.println(indexedPeopleDocumentCount + " People have been indexed successfully");
 				   System.out.println(indexedFileDocumentCount + " Files have been indexed successfully");
+				   System.out.println(indexedTopicsCount + " Topics have been indexed successfully");
 			} 
 			catch (Exception e) 
 			{  
@@ -95,18 +79,37 @@ public class LuceneIndexer
 		}
 		
 		@SuppressWarnings("deprecation")
-		 static int createIndexes(IndexWriter writer, Connection conn,String identifier) throws Exception 
+		 static int createIndexes(IndexWriterConfig indexWriterConfig , Connection conn,String identifier) throws Exception 
 		 {  
+			  IndexWriter indexWriter = null;
 			  String query = "";  
 			
 			  if(identifier.equals(YMessCommonUtility.QUESTION_IDENTIFIER_INDEXING))
+			  {  
 				  query = INDEX_QUESTION_DETAILS;
-			  
+				  indexWriter = new IndexWriter(FSDirectory.open(new File(YMessCommonUtility.INDEX_LOCATION_QUESTIONS)), indexWriterConfig);
+				  System.out.println("Indexing to directory '" + YMessCommonUtility.INDEX_LOCATION_QUESTIONS + "'...");  
+			  }
 			  if(identifier.equals(YMessCommonUtility.PEOPLE_IDENTIFIER_INDEXING))	
+			  {
 				  query = INDEX_USER_DETAILS;
+				  indexWriter = new IndexWriter(FSDirectory.open(new File(YMessCommonUtility.INDEX_LOCATION_PEOPLE)), indexWriterConfig);
+				  System.out.println("Indexing to directory '" + YMessCommonUtility.INDEX_LOCATION_PEOPLE + "'...");  
+			  }
 			  
 			  if(identifier.equals(YMessCommonUtility.FILE_IDENTIFIER_INDEXING))
+			  {
 				  query = INDEX_FILE_DETAILS;
+				  indexWriter = new IndexWriter(FSDirectory.open(new File(YMessCommonUtility.INDEX_LOCATION_FILES)), indexWriterConfig);
+				  System.out.println("Indexing to directory '" + YMessCommonUtility.INDEX_LOCATION_FILES + "'...");  
+			  }
+			  
+			  if(identifier.equals(YMessCommonUtility.TOPIC_IDENTIFIER_INDEXING))
+			  {
+				  query = INDEX_TOPICS;
+				  indexWriter = new IndexWriter(FSDirectory.open(new File(YMessCommonUtility.INDEX_LOCATION_TOPICS)), indexWriterConfig);
+				  System.out.println("Indexing to directory '" + YMessCommonUtility.INDEX_LOCATION_TOPICS + "'...");  
+			  }
 			  
 			  Statement stmt = conn.createStatement();  
 			  ResultSet rs = stmt.executeQuery(query);  
@@ -134,7 +137,7 @@ public class LuceneIndexer
 				         
 				         if(null != rs.getString("updated_date"))
 				         {
-				        	 float boost = 25.0f;
+				        	 float boost = 5.0f;
 					        	
 				        	 Date profileLastUpdatedDate = rs.getTimestamp("updated_date");
 				        	 Date currentDate = new Date();
@@ -147,9 +150,9 @@ public class LuceneIndexer
 				        	 long differenceInDays = differenceInTime / (1000 * 60 * 60 * 24);
 	
 				        	 /**  Setting Higher Boosts to Recently Posted Jobs */
-				        	 if(differenceInDays>0)
+				        	 if(differenceInDays > 0)
 				        	 {
-				        		boost =  (1.0f/differenceInDays) * 20;
+				        		boost =  (1.0f/differenceInDays) * 5;
 				        	 } 
 				        	
 				        	 String profileLastUpdated = DateTools.dateToString(profileLastUpdatedDate, Resolution.SECOND);
@@ -172,6 +175,10 @@ public class LuceneIndexer
 				         if(null != rs.getString("last_name"))
 				        	 document.add(new TextField("last_name", rs.getString("last_name"), Field.Store.YES));
 				        
+				         if(null != rs.getString("user_image_name"))
+				        	 document.add(new TextField("user_image_name", rs.getString("user_image_name"), Field.Store.YES));
+				         
+				         
 				         if(null != rs.getString("profile_last_updated"))
 				         {
 				        	 float boost = 25.0f;
@@ -244,9 +251,21 @@ public class LuceneIndexer
 			      
 			         }
 			         
-			         writer.addDocument(document);  
+			         if(identifier.equals(YMessCommonUtility.TOPIC_IDENTIFIER_INDEXING))
+			         {
+				         if(null != rs.getString("topic"))
+				        	 document.add(new Field("topic", rs.getString("topic"), Field.Store.YES,Field.Index.ANALYZED));
+				         
+				         if(0 != rs.getLong("file_count"))
+				        	 document.add(new LongField("file_count", rs.getLong("file_count"), Field.Store.YES));
+			         }
+			         
+			         indexWriter.addDocument(document);  
 				     indexCount++;
 			 }  
+		  indexWriter.commit();
+		  indexWriter.close();
+		  //indexWriter = null;
 		  return indexCount;
 		}	
 	}

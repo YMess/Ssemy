@@ -55,6 +55,7 @@ public class URLMappings {
 	public static final String DOWNLOAD_FILE = "download_file.htm"; //FileActivitiesController
 	
 	public static final String SEARCH = "search.htm"; //SearchController
+	public static final String GET_RELATED_TOPICS = "get_related_topics.htm"; //SearchController
 	
 
 

@@ -5,9 +5,9 @@
 	xmlns:beans="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans 
-                    http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+                    http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
                     http://www.springframework.org/schema/security 
-                    http://www.springframework.org/schema/security/spring-security-3.1.xsd">
+                    http://www.springframework.org/schema/security/spring-security-3.2.xsd">
 
 	<http pattern="/css/*" security="none" />
 	<http pattern="/fonts/*" security="none" />
@@ -24,13 +24,13 @@
 		</session-management>
 	<!-- 	<intercept-url pattern="/employer*.htm" access="ROLE_CORPORATE" />   -->
 		
-		
+ 
 		<intercept-url pattern="/user*.htm" access="ROLE_REGISTERED" />
 		
 		<form-login login-page="/home.htm"
 			default-target-url="/userdashboard.htm" authentication-failure-url="/loginfailed.htm" />
 		<logout logout-success-url="/home.htm" />
-			<!-- <logout success-handler-ref="customLogoutHandler" /> -->
+			<logout success-handler-ref="customLogoutHandler" />
 		
 	    <remember-me />
 
