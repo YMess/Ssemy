@@ -29,6 +29,8 @@ import com.ymess.exceptions.EmptyResultSetException;
 import com.ymess.pojos.File;
 import com.ymess.service.interfaces.YMessService;
 import com.ymess.util.JSPMappings;
+import com.ymess.util.LoggerConstants;
+import com.ymess.util.MessageConstants;
 import com.ymess.util.URLMappings;
 import com.ymess.util.YMessCommonUtility;
 
@@ -56,7 +58,7 @@ public class FileActivitiesController {
 			if(null != loggedInUserEmail && !loggedInUserEmail.isEmpty())
 				userFiles = yMessService.getUserFiles(loggedInUserEmail);
 		popularFiles = yMessService.getPopularTopicsWithFiles();
-		sharedFiles = yMessService.getAllSharedFiles();
+		//sharedFiles = yMessService.getAllSharedFiles();
 		
 		} catch (EmptyResultSetException e) {
 			logger.error(e.getMessage());
@@ -159,4 +161,37 @@ public class FileActivitiesController {
 		return null;
 	}
 
+	/**
+	 * Facilitates File Deletion
+	 * @param encodedFileId
+	 * @param encodedAuthorEmailId
+	 */
+	@RequestMapping(value = URLMappings.DELETE_FILE)
+	String deleteFile(@RequestParam("fId") String encodedFileId,@RequestParam("author") String encodedAuthorEmailId)
+	{
+		String fileId = YMessCommonUtility.decodeEncodedParameter(encodedFileId);
+		String authorEmailId = YMessCommonUtility.decodeEncodedParameter(encodedAuthorEmailId);
+		
+		yMessService.deleteFile(fileId,authorEmailId);
+		logger.info(LoggerConstants.FILE_DELETED);
+		
+		return URLMappings.REDIRECT_SUCCESS_FILE_DELETED;
+	}
+	
+	/**
+	 * Facilitates File Sharing
+	 * @param encodedFileId
+	 * @param encodedAuthorEmailId
+	 */
+	@RequestMapping(value = URLMappings.SHARE_FILE)
+	String shareFile(@RequestParam("fId") String encodedFileId,@RequestParam("author") String encodedAuthorEmailId)
+	{
+		String fileId = YMessCommonUtility.decodeEncodedParameter(encodedFileId);
+		String authorEmailId = YMessCommonUtility.decodeEncodedParameter(encodedAuthorEmailId);
+		
+		yMessService.shareFile(fileId,authorEmailId);
+		logger.info(LoggerConstants.FILE_SHARED);
+		
+		return URLMappings.REDIRECT_SUCCESS_FILE_SHARED;
+	}
 }

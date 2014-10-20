@@ -365,4 +365,26 @@ public class YMessServiceManager implements YMessService {
 	public Map<String, List<File>> getPopularTopicsWithFiles() {
 		return yMessDao.getPopularTopicsWithFiles();
 	}
+
+	/**
+	 * Deletes a File
+	 * @author balaji i
+	 * @param encodedFileId
+	 * @param encodedAuthorEmailId
+	 */
+	@Override
+	public void deleteFile(String encodedFileId, String encodedAuthorEmailId) {
+		yMessDao.deleteFile(encodedFileId,encodedAuthorEmailId);
+	}
+
+	/**
+	 * Facilitates File Sharing
+	 * @author balaji i
+	 * @param fileId
+	 * @param authorEmailId
+	 */
+	@Override
+	public void shareFile(String fileId, String authorEmailId) {
+			yMessDao.shareFile(fileId,authorEmailId);
+	}
 }

@@ -97,8 +97,12 @@ border: medium;
 							<c:out value="${userFile.fileSize}" />
 					</td>
 					<td style="padding-left:110px;">
-						<div style="float:left;"><a href="delete_file.htm?fileId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("fileId")).getBytes()))%>&author=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("author")).getBytes()))%>">Delete</a></div>
-						<div style="float:right;padding-right:75px;"><a href="edit_file.htm?fileId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("fileId")).getBytes()))%>&author=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("author")).getBytes()))%>">Edit</a></div>
+						<div style="float:left;"><a href="delete_file.htm?fId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("fileId")).getBytes()))%>&author=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("author")).getBytes()))%>">Delete</a></div>
+						<div style="float:right;padding-right:75px;"><a href="edit_file.htm?fId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("fileId")).getBytes()))%>&author=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("author")).getBytes()))%>">Edit</a></div>
+						
+						<c:if test="${userFile.shared eq false}">
+							<div style="float:right;padding-right:75px;"><a href="share_file.htm?fId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("fileId")).getBytes()))%>&author=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("author")).getBytes()))%>">Share</a></div>
+						</c:if>
 					</td>
 				</tr>
 			</c:forEach>

@@ -1539,7 +1539,7 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 				new int[]{Types.BIGINT,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.BOOLEAN,Types.ARRAY,Types.BINARY,Types.TIMESTAMP,Types.VARCHAR}
 				);
 		
-		if(file.getShared())
+		if(file.getShared()!=null && file.getShared())
 		{
 			for (String fileTopic : fileTopics) 
 			{
@@ -1767,5 +1767,66 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 			}
 		}
 		return sharedFiles;
+	}
+	/**
+	 * Deletes a File
+	 * @author balaji i
+	 * @param decodedFileId
+	 * @param decodedAuthorEmailId
+	 */
+	@Override
+	public void deleteFile(String decodedFileId, String decodedAuthorEmailId) {
+
+		Long fileId = Long.parseLong(decodedFileId);
+		Set<String> fileTopics = getTopics(fileId, decodedAuthorEmailId);
+		
+		final String DELETE_FILE = "delete from files where file_id = ? and user_email_id = ?";
+		getJdbcTemplate().update(DELETE_FILE,
+				new Object[]{fileId,decodedAuthorEmailId},
+				new int[]{Types.BIGINT,Types.VARCHAR}
+				);
+		
+		if(! fileTopics.isEmpty())
+		{
+			for (String topic : fileTopics) {
+				final String DELETE_REFERENCES_FROM_TOPICS = "delete file_ids["+fileId+"] from topics where topic='"+topic+"'";
+				getJdbcTemplate().update(DELETE_REFERENCES_FROM_TOPICS);
+			}
+		}
+		
+		
+	}
+	
+	
+	private Set<String> getTopics(Long fileId,String authorEmailId)
+	{
+		final String GET_TOPICS = "select topics from files where file_id="+fileId+" and user_email_id=?";
+		@SuppressWarnings("unchecked")
+		Set<String> fileTopics = getJdbcTemplate().queryForObject(GET_TOPICS, Set.class,authorEmailId);
+		return fileTopics;
+	}
+
+	/**
+	 * Facilitates File Sharing
+	 * @author balaji i
+	 * @param fileId
+	 * @param authorEmailId
+	 */
+	@Override
+	public void shareFile(String fileId, String authorEmailId) {
+		Long fileIdL = Long.parseLong(fileId);
+		Set<String> fileTopics = getTopics(fileIdL, authorEmailId);
+		
+		final String SHARE_FILE = "update files set share_flag=true where file_id="+fileIdL+" and user_email_id='"+authorEmailId+"'";
+		getJdbcTemplate().update(SHARE_FILE);
+		
+		if(! fileTopics.isEmpty())
+		{
+			for (String topic : fileTopics) {
+				final String ADD_FILE_TO_TOPICS = "update topics set file_ids = file_ids + {"+ fileIdL +": '"+ authorEmailId +"'} where topic='"+topic+"'";
+				getJdbcTemplate().update(ADD_FILE_TO_TOPICS);
+			}
+		}
+		
 	}
 }

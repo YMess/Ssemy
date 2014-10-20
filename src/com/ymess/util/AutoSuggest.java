@@ -67,7 +67,6 @@ public class AutoSuggest
 		}
 		if(null != results)
 			return results;
-		
 		else throw new EmptyResultDataAccessException(1);
 	}
 }

@@ -53,4 +53,8 @@ public class LoggerConstants {
 	public static final String USER_VIEW_PROFILE_IMAGE = "View Profile Page Loaded";
 
 	public static final String USER_UNFOLLOWING = "User Un-Followed ";
+
+	public static final String FILE_DELETED = "File Successfully Deleted";
+
+	public static final String FILE_SHARED = "File Successfully Shared";
 }

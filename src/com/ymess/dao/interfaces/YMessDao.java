@@ -260,4 +260,20 @@ public interface YMessDao {
 	 */
 	Map<String, List<File>> getPopularTopicsWithFiles();
 
+	/**
+	 * Deletes a File
+	 * @author balaji i
+	 * @param encodedFileId
+	 * @param encodedAuthorEmailId
+	 */
+	void deleteFile(String encodedFileId, String encodedAuthorEmailId);
+
+	/**
+	 * Facilitates File Sharing
+	 * @author balaji i
+	 * @param fileId
+	 * @param authorEmailId
+	 */
+	void shareFile(String fileId, String authorEmailId);
+
 }

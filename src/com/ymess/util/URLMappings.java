@@ -53,6 +53,10 @@ public class URLMappings {
 	public static final String FILE_UPLOAD = "file_upload.htm"; //FileActivitiesController
 	public static final String REDIRECT_SUCCESS_FILE_UPLOAD = "redirect:"+FILES+"?success='File Uploaded Successfully'"; //FileActivitiesController
 	public static final String DOWNLOAD_FILE = "download_file.htm"; //FileActivitiesController
+	public static final String DELETE_FILE = "delete_file.htm"; //FileActivitiesController
+	public static final String SHARE_FILE = "share_file.htm"; //FileActivitiesController
+	public static final String REDIRECT_SUCCESS_FILE_DELETED = "redirect:"+FILES +"?success=You've Successfully Deleted the File"; //FileActivitiesController
+	public static final String REDIRECT_SUCCESS_FILE_SHARED = "redirect:"+FILES +"?success=Successfully Shared the File"; //FileActivitiesController
 	
 	public static final String SEARCH = "search.htm"; //SearchController
 	public static final String GET_RELATED_TOPICS = "get_related_topics.htm"; //SearchController
