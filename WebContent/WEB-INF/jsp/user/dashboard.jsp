@@ -16,7 +16,15 @@
   <script src="js/jquery-ui.js" type="text/javascript"></script>
   <LINK REL=Stylesheet TYPE ="text/css" HREF="css/style.css">
 <LINK REL=Stylesheet TYPE ="text/css" HREF="css/pure-min.css">
-
+<script type="text/javascript">
+  
+  $().ready(function(){
+	  
+	   $('input[type="checkbox"]').click(function(){
+               $(".imageDiv").toggle();
+       });
+	});
+  </script>
 <script type="text/javascript">
 $().ready(function(){
 
@@ -41,22 +49,56 @@ $().ready(function(){
 
 	$("button#postAnswer").click(function(){
 
-			var qId = localStorage.getItem("clickedQuestionId");
-			var answer = $("#answerTextArea").val();
-
+		/* 	//var qId = localStorage.getItem("clickedQuestionId");
+			//var answer = $("#answerTextArea").val();
+            var formData = new FormData($(this)[0]);
+            formData.append( 'questionId', qId);
+            formData.append( 'questionDescription', $('input[name=answerTextArea]').val());
+            formData.append( 'image_attached', $('input[name=answerImage]')[0].files[0]);
 			if(answer)
 				{
 			
 			var successFlag = false;
 			 $.ajax({
 				 url:"user_post_answer.htm",
-				 data:'qId='+qId+"&answer="+answer,
+				 //data:'qId='+qId+"&answer="+answer,
+				 data:formData,
 				 async:false,
 				 success:function(result){
 		   		successFlag = true;
-		  }}); 
+		  }});  */
 
+
+
+		  var files = document.getElementById('answerImage').files;
 			
+		    // var tempfiles = [];
+		    // for(var i=0; i<files.length; i++){
+		    //     tempfiles[i]=files[i];
+		    // }
+
+		    var answer = new Object();
+			answer.answerDescription =" asdsadsadasd ";
+		  
+		    var formData = new FormData();
+
+		    for (i = 0, j = files.length; i < j; i++) {
+		        formData.append('answerImage', files[i]);
+		    }
+
+		    answer.answerImage = formData;
+		  //  formData.append('submittedFormAction', "attachDocumentSave");
+		    //formData.append('answerImage', files);  // still broken with formData.append('files', tempfiles);
+		   // formData.append('answerDescription', "foobar");
+
+		    var xhr = new XMLHttpRequest();
+		    xhr.open('POST',"user_post_answer.htm", true);
+		    xhr.send(answer);
+
+		    return false;
+		  
+
+			/* 
 			  if(successFlag)
 			  {
 				  alert("Success");
@@ -65,12 +107,12 @@ $().ready(function(){
 				  location.reload();
 			  }
 
-				}
+				
 			else
 				{
 					alert("Please post your answer");
 					return false;
-				}
+				} */
 		});
 	
 });
@@ -91,11 +133,28 @@ $().ready(function(){
 	<div>
 		<div class="userleft"><%@include file="/WEB-INF/jsp/include/left.jsp" %></div>
 		<div class="usercenter">
-					<div id="dialog-confirm" align="center" style="display: none">
+					<!-- <div id="dialog-confirm" align="center" style="display: none">
 							<textarea rows="5" cols="40" id="answerTextArea"></textarea>
 						<br>
 						<button id="postAnswer">Post Answer</button>
-					</div>	
+					</div> -->
+					
+					<div id="dialog-confirm" align="center" style="display: none">
+                                        <form:form action="userdashboard.htm" modelAttribute="answer" enctype="multipart/form-data" id="postAnswerForm">
+                                                        <form:textarea path="answerDescription" ></form:textarea>
+                                                <br>
+                                            <br>
+                                             <input id="addImage" type="checkbox" name="isImageAttached"> Add Image
+                                            <br><br>
+                                              <div class="imageDiv"  style="display: none;">
+                                                <input type="file"  accept="image/*" name="answerImage" id="answerImage">
+                                              </div>
+                                                <form:errors path="answerImage"></form:errors>
+                                        <br>
+                                                <br>
+                                                <button id="postAnswer">Post Answer</button>
+                                        </form:form>
+                                        </div>	
 		
 				<c:choose>
 					<c:when test="${not empty emptyResultSet }">

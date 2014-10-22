@@ -23,6 +23,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -31,6 +32,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.ymess.exceptions.EmptyResultSetException;
 import com.ymess.pojos.Answer;
+import com.ymess.pojos.File;
 import com.ymess.pojos.Question;
 import com.ymess.pojos.User;
 import com.ymess.service.interfaces.YMessService;
@@ -154,9 +156,9 @@ public class UserActivitiesController {
 	 * @param answer
 	 * @return Boolean (successFlag)
 	 */
-	@RequestMapping(value=URLMappings.USER_POST_ANSWER)
+	@RequestMapping(value=URLMappings.USER_POST_ANSWER,method=RequestMethod.POST)
 	@ResponseBody
-	Boolean addAnswer(@RequestParam("qId")String questionId,@RequestParam("answer")String answer)
+	Boolean addAnswer(@ModelAttribute File formData)
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		String loggedInUserEmailId = authentication.getName();
@@ -164,7 +166,7 @@ public class UserActivitiesController {
 		
 		try
 		{
-			yMessService.addAnswer(questionId,answer,loggedInUserEmailId);
+			//yMessService.addAnswer(questionId,answer,loggedInUserEmailId);
 			logger.info(LoggerConstants.USER_POSTED_ANSWER+" "+loggedInUserEmailId);
 		}
 		catch(Exception ex)
