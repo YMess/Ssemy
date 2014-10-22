@@ -158,7 +158,7 @@ public class UserActivitiesController {
 	 */
 	@RequestMapping(value=URLMappings.USER_POST_ANSWER,method=RequestMethod.POST)
 	@ResponseBody
-	Boolean addAnswer(@ModelAttribute File formData)
+	Boolean addAnswer(@ModelAttribute("answer") Answer answer)
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		String loggedInUserEmailId = authentication.getName();
@@ -166,7 +166,7 @@ public class UserActivitiesController {
 		
 		try
 		{
-			//yMessService.addAnswer(questionId,answer,loggedInUserEmailId);
+			//yMessService.addAnswer(answer);
 			logger.info(LoggerConstants.USER_POSTED_ANSWER+" "+loggedInUserEmailId);
 		}
 		catch(Exception ex)

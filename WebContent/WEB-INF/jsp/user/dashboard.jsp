@@ -29,8 +29,8 @@
 $().ready(function(){
 
 	$('.btnOpenDialog').click(fnOpenNormalDialog);
-	function fnOpenNormalDialog() {
-
+	function fnOpenNormalDialog() 
+	{
 		localStorage.setItem("clickedQuestionId",$(this).attr('id'));
 
 		// Define the Dialog and its properties.
@@ -39,82 +39,22 @@ $().ready(function(){
 	        modal: true,
 	        title: "Add Answer",
 	        height: 250,
-	        width: 400,
-	        
-	        
-	    });
+	        width: 400
+	         });
 		
-		}
+	}
 
-
-	$("button#postAnswer").click(function(){
-
-		/* 	//var qId = localStorage.getItem("clickedQuestionId");
-			//var answer = $("#answerTextArea").val();
-            var formData = new FormData($(this)[0]);
-            formData.append( 'questionId', qId);
-            formData.append( 'questionDescription', $('input[name=answerTextArea]').val());
-            formData.append( 'image_attached', $('input[name=answerImage]')[0].files[0]);
-			if(answer)
-				{
-			
-			var successFlag = false;
-			 $.ajax({
-				 url:"user_post_answer.htm",
-				 //data:'qId='+qId+"&answer="+answer,
-				 data:formData,
-				 async:false,
-				 success:function(result){
-		   		successFlag = true;
-		  }});  */
-
-
-
-		  var files = document.getElementById('answerImage').files;
-			
-		    // var tempfiles = [];
-		    // for(var i=0; i<files.length; i++){
-		    //     tempfiles[i]=files[i];
-		    // }
-
-		    var answer = new Object();
-			answer.answerDescription =" asdsadsadasd ";
-		  
-		    var formData = new FormData();
-
-		    for (i = 0, j = files.length; i < j; i++) {
-		        formData.append('answerImage', files[i]);
-		    }
-
-		    answer.answerImage = formData;
-		  //  formData.append('submittedFormAction', "attachDocumentSave");
-		    //formData.append('answerImage', files);  // still broken with formData.append('files', tempfiles);
-		   // formData.append('answerDescription', "foobar");
-
-		    var xhr = new XMLHttpRequest();
-		    xhr.open('POST',"user_post_answer.htm", true);
-		    xhr.send(answer);
-
-		    return false;
-		  
-
-			/* 
-			  if(successFlag)
-			  {
-				  alert("Success");
-				  $("#dialog-confirm").dialog( "close" );
-				  $("#answerTextArea").val("");
-				  location.reload();
-			  }
-
-				
-			else
-				{
-					alert("Please post your answer");
-					return false;
-				} */
-		});
-	
+	$( '#postAnswerForm' )
+	  .submit( function( e ) {
+	    $.ajax( {
+	      url: 'user_post_answer.htm',
+	      type: 'POST',
+	      data: new FormData( this ),
+	      processData: false,
+	      contentType: false
+	    } );
+	    e.preventDefault();
+	  } );
 });
 </script>
 </head>
@@ -147,7 +87,7 @@ $().ready(function(){
                                              <input id="addImage" type="checkbox" name="isImageAttached"> Add Image
                                             <br><br>
                                               <div class="imageDiv"  style="display: none;">
-                                                <input type="file"  accept="image/*" name="answerImage" id="answerImage">
+                                                	<input type="file"  accept="image/*" name="answerImage" id="answerImage">
                                               </div>
                                                 <form:errors path="answerImage"></form:errors>
                                         <br>
