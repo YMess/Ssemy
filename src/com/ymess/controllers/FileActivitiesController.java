@@ -24,13 +24,13 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.ymess.exceptions.EmptyResultSetException;
 import com.ymess.pojos.File;
 import com.ymess.service.interfaces.YMessService;
 import com.ymess.util.JSPMappings;
 import com.ymess.util.LoggerConstants;
-import com.ymess.util.MessageConstants;
 import com.ymess.util.URLMappings;
 import com.ymess.util.YMessCommonUtility;
 
@@ -47,8 +47,14 @@ public class FileActivitiesController {
 	YMessService yMessService;
 	
 	@RequestMapping(value = URLMappings.FILES)
-	String loadFilesPage(Model model)
+	String loadFilesPage(@ModelAttribute("fileData") File fileDetails, Model model)
 	{
+		if(fileDetails != null)
+			model.addAttribute("file",fileDetails);
+		else
+			model.addAttribute("file",new File());
+		
+		
 		String loggedInUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
 		
 		List<File> userFiles = new ArrayList<File>();
@@ -65,7 +71,9 @@ public class FileActivitiesController {
 			e.printStackTrace();
 		}
 		model.addAttribute("userFiles",userFiles);
-		model.addAttribute("file",new File());
+		
+		
+		
 		model.addAttribute("sharedFiles",sharedFiles);
 		model.addAttribute("popularFiles",popularFiles);
 		return JSPMappings.FILES;
@@ -193,5 +201,26 @@ public class FileActivitiesController {
 		logger.info(LoggerConstants.FILE_SHARED);
 		
 		return URLMappings.REDIRECT_SUCCESS_FILE_SHARED;
+	}
+	
+	@RequestMapping(value = URLMappings.EDIT_FILE)
+	String editFile(@RequestParam("fId")String encodedFileId, @RequestParam("author") String encodedAuthorEmailId, RedirectAttributes redirectAttributes)
+	{
+		String fileId = YMessCommonUtility.decodeEncodedParameter(encodedFileId);
+		String authorEmailId = YMessCommonUtility.decodeEncodedParameter(encodedAuthorEmailId);
+		
+		File fileDetails = new File();
+		fileDetails = yMessService.getFileDetails(fileId,authorEmailId);
+		
+		redirectAttributes.addFlashAttribute("fileData",fileDetails);
+		return "redirect:files.htm";
+	}
+	
+	@RequestMapping(value = URLMappings.FILES_IN_TOPIC)
+	String getFilesInTopic(@RequestParam("topic") String encodedTopic)
+	{
+		String topic = YMessCommonUtility.decodeEncodedParameter(encodedTopic);
+		List<File> filesInTopic = yMessService.getFilesInTopic(topic);
+		return "filesInTopic";
 	}
 }

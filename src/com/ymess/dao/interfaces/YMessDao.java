@@ -276,4 +276,21 @@ public interface YMessDao {
 	 */
 	void shareFile(String fileId, String authorEmailId);
 
+	/**
+	 * Retrieves File Details based on FileId and AuthorEmailId
+	 * @author balaji i
+	 * @param fileId
+	 * @param authorEmailId
+	 * @return File(fileDetails)
+	 */
+	File getFileDetails(String fileId, String authorEmailId);
+
+	/**
+	 * Gets all the Files Concerned with a Topic
+	 * @author balaji i
+	 * @param topic
+	 * @return List<File>(filesInTopic)
+	 */
+	List<File> getFilesInTopic(String topic);
+
 }

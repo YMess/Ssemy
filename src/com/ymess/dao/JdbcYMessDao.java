@@ -1594,7 +1594,6 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 	
 	private class FileDetailsMapper implements ParameterizedRowMapper<File>
 	{
-		@SuppressWarnings("unchecked")
 		@Override
 		public File mapRow(ResultSet rs, int arg1) throws SQLException {
 			File fileDetails = new File();
@@ -1603,7 +1602,7 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 			fileDetails.setFileType(rs.getString("file_type"));
 			fileDetails.setFilename(rs.getString("filename"));
 			fileDetails.setShared(rs.getBoolean("share_flag"));
-			fileDetails.setTopics((Set<String>) rs.getObject("topics"));
+			//fileDetails.setTopics((Set<String>) rs.getObject("topics"));
 			fileDetails.setUploadedTime(rs.getDate("upload_time"));
 			fileDetails.setFileSize(rs.getString("file_size"));
 			//fileDetails.setFileDataDb(rs.getBytes("filedata"));
@@ -1625,7 +1624,7 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 		List<File> files = new ArrayList<File>();
 		final String GET_SHARED_FILES = "select file_id,user_email_id,file_type,filename,share_flag,topics,upload_time,file_size from files where share_flag=true"; 
 		try{
-			files = getJdbcTemplate().query(GET_SHARED_FILES,new FileDetailsMapper());
+			files = getJdbcTemplate().query(GET_SHARED_FILES,new FileDetailsMapperWithTopics());
 		}
 		catch(EmptyResultDataAccessException emptyRs)
 		{
@@ -1649,14 +1648,14 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 	/**
 	 * Downloads the file data
 	 * @author balaji i
-	 * @param encodedFileId
-	 * @param encodedAuthorEmailId
+	 * @param fileId
+	 * @param authorEmailId
 	 * @return File (downloadedFileDetails)
 	 */
 	@Override
-	public File downloadFile(String encodedFileId, String encodedAuthorEmailId) {
-		final String GET_FILE_DETAILS = "select filename,filedata from files where file_id="+encodedFileId+" and user_email_id=?";
-		File fileDetails = getJdbcTemplate().queryForObject(GET_FILE_DETAILS,new FileDownloadMapper(),encodedAuthorEmailId);
+	public File downloadFile(String fileId, String authorEmailId) {
+		final String GET_FILE_DETAILS = "select filename,filedata from files where file_id="+fileId+" and user_email_id=?";
+		File fileDetails = getJdbcTemplate().queryForObject(GET_FILE_DETAILS,new FileDownloadMapper(),authorEmailId);
 		return fileDetails;
 	}
 	/**
@@ -1670,24 +1669,13 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 		List<File> userFiles = new ArrayList<File>();
 		final String GET_USER_FILES = "select file_id,user_email_id,file_type,filename,share_flag,topics,upload_time,file_size from files where user_email_id = ?"; 
 		try{
-			userFiles = getJdbcTemplate().query(GET_USER_FILES,new FileDetailsMapper(),loggedInUserEmail);
+			userFiles = getJdbcTemplate().query(GET_USER_FILES,new FileDetailsMapperWithTopics(),loggedInUserEmail);
 		}
 		catch(EmptyResultDataAccessException emptyRs)
 		{
 			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
 		}
 		return userFiles;
-	}
-
-	private class PopularTopicFileMapper implements ParameterizedRowMapper<Topic>
-	{
-		@Override
-		public Topic mapRow(ResultSet rs, int arg1) throws SQLException {
-			Topic topic = new Topic();
-			topic.setTopicName(rs.getString("topic"));
-			topic.setFileCount(rs.getLong("file_count"));
-			return topic;
-		}
 	}
 	
 	private class TopicFileIdsMapper implements ParameterizedRowMapper<Topic>
@@ -1709,7 +1697,6 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 	 * @author balaji i
 	 * @return Map<String, List<File>>(Popular Topic with files)
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String,List<File>> getPopularTopicsWithFiles()
 	{
@@ -1760,7 +1747,7 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 					userEmailIdStr = userEmailIds.substring(0,userEmailIds.lastIndexOf(","));
 				
 				
-				final String GET_FILE_DETAILS = "select file_id,user_email_id,file_type,filename,share_flag,topics,upload_time,file_size from files where user_email_id in ("+ userEmailIdStr +") and file_id in ("+fileIdStr+")"; 
+				final String GET_FILE_DETAILS = "select file_id,user_email_id,file_type,filename,share_flag,upload_time,file_size from files where user_email_id in ("+ userEmailIdStr +") and file_id in ("+fileIdStr+")"; 
 				sharedFiles.put(topic.getTopicName(),getJdbcTemplate().query(GET_FILE_DETAILS,new FileDetailsMapper()));
 				
 				}
@@ -1829,4 +1816,69 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 		}
 		
 	}
+	
+	private class FileDetailsMapperWithTopics implements ParameterizedRowMapper<File>
+	{
+		@SuppressWarnings("unchecked")
+		@Override
+		public File mapRow(ResultSet rs, int arg1) throws SQLException {
+			File fileDetails = new File();
+			fileDetails.setFileId(rs.getLong("file_id"));
+			fileDetails.setAuthorEmailId(rs.getString("user_email_id"));
+			fileDetails.setFileType(rs.getString("file_type"));
+			fileDetails.setFilename(rs.getString("filename"));
+			fileDetails.setShared(rs.getBoolean("share_flag"));
+			fileDetails.setTopics((Set<String>) rs.getObject("topics"));
+			fileDetails.setUploadedTime(rs.getDate("upload_time"));
+			fileDetails.setFileSize(rs.getString("file_size"));
+			
+			return fileDetails;
+		}
+		
+	}
+
+	/**
+	 * Retrieves File Details based on FileId and AuthorEmailId
+	 * @author balaji i
+	 * @param fileId
+	 * @param authorEmailId
+	 * @return File(fileDetails)
+	 */
+	@Override
+	public File getFileDetails(String fileId, String authorEmailId) {
+		
+		Long fileIdL = Long.parseLong(fileId);
+		
+		final String GET_FILE_DETAILS = "select file_id,user_email_id,filename,share_flag,topics,upload_time,file_type,file_size from files where file_id="+fileIdL+" and user_email_id=?";
+		File fileDetails = getJdbcTemplate().queryForObject(GET_FILE_DETAILS, new FileDetailsMapperWithTopics(),authorEmailId);
+		return fileDetails;
+	}
+
+	
+	/**
+	 * Gets all the Files Concerned with a Topic
+	 * @author balaji i
+	 * @param topic
+	 * @return List<File>(filesInTopic)
+	 */
+	@Override
+	public List<File> getFilesInTopic(String topic) {
+		final String GET_FILES_IN_TOPIC = "select file_ids from topics where topic=?";
+		Map<Long,String> fileIdsWithAuthorEmailIds = getJdbcTemplate().queryForObject(GET_FILES_IN_TOPIC, Map.class);
+		
+		if( null != fileIdsWithAuthorEmailIds && !fileIdsWithAuthorEmailIds.isEmpty())
+		{
+			
+		}
+		return null;
+	}
+	
+	
+	File getDefaultImage()
+	{
+		final String GET_DEFAULT_IMAGE = "select filename,filedata from master_data where identifier=1";
+		File defaultImage = getJdbcTemplate().queryForObject(GET_DEFAULT_IMAGE, new FileDownloadMapper());
+		return defaultImage;
+	}
+	
 }

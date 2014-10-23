@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -22,6 +23,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ymess.pojos.Question;
 import com.ymess.pojos.SearchParameters;
 import com.ymess.pojos.User;
@@ -119,15 +122,16 @@ public class SearchController {
 	 * Fetches the related topics(Suggestions) once the user starts to type something
 	 * @author balaji i
 	 * @param topic
+	 * @throws JsonProcessingException 
 	 */
 	@RequestMapping(value = URLMappings.GET_RELATED_TOPICS, produces = MediaType.APPLICATION_JSON_VALUE,method = RequestMethod.GET,headers="Accept=*/*")
-	public
-	@ResponseBody List<String> getRelatedTopics(@RequestParam("topic") String topic,HttpServletResponse response)
+	@ResponseBody
+	public String getRelatedTopics(@RequestParam("topic") String topic,HttpServletRequest request,HttpServletResponse response) throws JsonProcessingException
 	{
-		response.setHeader("Access-Control-Allow-Origin", "*");
 		AutoSuggest autoSuggest = new AutoSuggest();
 		List<LookupResult> words = autoSuggest.returnSuggestedWords(topic);
 		
+		System.out.println("Reached");
 		List<String> suggestions = new ArrayList<String>();
 		if(!words.isEmpty())
 		{
@@ -135,7 +139,9 @@ public class SearchController {
 				suggestions.add((String) word.key.toString().replace("<b>", "").replace("</b>", ""));
 			}
 		}
-		return suggestions;
+		
+		ObjectMapper mapper = new ObjectMapper(); 
+		return mapper.writeValueAsString(suggestions);
 	}
 	
 }

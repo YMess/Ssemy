@@ -4,6 +4,8 @@
 <%@ page language="java" import="org.springframework.security.core.Authentication, org.springframework.security.core.context.SecurityContextHolder" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@taglib prefix="spring"  uri="http://www.springframework.org/tags" %>
+
 <%@page import="org.apache.commons.codec.binary.Base64" %>
 <!DOCTYPE html>
 <html>
@@ -56,14 +58,51 @@ border: medium;
 							<form:form action="file_upload.htm" method="POST" modelAttribute="file" enctype="multipart/form-data">
 									<div style="float: left;">
 										<input type="file" name="fileData">
+										
+										
+										<!-- Editing an Already Uploaded File -->
+										<form:hidden path="fileId"/>
+										<form:hidden path="authorEmailId"/>
+										
+										<spring:bind path="filename">
+											<c:set value="${status.value }" var="filename" />
+										</spring:bind>
+										<spring:bind path="topics">
+											<c:set value="${status.value }" var="topics" />
+										</spring:bind>
+										<spring:bind path="shared">
+										<c:set value="${status.value }" var="shared" />
+										</spring:bind>
+										
+										
+										Uploaded File : <c:out value="${filename }"/>
+										
 										<form:errors path="fileSize" cssClass="errormessage"></form:errors>
 										 <br> <br>
 										 
-										 <textarea name="topics" placeholder="Topics(Separated by Comma)"></textarea>
-										 <form:errors path="topics" cssClass="errormessage"></form:errors>
+										 <c:choose>
+											 <c:when test="${not empty topics}">
+											 	 <textarea name="topics"><c:out value="${topics}" /></textarea>
+											 </c:when>
+											 <c:otherwise>
+											  <textarea name="topics" placeholder="Enter Topics(Separated By Comma)"></textarea>
+											  <form:errors path="fileSize"></form:errors>
+											 </c:otherwise>
+										 </c:choose>
+										
 										 <br>
 										 <br>
-										 <input type="radio" name="shared"> &nbsp; Share the File with the World!
+										 
+										  <c:choose>
+											 <c:when test="${not empty shared}">
+											 	  <input type="radio" name="shared" checked="checked"> &nbsp;Already Shared
+											 </c:when>
+											 <c:otherwise>
+											  <input type="radio" name="shared"> &nbsp; Share the File with the World!
+											 </c:otherwise>
+										 </c:choose>
+										 
+										
 										 <br><br>
 										 <input type="submit" value="Upload File">
 									</div>

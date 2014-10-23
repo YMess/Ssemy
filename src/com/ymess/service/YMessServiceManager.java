@@ -387,4 +387,27 @@ public class YMessServiceManager implements YMessService {
 	public void shareFile(String fileId, String authorEmailId) {
 			yMessDao.shareFile(fileId,authorEmailId);
 	}
+
+	/**
+	 * Retrieves File Details based on FileId and AuthorEmailId
+	 * @author balaji i
+	 * @param fileId
+	 * @param authorEmailId
+	 * @return File(fileDetails)
+	 */
+	@Override
+	public File getFileDetails(String fileId, String authorEmailId) {
+		return yMessDao.getFileDetails(fileId,authorEmailId);
+	}
+
+	/**
+	 * Gets all the Files Concerned with a Topic
+	 * @author balaji i
+	 * @param topic
+	 * @return List<File>(filesInTopic)
+	 */
+	@Override
+	public List<File> getFilesInTopic(String topic) {
+		return yMessDao.getFilesInTopic(topic);
+	}
 }

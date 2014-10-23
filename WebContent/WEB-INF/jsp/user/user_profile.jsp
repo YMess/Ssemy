@@ -24,56 +24,48 @@
 		 $("#suggest").on('change keyup paste',function(){
 		  		suggestTopics();
 		 	}); 
-		  
-		$('.btnOpenDialog').click(fnOpenNormalDialog);
-		function fnOpenNormalDialog() {
-
-			localStorage.setItem("clickedQuestionId", $(this).attr('id'));
-
-			// Define the Dialog and its properties.
-			$("#dialog-confirm").dialog({
-				resizable : false,
-				modal : true,
-				title : "Add Answer",
-				height : 250,
-				width : 400,
-
-			});
-
-		}
-
-		$("button#postAnswer").click(function() {
-			var qId = localStorage.getItem("clickedQuestionId");
-			var answer = $("#answerTextArea").val();
-
-			var successFlag = false;
-			$.ajax({
-				url : "user_post_answer.htm",
-				data : 'qId=' + qId + "&answer=" + answer,
-				success : function(result) {
-					successFlag = true;
-				}
-			});
-
-			if (successFlag) {
-				$(this).dialog('close');
-				window.reload();
-				successFlag = false;
-			}
-		});
 
 	});
 </script>
 <script type="text/javascript">
 function suggestTopics()
 {
-	alert("Suggested Topics");
 	var topic = $("#suggest").val();
-	alert(topic);
 	var successFlag = false;
-	$.ajax({
+	
+	$.getJSON( "get_related_topics.htm",'topic=' + topic, function(relatedTopics ) {
+
+		 var returned = [];
+			returned = relatedTopics;
+			   $( "#suggest" ).autocomplete({
+		         source: returned,
+		 	 focus: function( event, ui ) {
+		        	 
+		        	 var displayProperty=$("#ui-id-2").css("display");
+		             if(displayProperty=="block"){
+		            	 $.fn.fullpage.setKeyboardScrolling(false);
+		            	 $.fn.fullpage.setAllowScrolling(false);
+		             }
+		            },
+		            close: function( event, ui ) {
+		                
+		                var displayProperty=$("#ui-id-2").css("display");
+		                  if(displayProperty=="none"){
+		                   $.fn.fullpage.setKeyboardScrolling(false);
+		                   $.fn.fullpage.setAllowScrolling(true);
+		                  } 
+		                
+		                 }
+		       }); 
+		   $( "#suggest" ).on( "autocompletefocus", function( event, ui ) {} );
+		   $( "#suggest" ).on( "autocompleteclose", function( event, ui ) {} );
+			 });
+	
+	
+/* 	$.ajax({
 		url : "get_related_topics.htm",
 		data : 'topic=' + topic,
+		dataType : 'JSON',
 		async:false,
 		cache:false,
 		success : function(result) {
@@ -83,7 +75,7 @@ function suggestTopics()
     error:function(data,status,er) { 
         alert("error: "+data+" status: "+status+" er:"+er);
     }
-	});
+	}); */
 	
 }
 </script>
@@ -105,15 +97,6 @@ function suggestTopics()
 		<div class="userleft"><%@include
 				file="/WEB-INF/jsp/include/left.jsp"%></div>
 		<div class="usercenter">
-			<div id="dialog-confirm" align="center" style="display: none">
-				<textarea rows="5" cols="40" id="answerTextArea"></textarea>
-				<br>
-				<button id="postAnswer">Post Answer</button>
-			</div>
-
-
-
-
 			<c:choose>
 				<c:when test="${not empty emptyResultSet }">
 									No Details Found! Please Fill Profile Details!
