@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.ymess.exceptions.EmptyResultSetException;
+import com.ymess.pojos.Answer;
 import com.ymess.pojos.Question;
 import com.ymess.pojos.SearchParameters;
 import com.ymess.service.interfaces.YMessService;
@@ -102,6 +103,8 @@ public class LoginController
 		}
 		model.addAttribute("searchParameters",new SearchParameters());
 		model.addAttribute("questions",questions);
+		model.addAttribute("answer",new Answer());
+		
 		logger.info(LoggerConstants.DASHBOARD_PAGE);
 		return JSPMappings.DASHBOARD_PAGE;
 	}

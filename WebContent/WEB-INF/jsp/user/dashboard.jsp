@@ -16,13 +16,21 @@
   <script src="js/jquery-ui.js" type="text/javascript"></script>
   <LINK REL=Stylesheet TYPE ="text/css" HREF="css/style.css">
 <LINK REL=Stylesheet TYPE ="text/css" HREF="css/pure-min.css">
-
+<script type="text/javascript">
+  
+  $().ready(function(){
+	  
+	   $('input[type="checkbox"]').click(function(){
+               $(".imageDiv").toggle();
+       });
+	});
+  </script>
 <script type="text/javascript">
 $().ready(function(){
 
 	$('.btnOpenDialog').click(fnOpenNormalDialog);
-	function fnOpenNormalDialog() {
-
+	function fnOpenNormalDialog() 
+	{
 		localStorage.setItem("clickedQuestionId",$(this).attr('id'));
 
 		// Define the Dialog and its properties.
@@ -31,48 +39,22 @@ $().ready(function(){
 	        modal: true,
 	        title: "Add Answer",
 	        height: 250,
-	        width: 400,
-	        
-	        
-	    });
+	        width: 400
+	         });
 		
-		}
+	}
 
-
-	$("button#postAnswer").click(function(){
-
-			var qId = localStorage.getItem("clickedQuestionId");
-			var answer = $("#answerTextArea").val();
-
-			if(answer)
-				{
-			
-			var successFlag = false;
-			 $.ajax({
-				 url:"user_post_answer.htm",
-				 data:'qId='+qId+"&answer="+answer,
-				 async:false,
-				 success:function(result){
-		   		successFlag = true;
-		  }}); 
-
-			
-			  if(successFlag)
-			  {
-				  alert("Success");
-				  $("#dialog-confirm").dialog( "close" );
-				  $("#answerTextArea").val("");
-				  location.reload();
-			  }
-
-				}
-			else
-				{
-					alert("Please post your answer");
-					return false;
-				}
-		});
-	
+	$( '#postAnswerForm' )
+	  .submit( function( e ) {
+	    $.ajax( {
+	      url: 'user_post_answer.htm',
+	      type: 'POST',
+	      data: new FormData( this ),
+	      processData: false,
+	      contentType: false
+	    } );
+	    e.preventDefault();
+	  } );
 });
 </script>
 </head>
@@ -91,11 +73,28 @@ $().ready(function(){
 	<div>
 		<div class="userleft"><%@include file="/WEB-INF/jsp/include/left.jsp" %></div>
 		<div class="usercenter">
-					<div id="dialog-confirm" align="center" style="display: none">
+					<!-- <div id="dialog-confirm" align="center" style="display: none">
 							<textarea rows="5" cols="40" id="answerTextArea"></textarea>
 						<br>
 						<button id="postAnswer">Post Answer</button>
-					</div>	
+					</div> -->
+					
+					<div id="dialog-confirm" align="center" style="display: none">
+                                        <form:form action="userdashboard.htm" modelAttribute="answer" enctype="multipart/form-data" id="postAnswerForm">
+                                                        <form:textarea path="answerDescription" ></form:textarea>
+                                                <br>
+                                            <br>
+                                             <input id="addImage" type="checkbox" name="isImageAttached"> Add Image
+                                            <br><br>
+                                              <div class="imageDiv"  style="display: none;">
+                                                	<input type="file"  accept="image/*" name="answerImage" id="answerImage">
+                                              </div>
+                                                <form:errors path="answerImage"></form:errors>
+                                        <br>
+                                                <br>
+                                                <button id="postAnswer">Post Answer</button>
+                                        </form:form>
+                                        </div>	
 		
 				<c:choose>
 					<c:when test="${not empty emptyResultSet }">

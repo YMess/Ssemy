@@ -3,6 +3,8 @@ package com.ymess.pojos;
 import java.util.Date;
 import java.util.Set;
 
+import org.springframework.web.multipart.MultipartFile;
+
 /**
  * Contains all the attributes of an Answer
  * @author balaji i
@@ -22,6 +24,11 @@ public class Answer {
 	private String firstName;
 	private String lastName;
 	private String questionDescription;
+	
+	private MultipartFile answerImage;
+	private Boolean isImageAttached;
+	
+	private byte[] answerImageDb;
 	
 	
 	public Long getQuestionId() {
@@ -95,6 +102,24 @@ public class Answer {
 	}
 	public void setQuestionDescription(String questionDescription) {
 		this.questionDescription = questionDescription;
+	}
+	public MultipartFile getAnswerImage() {
+		return answerImage;
+	}
+	public void setAnswerImage(MultipartFile answerImage) {
+		this.answerImage = answerImage;
+	}
+	public byte[] getAnswerImageDb() {
+		return answerImageDb;
+	}
+	public void setAnswerImageDb(byte[] answerImageDb) {
+		this.answerImageDb = answerImageDb;
+	}
+	public Boolean getIsImageAttached() {
+		return isImageAttached;
+	}
+	public void setIsImageAttached(Boolean isImageAttached) {
+		this.isImageAttached = isImageAttached;
 	}
 	
 }
