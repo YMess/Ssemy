@@ -12,7 +12,7 @@
 
 	<properties>
 		<java.version>1.7</java.version>
-		<spring.version>3.2.8.RELEASE</spring.version>
+		<spring.version>4.0.1.RELEASE</spring.version>
 		<spring.security.version>3.2.3.RELEASE</spring.security.version>
 		<lucene.version>4.8.1</lucene.version>
 		<log4j.version>1.2.17</log4j.version>
@@ -86,6 +86,30 @@
     <!-- Cassandra API Ends -->
     
     
+   <!--  <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+             <version>1.1.8.RELEASE</version>
+ 
+        </dependency>
+     <dependency>
+	<groupId>org.springframework</groupId>
+	<artifactId>spring-messaging</artifactId>
+	<version>4.0.0.RELEASE</version>
+</dependency> -->
+     
+  
+<!-- <dependency>
+   <groupId>org.springframework</groupId>
+   <artifactId>spring-websocket</artifactId>
+   <version>4.0.1.RELEASE</version>
+</dependency>
+<dependency>
+   <groupId>org.springframework</groupId>
+   <artifactId>spring-messaging</artifactId>
+   <version>4.0.1.RELEASE</version>
+</dependency>
+     -->
     
     
     <dependency>
@@ -101,6 +125,54 @@
 			<artifactId>log4j</artifactId>
 			<version>${log4j.version}</version>
 		</dependency>
+ 
+ 
+ 
+ <!-- Comet Chat API -->
+ 
+    <dependency>
+        <groupId>org.cometd.java</groupId>
+        <artifactId>bayeux-api</artifactId>
+        <version>2.5.0</version>
+    </dependency>
+    <dependency>
+         <groupId>org.cometd.java</groupId>
+         <artifactId>cometd-java-server</artifactId>
+         <version>2.5.0</version>
+    </dependency>
+    <dependency>
+         <groupId>org.cometd.java</groupId>
+         <artifactId>cometd-websocket-jetty</artifactId>
+         <version>2.5.0</version>
+         <exclusions>
+             <exclusion>
+                 <groupId>org.cometd.java</groupId>
+                 <artifactId>cometd-java-client</artifactId>
+             </exclusion>
+         </exclusions>
+   </dependency>
+   <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-simple</artifactId>
+        <version>1.6.6</version>
+   </dependency>
+   <dependency>
+        <groupId>org.cometd.java</groupId>
+        <artifactId>cometd-java-annotations</artifactId>
+        <version>2.5.0</version>
+   </dependency>
+   
+   
+ <!--  Comet Chat API -->
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
  
  
  <!-- Apache Commons API Starts --> 
@@ -163,8 +235,14 @@
 	<artifactId>log4j-1.2-api</artifactId>
 	<version>2.0-beta9</version>
 </dependency>
-
+<!-- 
 <dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-mapper-asl</artifactId>
+			<version>1.9.10</version>
+		</dependency> -->
+ 
+<!-- <dependency>
     <groupId>com.fasterxml.jackson.core</groupId>
     <artifactId>jackson-core</artifactId>
     <version>2.0.4</version>
@@ -174,7 +252,7 @@
     <groupId>com.fasterxml.jackson.core</groupId>
     <artifactId>jackson-databind</artifactId>
     <version>2.0.4</version>
-</dependency>
+</dependency> -->
 
 <!--
 <dependency>
@@ -200,7 +278,17 @@
         <version>2.2.3</version>
     </dependency>  -->
 
+<dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-core</artifactId>
+    <version>2.3.0</version>
+</dependency>
 
+<dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+    <version>2.3.0</version>
+</dependency>
 
 
 
@@ -338,7 +426,7 @@
 <dependency>
 	<groupId>javax.servlet</groupId>
 	<artifactId>javax.servlet-api</artifactId>
-	<version>3.0.1</version>
+	<version>3.1.0</version>
 </dependency>
 
 <dependency>
