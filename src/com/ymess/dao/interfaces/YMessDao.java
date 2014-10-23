@@ -293,4 +293,11 @@ public interface YMessDao {
 	 */
 	List<File> getFilesInTopic(String topic);
 
+	/**
+	 * Gets the Default Image(No Image in absence of any Image)
+	 * @author balaji i
+	 * @return File(defaultImages)
+	 */
+	File getDefaultImage();
+
 }

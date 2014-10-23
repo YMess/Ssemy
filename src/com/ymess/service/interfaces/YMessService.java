@@ -291,4 +291,11 @@ public interface YMessService {
 	 * @return List<File>(filesInTopic)
 	 */
 	List<File> getFilesInTopic(String topic);
+
+	/**
+	 * Gets the Default Image(No Image in absence of any Image)
+	 * @author balaji i
+	 * @return File(defaultImages)
+	 */
+	File getDefaultImage();
 }

@@ -299,8 +299,8 @@ public class LuceneSearcher {
 	public static Map<String, com.ymess.pojos.File> searchFiles(File indexLocation,String searchString)  throws FileNotFoundException, ParseException, IOException  {
 		
 		MultiFieldQueryParser multiFieldQueryParser;
-		BooleanQuery booleanQuery = null;
-		
+		BooleanQuery booleanQuery = new BooleanQuery(); 	
+				
 				//Setting the boosts for search parameters
     			HashMap<String,Float> boosts = new HashMap<String,Float>();
     			boosts.put("question_title", (float) 10 );

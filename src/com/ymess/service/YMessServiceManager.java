@@ -410,4 +410,14 @@ public class YMessServiceManager implements YMessService {
 	public List<File> getFilesInTopic(String topic) {
 		return yMessDao.getFilesInTopic(topic);
 	}
+
+	/**
+	 * Gets the Default Image(No Image in absence of any Image)
+	 * @author balaji i
+	 * @return File(defaultImages)
+	 */
+	@Override
+	public File getDefaultImage() {
+		return yMessDao.getDefaultImage();
+	}
 }

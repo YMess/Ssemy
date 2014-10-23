@@ -1873,8 +1873,8 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 		return null;
 	}
 	
-	
-	File getDefaultImage()
+	@Override
+	public File getDefaultImage()
 	{
 		final String GET_DEFAULT_IMAGE = "select filename,filedata from master_data where identifier=1";
 		File defaultImage = getJdbcTemplate().queryForObject(GET_DEFAULT_IMAGE, new FileDownloadMapper());

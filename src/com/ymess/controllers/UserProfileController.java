@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.ymess.exceptions.EmptyResultSetException;
+import com.ymess.pojos.File;
 import com.ymess.pojos.User;
 import com.ymess.service.interfaces.YMessService;
 import com.ymess.util.JSPMappings;
@@ -54,8 +55,6 @@ public class UserProfileController {
 		String userInterests = "";
 		
 		try{
-			
-			
 			userDetails = yMessService.getUserDetails(loggedInUserEmail);
 			
 				for (String  userPreviousOrganization : userDetails.getPreviousOrganizations()) {
@@ -118,15 +117,27 @@ public class UserProfileController {
 		
 		User userImage = yMessService.getUserImage(loggedInUserEmail);
 		String imageName = userImage.getImageName();
-		byte[] image =  userImage.getUserImageData();
-		   
+		byte[] image = null;
+		
+		if(null != imageName && imageName.length() > 0)
+		{
+			image =  userImage.getUserImageData();
+			imageName = userImage.getImageName();
+		}
+		else
+		{
+			File fileDetails = yMessService.getDefaultImage();
+			image = fileDetails.getFileDataDb();
+			imageName = fileDetails.getFilename();
+		}
+		
 		logger.info(LoggerConstants.USER_PROFILE_IMAGE+" "+ loggedInUserEmail);
 		   try
 		   {
 		    String imageFormat=null;
 		    //Code Added By BalajiI to Accommodate All Image Formats(namely PNG,JPEG,BMP)
 		    
-		    if(imageName!=null && !imageName.equals(""))
+		    if(imageName != null && !imageName.equals(""))
 		    {
 		     //To check for file format and render accordingly
 		     String fileExtension = YMessCommonUtility.getFileExtension(imageName);
@@ -259,6 +270,18 @@ public class UserProfileController {
 		String imageName = userImage.getImageName();
 		byte[] image =  userImage.getUserImageData();
 		   
+		if(null != imageName && imageName.length() > 0)
+		{
+			image =  userImage.getUserImageData();
+			imageName = userImage.getImageName();
+		}
+		else
+		{
+			File fileDetails = yMessService.getDefaultImage();
+			image = fileDetails.getFileDataDb();
+			imageName = fileDetails.getFilename();
+		}
+		
 		logger.info(LoggerConstants.USER_VIEW_PROFILE_IMAGE+" "+ decodedUserEmailId);
 		   try
 		   {
