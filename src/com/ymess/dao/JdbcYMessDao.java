@@ -1568,10 +1568,10 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 		if(!fileTopics.isEmpty())
 			fileTopics = YMessCommonUtility.removeNullAndEmptyElements(fileTopics);
 		
-		final String UPLOAD_FILE = "insert into files(file_id,user_email_id,file_type,filename,share_flag,topics,filedata,upload_time,file_size) values (?,?,?,?,?,?,?,?,?)";
+		final String UPLOAD_FILE = "insert into files(file_id,user_email_id,file_type,filename,share_flag,topics,filedata,upload_time,file_size,file_description) values (?,?,?,?,?,?,?,?,?,?)";
 		getJdbcTemplate().update(UPLOAD_FILE,
-				new Object[]{newFileId,file.getAuthorEmailId(),YMessCommonUtility.getFileExtension(file.getFileData().getOriginalFilename()),file.getFileData().getOriginalFilename(),file.getShared(),fileTopics,file.getFileData().getBytes(),new Date(),file.getFileSize()},
-				new int[]{Types.BIGINT,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.BOOLEAN,Types.ARRAY,Types.BINARY,Types.TIMESTAMP,Types.VARCHAR}
+				new Object[]{newFileId,file.getAuthorEmailId(),YMessCommonUtility.getFileExtension(file.getFileData().getOriginalFilename()),file.getFileData().getOriginalFilename(),file.getShared(),fileTopics,file.getFileData().getBytes(),new Date(),file.getFileSize(),file.getFileDescription()},
+				new int[]{Types.BIGINT,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.BOOLEAN,Types.ARRAY,Types.BINARY,Types.TIMESTAMP,Types.VARCHAR,Types.VARCHAR}
 				);
 		
 		if(file.getShared()!=null && file.getShared())
@@ -1640,6 +1640,7 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 			//fileDetails.setTopics((Set<String>) rs.getObject("topics"));
 			fileDetails.setUploadedTime(rs.getDate("upload_time"));
 			fileDetails.setFileSize(rs.getString("file_size"));
+			fileDetails.setFileDescription(rs.getString("file_description"));
 			//fileDetails.setFileDataDb(rs.getBytes("filedata"));
 			
 			return fileDetails;
@@ -1657,7 +1658,7 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 	@Override
 	public List<File> getAllSharedFiles() throws EmptyResultSetException {
 		List<File> files = new ArrayList<File>();
-		final String GET_SHARED_FILES = "select file_id,user_email_id,file_type,filename,share_flag,topics,upload_time,file_size from files where share_flag=true"; 
+		final String GET_SHARED_FILES = "select file_id,user_email_id,file_type,filename,share_flag,topics,upload_time,file_size,file_description from files where share_flag=true"; 
 		try{
 			files = getJdbcTemplate().query(GET_SHARED_FILES,new FileDetailsMapperWithTopics());
 		}
@@ -1702,7 +1703,7 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 	@Override
 	public List<File> getUserFiles(String loggedInUserEmail) throws EmptyResultSetException {
 		List<File> userFiles = new ArrayList<File>();
-		final String GET_USER_FILES = "select file_id,user_email_id,file_type,filename,share_flag,topics,upload_time,file_size from files where user_email_id = ?"; 
+		final String GET_USER_FILES = "select file_id,user_email_id,file_type,filename,share_flag,topics,upload_time,file_size,file_description from files where user_email_id = ?"; 
 		try{
 			userFiles = getJdbcTemplate().query(GET_USER_FILES,new FileDetailsMapperWithTopics(),loggedInUserEmail);
 		}
@@ -1770,21 +1771,23 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 				String fileIdStr = "";
 				String userEmailIdStr = "";
 				
-				for ( Long key : topic.getFileIdsAndAuthorEmails().keySet() ) {
-					fileIds.append(key).append(",");
-					userEmailIds.append("'").append(topic.getFileIdsAndAuthorEmails().get(key)).append("',");
+				if(topic.getFileIdsAndAuthorEmails() != null)
+				{	for ( Long key : topic.getFileIdsAndAuthorEmails().keySet() ) {
+						fileIds.append(key).append(",");
+						userEmailIds.append("'").append(topic.getFileIdsAndAuthorEmails().get(key)).append("',");
+					}
 				}
-
 				if(fileIds.length() > 0)
 					fileIdStr = fileIds.substring(0,fileIds.lastIndexOf(","));
 				
 				if(userEmailIds.length() > 0)
 					userEmailIdStr = userEmailIds.substring(0,userEmailIds.lastIndexOf(","));
 				
-				
-				final String GET_FILE_DETAILS = "select file_id,user_email_id,file_type,filename,share_flag,upload_time,file_size from files where user_email_id in ("+ userEmailIdStr +") and file_id in ("+fileIdStr+")"; 
-				sharedFiles.put(topic.getTopicName(),getJdbcTemplate().query(GET_FILE_DETAILS,new FileDetailsMapper()));
-				
+					if(userEmailIdStr != null && userEmailIdStr.length() > 0)
+					{	
+						final String GET_FILE_DETAILS = "select file_id,user_email_id,file_type,filename,share_flag,upload_time,file_size,file_description from files where user_email_id in ("+ userEmailIdStr +") and file_id in ("+fileIdStr+")"; 
+						sharedFiles.put(topic.getTopicName(),getJdbcTemplate().query(GET_FILE_DETAILS,new FileDetailsMapper()));
+					}
 				}
 			}
 		}
@@ -1813,6 +1816,13 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 			for (String topic : fileTopics) {
 				final String DELETE_REFERENCES_FROM_TOPICS = "delete file_ids["+fileId+"] from topics where topic='"+topic+"'";
 				getJdbcTemplate().update(DELETE_REFERENCES_FROM_TOPICS);
+				
+				final String DECREMENT_FILE_COUNT = "select file_count from topics where topic=?";
+				Long fileCount = getJdbcTemplate().queryForObject(DECREMENT_FILE_COUNT,Long.class,topic);
+				
+				final String UPDATE_FILE_COUNT = "update topics set file_count="+(fileCount - 1)+" where topic=?";
+				getJdbcTemplate().update(UPDATE_FILE_COUNT,topic);
+				
 			}
 		}
 		
@@ -1866,6 +1876,7 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 			fileDetails.setTopics((Set<String>) rs.getObject("topics"));
 			fileDetails.setUploadedTime(rs.getDate("upload_time"));
 			fileDetails.setFileSize(rs.getString("file_size"));
+			fileDetails.setFileDescription(rs.getString("file_description"));
 			
 			return fileDetails;
 		}
@@ -1884,7 +1895,7 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 		
 		Long fileIdL = Long.parseLong(fileId);
 		
-		final String GET_FILE_DETAILS = "select file_id,user_email_id,filename,share_flag,topics,upload_time,file_type,file_size from files where file_id="+fileIdL+" and user_email_id=?";
+		final String GET_FILE_DETAILS = "select file_id,user_email_id,filename,share_flag,topics,upload_time,file_type,file_size,file_description from files where file_id="+fileIdL+" and user_email_id=?";
 		File fileDetails = getJdbcTemplate().queryForObject(GET_FILE_DETAILS, new FileDetailsMapperWithTopics(),authorEmailId);
 		return fileDetails;
 	}
@@ -1899,13 +1910,18 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 	@Override
 	public List<File> getFilesInTopic(String topic) {
 		final String GET_FILES_IN_TOPIC = "select file_ids from topics where topic=?";
-		Map<Long,String> fileIdsWithAuthorEmailIds = getJdbcTemplate().queryForObject(GET_FILES_IN_TOPIC, Map.class);
+		Map<Long,String> fileIdsWithAuthorEmailIds = getJdbcTemplate().queryForObject(GET_FILES_IN_TOPIC, Map.class,topic);
 		
+		List<File> filesInTopic = new ArrayList<File>();
 		if( null != fileIdsWithAuthorEmailIds && !fileIdsWithAuthorEmailIds.isEmpty())
 		{
-			
+			for (Long fileId : fileIdsWithAuthorEmailIds.keySet()) {
+				String authorEmailId = fileIdsWithAuthorEmailIds.get(fileId);
+				File file = getFileDetails(String.valueOf(fileId), authorEmailId);
+				filesInTopic.add(file);
+			}
 		}
-		return null;
+		return filesInTopic;
 	}
 	
 	@Override

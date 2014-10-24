@@ -194,4 +194,29 @@ div.userleft{
 	float:left;
 	width:15%;
 }
+li.grid {
+	 	width: 400px;
+        min-height: 250px;
+        border: 1px solid #000;
+        display: -moz-inline-stack;
+        display: inline-block;
+        vertical-align: top;
+        margin: 5px;
+        zoom: 1;
+        *display: inline;
+        word-break:break-all;
+      
+}
+li.gridsmall{
+	  width: 190px;
+        min-height: 250px;
+        border: 1px solid #000;
+        display: -moz-inline-stack;
+        display: inline-block;
+        vertical-align: top;
+        margin: 5px;
+        zoom: 1;
+        *display: inline;
+        word-break:break-all;
+}
 

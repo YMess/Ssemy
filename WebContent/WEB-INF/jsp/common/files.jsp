@@ -55,11 +55,7 @@ border: medium;
 		
 		<div class="height30">
 						<div style="height: 25%; width: 100%;">
-							<form:form action="file_upload.htm" method="POST" modelAttribute="file" enctype="multipart/form-data">
-									<div style="float: left;">
-										<input type="file" name="fileData">
-										
-										
+						<form:form action="file_upload.htm" method="POST" modelAttribute="file" enctype="multipart/form-data">
 										<!-- Editing an Already Uploaded File -->
 										<form:hidden path="fileId"/>
 										<form:hidden path="authorEmailId"/>
@@ -71,16 +67,46 @@ border: medium;
 											<c:set value="${status.value }" var="topics" />
 										</spring:bind>
 										<spring:bind path="shared">
-										<c:set value="${status.value }" var="shared" />
+											<c:set value="${status.value }" var="shared" />
+										</spring:bind>
+										<spring:bind path="fileDescription">
+											<c:set value="${status.value }" var="fileDescription" />
 										</spring:bind>
 										
 										
-										Uploaded File : <c:out value="${filename }"/>
+						<!-- Left Section -->
+							<div style="width:40%;float:left;">
+								<input type="file" name="fileData">
+								<c:out value="${filename }"/>
+									<form:errors path="fileSize" cssClass="errormessage"></form:errors>
+								<br>
+								<br>	  
+										  <c:choose>
+											 <c:when test="${not empty fileDescription}">
+											 	 <textarea name="fileDescription"><c:out value="${fileDescription}" /></textarea>
+											 </c:when>
+											 <c:otherwise>
+											  <textarea name="fileDescription" placeholder="Enter File Description"></textarea>
+											  <form:errors path="fileDescription"></form:errors>
+											 </c:otherwise>
+										 </c:choose>
 										
-										<form:errors path="fileSize" cssClass="errormessage"></form:errors>
-										 <br> <br>
-										 
-										 <c:choose>
+							</div>
+						<!-- Left Section -->
+						
+						<!-- Right Section -->
+							<div style="width:50%;float:left;"> 
+								 		 <c:choose>
+											 <c:when test="${not empty shared}">
+											 	  <input type="checkbox" name="shared" checked="checked"> &nbsp;<span> Already Shared </span>
+											 </c:when>
+											 <c:otherwise>
+											  <input type="checkbox" name="shared"> &nbsp;<span> Share the File with the World! </span>
+											 </c:otherwise>
+										 </c:choose>
+									<br>
+									<br>	
+										  <c:choose>
 											 <c:when test="${not empty topics}">
 											 	 <textarea name="topics"><c:out value="${topics}" /></textarea>
 											 </c:when>
@@ -89,94 +115,66 @@ border: medium;
 											  <form:errors path="fileSize"></form:errors>
 											 </c:otherwise>
 										 </c:choose>
-										
-										 <br>
-										 <br>
 										 
-										  <c:choose>
-											 <c:when test="${not empty shared}">
-											 	  <input type="radio" name="shared" checked="checked"> &nbsp;Already Shared
-											 </c:when>
-											 <c:otherwise>
-											  <input type="radio" name="shared"> &nbsp; Share the File with the World!
-											 </c:otherwise>
-										 </c:choose>
-										 
-										
-										 <br><br>
-										 <input type="submit" value="Upload File">
-									</div>
-							</form:form>
+							
+							</div>	
+						<!-- Right Section -->
+						
+						 <br><br>
+						<input type="submit" value="Upload File">	
+						</form:form>	
+							
 						</div>
 				<div class="clear"></div>
 		</div>
 		
 		<div style="float:left;width:100%;padding-top:30px;">
-						<p style="float:left;padding-left: 45%;">	MyFiles</p>
-		<form>
-	<fieldset>
-		<table class="width100">
-			<thead>
-			
-				<tr>
-					<th style="width:35%;">FileName</th>
-					<th style="width:20%;">FileSize</th>
-					<th style="width:25%;">Actions</th>
-				</tr>
-			</thead>
-			<tbody>
-			<c:forEach items="${userFiles}" var="userFile">
-				<tr>
-				<c:set var="fileId"  value="${userFile.fileId }"/>
-				<c:set var="author"  value="${userFile.authorEmailId }"/>
-					<td style="padding-left:70px;"> 
-						<a href="download_file.htm?fileId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("fileId")).getBytes()))%>&author=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("author")).getBytes()))%>"><c:out value="${userFile.filename}" /></a>
-					</td>
-					<td style="padding-left:80px;">
-							<c:out value="${userFile.fileSize}" />
-					</td>
-					<td style="padding-left:110px;">
-						<div style="float:left;"><a href="delete_file.htm?fId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("fileId")).getBytes()))%>&author=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("author")).getBytes()))%>">Delete</a></div>
-						<div style="float:right;padding-right:75px;"><a href="edit_file.htm?fId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("fileId")).getBytes()))%>&author=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("author")).getBytes()))%>">Edit</a></div>
+						<p style="padding-left: 45%;">	My Files </p>
+						<ul>
+						<c:forEach items="${userFiles}" var="userFile">
+						<c:set var="fileId"  value="${userFile.fileId }"/>
+						<c:set var="author"  value="${userFile.authorEmailId }"/>
+							<li class="grid">
+								<div><c:out value="${userFile.fileDescription }" /></div>
+								<div><a href="download_file.htm?fileId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("fileId")).getBytes()))%>&author=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("author")).getBytes()))%>"><c:out value="${userFile.filename}" /></a>
+								</div><div><c:out value="${userFile.fileSize}" /></div>
+								<div style="padding-left:25%;float: left;">
+									<a href="edit_file.htm?fId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("fileId")).getBytes()))%>&author=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("author")).getBytes()))%>">
+										<img height="40px" width="40px" src="images/Edit_Icon.png">
+									</a>
+								</div>
+								<div style="padding-left:10px;float: left;">
+								<a href="delete_file.htm?fId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("fileId")).getBytes()))%>&author=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("author")).getBytes()))%>">
+									<img height="40px" width="40px" src="images/Delete_Icon.png">
+								</a>
+								</div>
+							</li>
+						</c:forEach>
+						</ul>
 						
-						<c:if test="${userFile.shared eq false}">
-							<div style="float:right;padding-right:75px;"><a href="share_file.htm?fId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("fileId")).getBytes()))%>&author=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("author")).getBytes()))%>">Share</a></div>
-						</c:if>
-					</td>
-				</tr>
-			</c:forEach>
-			</tbody>
-		</table>
-	</fieldset>
-</form>
+	
 		</div>
 		<div class="clear"></div>
 		<div style="width:100%;float:left;">
-				<p style="padding-left: 45%;padding-top: 20px;">	Popular Topics</p>
-				<div id="navcontainer">
-					<ul id="navlist">
-					
+					<p style="padding-left: 45%;">	Popular Files </p>
+						<ul>
 					<c:forEach var="popularFile" items="${popularFiles}">
-					
-					<li id="active" class="main"><a href="#" id="current"><c:out value="${popularFile.key }"/></a>
-					   <ul>
-					  
-					   <c:forEach var="popularFileDetails" items="${popularFile.value}">
-					  
-					       <li>
-					       	<a href="view_file_details.htm"><c:out value="${popularFileDetails.filename}"/></a><br>
-					       	<c:out value="${popularFileDetails.fileSize }"/>
-					       </li>
-					    </c:forEach>    
-					    
-					    </ul>
-					    
-					    </li>
-				 </c:forEach>	    
-					</ul>
-				</div>
-									
-				
+							<li class="gridsmall">
+							<c:set var="topic" value="${popularFile.key}" />
+								<div style="padding-left: 25%;word-break: break-all;"><a href="view_files_topic.htm?t=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("topic")).getBytes()))%>" id="current"><c:out value="${popularFile.key}"/></a></div>
+								<div>
+									<ul>
+						   				<c:forEach var="popularFileDetails" items="${popularFile.value}">
+						      				 <li>
+										       	<a href="view_file_details.htm"><c:out value="${popularFileDetails.filename}"/></a><br>
+										       	<c:out value="${popularFileDetails.fileSize }"/>
+						      				 </li>
+						   			    </c:forEach>    
+					    			</ul>
+								</div>
+							</li>
+						</c:forEach>
+						</ul>
 		</div>
 		
 		</div>

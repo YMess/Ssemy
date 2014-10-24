@@ -71,9 +71,6 @@ public class FileActivitiesController {
 			e.printStackTrace();
 		}
 		model.addAttribute("userFiles",userFiles);
-		
-		
-		
 		model.addAttribute("sharedFiles",sharedFiles);
 		model.addAttribute("popularFiles",popularFiles);
 		return JSPMappings.FILES;
@@ -121,6 +118,10 @@ public class FileActivitiesController {
 		if(file.getTopics().isEmpty())
 		{
 			result.rejectValue("topics", "file.topics","Please Enter at Least One Topic");
+		}
+		if(file.getFileDescription().isEmpty())
+		{
+			result.rejectValue("fileDescription", "file.fileDescription","Please Enter File Description");
 		}
 		
 		if(result.hasErrors())
@@ -203,6 +204,14 @@ public class FileActivitiesController {
 		return URLMappings.REDIRECT_SUCCESS_FILE_SHARED;
 	}
 	
+	/**
+	 * Facilitates File Editing
+	 * @author balaji i
+	 * @param encodedFileId
+	 * @param encodedAuthorEmailId
+	 * @param redirectAttributes
+	 * @return
+	 */
 	@RequestMapping(value = URLMappings.EDIT_FILE)
 	String editFile(@RequestParam("fId")String encodedFileId, @RequestParam("author") String encodedAuthorEmailId, RedirectAttributes redirectAttributes)
 	{
@@ -216,11 +225,18 @@ public class FileActivitiesController {
 		return "redirect:files.htm";
 	}
 	
+	/**
+	 * Retrieves Files in a Topic
+	 * @author balaji i
+	 * @param encodedTopic
+	 * @return topic_files(filesInTopic)
+	 */
 	@RequestMapping(value = URLMappings.FILES_IN_TOPIC)
-	String getFilesInTopic(@RequestParam("topic") String encodedTopic)
+	String getFilesInTopic(@RequestParam("t") String encodedTopic,Model model)
 	{
 		String topic = YMessCommonUtility.decodeEncodedParameter(encodedTopic);
 		List<File> filesInTopic = yMessService.getFilesInTopic(topic);
-		return "filesInTopic";
+		model.addAttribute("filesInTopic",filesInTopic);
+		return JSPMappings.FILES_IN_TOPIC;
 	}
 }

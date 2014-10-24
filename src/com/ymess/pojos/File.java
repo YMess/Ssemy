@@ -23,6 +23,7 @@ public class File {
 	private Set<String> topics;
 	private String fileType;
 	private String fileSize;
+	private String fileDescription;
 	
 	private MultipartFile fileData;
 	private byte[] fileDataDb;
@@ -95,6 +96,12 @@ public class File {
 	@Override
 	public int hashCode() {
 		return Integer.parseInt(this.fileId.toString());
+	}
+	public String getFileDescription() {
+		return fileDescription;
+	}
+	public void setFileDescription(String fileDescription) {
+		this.fileDescription = fileDescription;
 	}
 	
 

@@ -62,7 +62,7 @@ public class URLMappings {
 	public static final String GET_RELATED_TOPICS = "get_related_topics.htm"; //SearchController
 	
 	public static final String EDIT_FILE = "edit_file.htm"; //FileActivitiesController
-	public static final String FILES_IN_TOPIC = ""; //FileActivitiesController
+	public static final String FILES_IN_TOPIC = "view_files_topic.htm"; //FileActivitiesController
 	
 
 

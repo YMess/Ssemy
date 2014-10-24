@@ -33,6 +33,7 @@ public class JSPMappings {
 	public static final String FILES = "common/files";
 	
 	public static final String SEARCH_RESULTS = "common/search_results"; //SearchController
+	public static final String FILES_IN_TOPIC = "common/topic_files"; //FileActivitiesController
 	
 	
 
