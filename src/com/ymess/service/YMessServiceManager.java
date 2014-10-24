@@ -90,8 +90,8 @@ public class YMessServiceManager implements YMessService {
 	 * @param answer
 	 */
 	@Override
-	public void addAnswer(String questionId, String answer,String loggedInUserEmailId) {
-		yMessDao.addAnswer(questionId,answer,loggedInUserEmailId);
+	public void addAnswer(Answer answer) {
+		yMessDao.addAnswer(answer);
 	}
 
 	/**

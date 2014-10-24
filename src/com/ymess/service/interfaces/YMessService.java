@@ -62,7 +62,7 @@ public interface YMessService {
 	 * @param answer
 	 * @param loggedInUserEmailId 
 	 */
-	void addAnswer(String questionId, String answer, String loggedInUserEmailId);
+	void addAnswer(Answer answer);
 
 	/**
 	 * Fetches all the Answers of a Question in Descending Order (Latest First)
@@ -298,4 +298,6 @@ public interface YMessService {
 	 * @return File(defaultImages)
 	 */
 	File getDefaultImage();
+
+	
 }

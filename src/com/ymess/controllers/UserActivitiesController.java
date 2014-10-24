@@ -166,7 +166,7 @@ public class UserActivitiesController {
 		
 		try
 		{
-			//yMessService.addAnswer(answer);
+			yMessService.addAnswer(answer);
 			logger.info(LoggerConstants.USER_POSTED_ANSWER+" "+loggedInUserEmailId);
 		}
 		catch(Exception ex)
