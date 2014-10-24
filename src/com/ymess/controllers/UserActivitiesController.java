@@ -163,6 +163,7 @@ public class UserActivitiesController {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		String loggedInUserEmailId = authentication.getName();
 		Boolean successFlag = false;
+		answer.setAuthorEmailId(loggedInUserEmailId);
 		
 		try
 		{

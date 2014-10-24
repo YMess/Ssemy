@@ -46,10 +46,12 @@ $().ready(function(){
 
 	$( '#postAnswerForm' )
 	  .submit( function( e ) {
+		   var formdata = new FormData( this );
+		   formdata.append("questionId",localStorage.getItem("clickedQuestionId"));
 	    $.ajax( {
 	      url: 'user_post_answer.htm',
 	      type: 'POST',
-	      data: new FormData( this ),
+	      data: formdata,//new FormData( this ),
 	      processData: false,
 	      contentType: false
 	    } );

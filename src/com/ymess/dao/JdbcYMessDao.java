@@ -540,17 +540,7 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 			answer.setAnswerId(newAnswerId);
 			
 			User userDetails = getUserDetailsByEmailId(answer.getAuthorEmailId());
-	
-		    final String GET_QUESTION_AUTHOR = "select author_email_id from questions where question_id="+answer.getQuestionId()+" allow filtering";
-			String questionAuthorEmailId = getJdbcTemplate().queryForObject(GET_QUESTION_AUTHOR, String.class);
-				
-			final String GET_QUESTION_DESC = "select question_desc from questions where question_id="+answer.getQuestionId()+" allow filtering";
-			String questionDesc = getJdbcTemplate().queryForObject(GET_QUESTION_DESC, String.class);
-				
-			final String UPDATE_QUESTION_LAST_ANSWER = "update questions set last_answer=? where question_id="+answer.getQuestionId()+" and author_email_id=?";
-			getJdbcTemplate().update(UPDATE_QUESTION_LAST_ANSWER,answer,questionAuthorEmailId);
-			
-
+	        
 			/** Question Along with Image */
 			if(answer.getIsImageAttached() != null && answer.getIsImageAttached())
 			{
@@ -560,9 +550,18 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 					
 					String ADD_ANSWER_WITH_IMAGE="insert into answers (question_id,answer_id,answered_time,answer_desc,author_email_id,author_first_name,author_last_name,image_data,is_image_attached) values(?,?,?,?,?,?,?,?,?)";
 					getJdbcTemplate().update(ADD_ANSWER_WITH_IMAGE,
-							new Object[]{answer.getQuestionId(),newAnswerId,new Date(),answer,answer.getAuthorEmailId(),userDetails.getFirstName(),userDetails.getLastName(),answer.getAnswerImage(),answer.getIsImageAttached()},
+							new Object[]{answer.getQuestionId(),newAnswerId,new Date(),answer,answer.getAuthorEmailId(),userDetails.getFirstName(),userDetails.getLastName(),compressedImage,answer.getIsImageAttached()},
 							new int[]{Types.BIGINT,Types.BIGINT,Types.TIMESTAMP,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.BINARY,Types.BOOLEAN}
 							);
+					
+					final String GET_QUESTION_AUTHOR = "select author_email_id from questions where question_id="+answer.getQuestionId()+" allow filtering";
+					String questionAuthorEmailId = getJdbcTemplate().queryForObject(GET_QUESTION_AUTHOR, String.class);
+						
+					final String GET_QUESTION_DESC = "select question_desc from questions where question_id="+answer.getQuestionId()+" allow filtering";
+					String questionDesc = getJdbcTemplate().queryForObject(GET_QUESTION_DESC, String.class);
+						
+					final String UPDATE_QUESTION_LAST_ANSWER = "update questions set last_answer=? where question_id="+answer.getQuestionId()+" and author_email_id=?";
+					getJdbcTemplate().update(UPDATE_QUESTION_LAST_ANSWER,answer,questionAuthorEmailId);
 
 					String ADD_ANSWER_TIMELINE="insert into user_timeline(user_email_id, user_timestamp, activity, user_first_name, user_last_name, answered_question_id, answered_question_desc, answered_question_email_id, answered_answered_id, answered_answered_desc, is_answered_question,answered_answered_is_image_attached) values(?,?,?,?,?,?,?,?,?,?,?,?)";
 					getJdbcTemplate().update(ADD_ANSWER_TIMELINE, new Object[]{answer.getAuthorEmailId(), new Date(), ActivityConstants.ANSWERED_QUESTION, userDetails.getFirstName(),userDetails.getLastName(),answer.getQuestionId(), questionDesc, GET_QUESTION_AUTHOR, newAnswerId, answer,  YMessCommonUtility.IS_ANSWERED_QUESTIONS,true},
@@ -580,6 +579,15 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 					new Object[]{answer.getQuestionId(),newAnswerId,new Date(),answer,answer.getAuthorEmailId(),userDetails.getFirstName(),userDetails.getLastName()},
 					new int[]{Types.BIGINT,Types.BIGINT,Types.TIMESTAMP,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR}
 					);
+				
+				final String GET_QUESTION_AUTHOR = "select author_email_id from questions where question_id="+answer.getQuestionId()+" allow filtering";
+				String questionAuthorEmailId = getJdbcTemplate().queryForObject(GET_QUESTION_AUTHOR, String.class);
+					
+				final String GET_QUESTION_DESC = "select question_desc from questions where question_id="+answer.getQuestionId()+" allow filtering";
+				String questionDesc = getJdbcTemplate().queryForObject(GET_QUESTION_DESC, String.class);
+					
+				final String UPDATE_QUESTION_LAST_ANSWER = "update questions set last_answer=? where question_id="+answer.getQuestionId()+" and author_email_id=?";
+			    getJdbcTemplate().update(UPDATE_QUESTION_LAST_ANSWER,answer,questionAuthorEmailId);
 
 				getJdbcTemplate().update(ADD_ANSWER_TIMELINE, new Object[]{answer.getAuthorEmailId(), new Date(), ActivityConstants.ANSWERED_QUESTION, userDetails.getFirstName(),userDetails.getLastName(),answer.getQuestionId(), questionDesc, GET_QUESTION_AUTHOR, newAnswerId, answer,  YMessCommonUtility.IS_ANSWERED_QUESTIONS},
 					new int[]{Types.VARCHAR,Types.TIMESTAMP,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR, Types.BIGINT,Types.VARCHAR,Types.VARCHAR,Types.BIGINT,Types.VARCHAR,Types.BOOLEAN}
@@ -589,16 +597,6 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 		catch (Exception e) {
 			logger.error(e.getLocalizedMessage());
 		}
-	
-			/*final String GET_QUESTION_AUTHOR = "select author_email_id from questions where question_id="+questionIdLong+" allow filtering";
-			String questionAuthorEmailId = getJdbcTemplate().queryForObject(GET_QUESTION_AUTHOR, String.class);
-			
-			final String GET_QUESTION_DESC = "select question_desc from questions where question_id="+questionIdLong+" allow filtering";
-			String questionDesc = getJdbcTemplate().queryForObject(GET_QUESTION_DESC, String.class);
-			
-			final String UPDATE_QUESTION_LAST_ANSWER = "update questions set last_answer=? where question_id="+questionIdLong+" and author_email_id=?";
-			getJdbcTemplate().update(UPDATE_QUESTION_LAST_ANSWER,answer,questionAuthorEmailId);*/
-			
 	}
 
 
