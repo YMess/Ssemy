@@ -29,7 +29,7 @@
 		<div class="usercenter">
 		<ul>
 			<c:if test="${not empty questions }">
-			Questions Fetched : <c:out value="${questionCount }"/>
+			<span>Questions Fetched : </span><c:out value="${questionCount }"/>
 			<br>
 				<c:forEach var="question" items="${questions}"> 
 				
@@ -44,13 +44,44 @@
 			</c:if>
 			
 			<c:if test="${not empty users }">
-					<li>
+			<span>Users Fetched : </span><c:out value="${userCount }"/>
+			<br><br>
+				<c:forEach var="user" items="${users}"> 
+					<c:set var="userId" value="${user.value.userEmailId }" />
+					<li style="height:100px;">
+						<div>
+						
+							<div style="float:left;">
+								<img alt="User Image" src="user_view_profile_image.htm?aId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("userId")).getBytes())) %>" height="75px;" width="75px;">
+							</div>
+							
+							<div style="float:left;padding=left:20px;"><a href="user_view_profile.htm?aId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("userId")).getBytes())) %>"><c:out value="${user.value.firstName }"/>&nbsp;<c:out value="${user.value.lastName }"/></a></div>
+							<div><c:out value="${user.value.designation }"/></div>
+							<div><c:out value="${user.value.organization }" /></div>
+						
+						</div>
+						<div class="clear"></div>
 					</li>
+				
+				</c:forEach>
+			
 			</c:if>
 			
 			<c:if test="${not empty files }">
-					<li>
+			<span>Files Fetched : </span><c:out value="${fileCount }"/>
+			<br>
+				<c:forEach var="file" items="${files}"> 
+				<c:set var="authorEmailId" value="${file.value.authorEmailId}" />
+					<li style="padding-top:20px;padding-bottom: 20px;">
+						<span style="float:left;"> Description : </span><div><c:out value="${file.value.fileDescription }"/></div><br><br>
+						<span style="float:left;">Name : </span><div style="padding-left: 10px;"><c:out value="${file.value.filename }"/></div>
+						<span style="float:left;">Time : </span><div><c:out value="${file.value.uploadedTime }"/></div>
+						<span style="float:left;">Author : </span><div><a href="user_view_profile.htm?aId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("authorEmailId")).getBytes())) %>"><c:out value="${file.value.authorFirstName }"/>&nbsp;<c:out value="${file.value.authorLastName }"/></a></div>
+						<span style="float:left;"> Topics : </span><div><c:out value="${file.value.topics}"/></div>
 					</li>
+				
+				</c:forEach>
+			
 			</c:if>
 		</ul>
 		

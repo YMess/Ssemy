@@ -35,7 +35,7 @@ public class LuceneIndexer
 		
 		private final static String INDEX_QUESTION_DETAILS ="select author_email_id,question_id,updated_date,question_title,question_desc,topics from questions";
 		private static final String INDEX_USER_DETAILS = "select email_id,first_name,last_name,profile_last_updated,user_image_name from users_data";
-		private static final String INDEX_FILE_DETAILS = "select file_id,user_email_id,filename,topics,upload_time from files";
+		private static final String INDEX_FILE_DETAILS = "select file_id,user_email_id,filename,topics,upload_time,file_description,user_first_name,user_last_name from files";
 		private static final String INDEX_TOPICS = "select topic,file_count from topics";
 		
 		public static void main(String[] args) throws Exception 
@@ -222,6 +222,17 @@ public class LuceneIndexer
 				         if(null != rs.getString("filename"))
 				        	 document.add(new Field("filename", rs.getString("filename"), Field.Store.YES,Field.Index.ANALYZED));
 				        
+				         if(null != rs.getString("file_description"))
+				        	 document.add(new Field("file_description",rs.getString("file_description"),Field.Store.YES,Field.Index.ANALYZED));
+				         
+				         if(null != rs.getString("user_first_name"))
+				        	 document.add(new Field("user_first_name",rs.getString("user_first_name"),Field.Store.YES,Field.Index.ANALYZED));
+				         
+				         if(null != rs.getString("user_last_name"))
+				        	 document.add(new Field("user_last_name",rs.getString("user_last_name"),Field.Store.YES,Field.Index.ANALYZED));
+				         
+				         
+				         
 				         if(null != rs.getString("upload_time"))
 				         {
 				        	 float boost = 25.0f;

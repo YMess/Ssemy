@@ -126,7 +126,7 @@ $().ready(function(){
 									<c:out value="${question.firstName }"></c:out>&nbsp;<c:out value="${question.lastName }"></c:out></a>
 									
 									<span>Last Updated :</span> <c:out value="${question.updatedDate }"></c:out>  
-									<button onclick="editQuestionDesc('${question.questionId}')">Edit</button>
+									<%-- <button onclick="editQuestionDesc('${question.questionId}')">Edit</button> --%>
 									
 									<br>
 									<h3><c:out value="${question.lastAnswer}"/></h3>

@@ -90,6 +90,7 @@ public class SearchController {
 			 
 			 if(null != users && ! users.isEmpty())
 			 {
+				 User user = users.get("first@ymess.com");
 				 model.addAttribute("users",users);
 				 model.addAttribute("userCount",users.size());
 			 }

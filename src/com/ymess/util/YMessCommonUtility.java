@@ -10,10 +10,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -21,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TimeZone;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -147,7 +151,7 @@ public class YMessCommonUtility {
 		String fileExtension = "";
 		if(imageName.contains("."))
 		{
-			fileExtension = imageName.substring(imageName.lastIndexOf("."),imageName.length());
+			fileExtension = imageName.substring(imageName.lastIndexOf(".")+1,imageName.length());
 		}
 		return fileExtension;
 	}
@@ -325,5 +329,38 @@ public class YMessCommonUtility {
 	    	
 	    	return keys;
 		}
+
+		/**
+		 * Returns the Corresponding String of Date Object depending on TimeZone
+		 * @param date
+		 * @param format
+		 * @param timeZone
+		 * @return
+		 */
+		public static String formatDateToString(Date date, String format,
+	            String timeZone) {
+	        // null check
+	        if (date == null) return null;
+	        // create SimpleDateFormat object with input format
+	        SimpleDateFormat sdf = new SimpleDateFormat(format);
+	        // default system timezone if passed null or empty
+	        if (timeZone == null || "".equalsIgnoreCase(timeZone.trim())) {
+	            timeZone = Calendar.getInstance().getTimeZone().getID();
+	        }
+	        // set timezone to SimpleDateFormat
+	        sdf.setTimeZone(TimeZone.getTimeZone(timeZone));
+	        // return Date in required format with timezone as String
+	        return sdf.format(date);
+	    }
 		
+		
+		/**
+		 * Replaces all the Apostrophes
+		 * @param wordWithApostrophe
+		 * @return wordWithoutApostrophe
+		 */
+		public static String removeExtraneousApostrophe(String wordWithApostrophe)
+		{
+			return wordWithApostrophe.replaceAll("'", "");
+		}
 }

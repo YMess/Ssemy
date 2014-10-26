@@ -28,7 +28,8 @@ public class File {
 	private MultipartFile fileData;
 	private byte[] fileDataDb;
 	
-	
+	private String authorFirstName;
+	private String authorLastName;
 	
 	public Long getFileId() {
 		return fileId;
@@ -102,6 +103,18 @@ public class File {
 	}
 	public void setFileDescription(String fileDescription) {
 		this.fileDescription = fileDescription;
+	}
+	public String getAuthorFirstName() {
+		return authorFirstName;
+	}
+	public void setAuthorFirstName(String authorFirstName) {
+		this.authorFirstName = authorFirstName;
+	}
+	public String getAuthorLastName() {
+		return authorLastName;
+	}
+	public void setAuthorLastName(String authorLastName) {
+		this.authorLastName = authorLastName;
 	}
 	
 

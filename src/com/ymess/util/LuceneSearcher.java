@@ -3,9 +3,11 @@ package com.ymess.util;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -169,10 +171,10 @@ public class LuceneSearcher {
 		
 				//Setting the boosts for search parameters
     			HashMap<String,Float> boosts = new HashMap<String,Float>();
-    			boosts.put("question_title", (float) 10 );
-    			boosts.put("question_desc", (float) 8 );
-    			boosts.put("topics", (float) 8 );
-    			boosts.put("updated_date", (float) 5 );
+    			boosts.put("question_title", (float) 40 );
+    			boosts.put("question_desc", (float) 35 );
+    			boosts.put("topics", (float) 30 );
+    			boosts.put("updated_date", (float) 10 );
     			
     			String[] fields = new String[] {"question_title","question_desc","topics","updated_date"};
     			multiFieldQueryParser = new MultiFieldQueryParser(luceneVersion, fields,new StandardAnalyzer(luceneVersion),boosts);
@@ -238,10 +240,10 @@ public class LuceneSearcher {
 		
 				//Setting the boosts for search parameters
     			HashMap<String,Float> boosts = new HashMap<String,Float>();
-    			boosts.put("first_name", (float) 10 );
-    			boosts.put("last_name", (float) 8 );
-    			boosts.put("profile_last_updated", (float) 5 );
-    			boosts.put("user_image_name", (float) 3 );
+    			boosts.put("first_name", (float) 40 );
+    			boosts.put("last_name", (float) 30 );
+    			boosts.put("profile_last_updated", (float) 20 );
+    			boosts.put("user_image_name", (float) 10 );
     			
     			String[] fields = new String[] {"first_name","last_name","profile_last_updated","user_image_name"};
     			multiFieldQueryParser = new MultiFieldQueryParser(luceneVersion, fields,new StandardAnalyzer(luceneVersion),boosts);
@@ -303,12 +305,12 @@ public class LuceneSearcher {
 				
 				//Setting the boosts for search parameters
     			HashMap<String,Float> boosts = new HashMap<String,Float>();
-    			boosts.put("question_title", (float) 10 );
-    			boosts.put("topics", (float) 8 );
-    			boosts.put("question_desc", (float) 8 );
-    			boosts.put("updated_date", (float) 5 );
+    			boosts.put("topics", (float) 40 );
+    			boosts.put("filename", (float) 30 );
+    			boosts.put("file_description", (float) 20 );
+    			boosts.put("upload_time", (float) 20 );
     			
-    			String[] fields = new String[] {"question_title","topics","question_desc","updated_date"};
+    			String[] fields = new String[] {"topics","filename","upload_time","file_description"};
     			multiFieldQueryParser = new MultiFieldQueryParser(luceneVersion, fields,new StandardAnalyzer(luceneVersion),boosts);
     			booleanQuery.add(multiFieldQueryParser.parse(searchString), BooleanClause.Occur.MUST);
     			
@@ -329,7 +331,7 @@ public class LuceneSearcher {
     	/**
     	 * The sorting is done on the FIELD_SCORE(document relevance) 
     	 */
-    		topDocs = indexSearcher.search(booleanQuery, MAX_HITS, new Sort(SortField.FIELD_SCORE));
+    		topDocs = indexSearcher.search(booleanQuery, MAX_HITS, new Sort(new SortField("upload_time",SortField.Type.LONG,true)));
     
     	
     	Map<String,com.ymess.pojos.File> files = new HashMap<String,com.ymess.pojos.File>();
@@ -347,8 +349,24 @@ public class LuceneSearcher {
             file.setAuthorEmailId(document.get("user_email_id"));
             file.setFileId(Long.parseLong(document.get("file_id")));
             file.setFilename(document.get("filename"));
+          
+            if(null != document.get("upload_time") && document.get("upload_time").length() > 0)
+            {
+            	Long timeInSeconds = Long.parseLong(document.get("upload_time"));
+            	Long timeInMilliseconds = timeInSeconds * 1000;
+            	Date postedDate = new Date(timeInMilliseconds);
+            	
+            	postedDate.toGMTString();
+            	
+            	file.setUploadedTime(new Date(postedDate.toGMTString()));
+            }
+            file.setFileDescription(document.get("file_description"));
+            file.setAuthorFirstName(document.get("user_first_name"));
+            file.setAuthorLastName(document.get("user_last_name"));
             
-            files.put(document.get("user_email_id"),file);
+            file.setTopics(new HashSet(Arrays.asList(document.get("topics"))));
+            
+            files.put(document.get("file_id"),file);
 		}
         
         if(hits.length == 0)

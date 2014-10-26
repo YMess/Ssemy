@@ -136,7 +136,12 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 		{
 			try {
 				byte[] originalImage = question.getQuestionImage().getBytes();
-				byte[] compressedImage = YMessCommonUtility.returnCompressedImage(originalImage);
+				byte[] compressedImage = null;
+				if(YMessCommonUtility.getFileExtension(question.getQuestionImage().getOriginalFilename()).equalsIgnoreCase("jpg") 
+						|| YMessCommonUtility.getFileExtension(question.getQuestionImage().getOriginalFilename()).equalsIgnoreCase("jpeg") )
+					compressedImage = YMessCommonUtility.returnCompressedImage(originalImage);
+				else
+					compressedImage = originalImage;
 				
 				final String INSERT_QUESTION_WITH_IMAGE = "insert into questions (question_id,author_email_id,question_title,question_desc,created_date,updated_date,keywords,author_first_name,author_last_name,is_image_attached,image_data,image_name,topics) values (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 						getJdbcTemplate().update(INSERT_QUESTION_WITH_IMAGE,
@@ -207,6 +212,7 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 			
 			if(topic.trim().length() > 0)
 			{
+				topic = YMessCommonUtility.removeExtraneousApostrophe(topic);
 				topic = topic.trim().toLowerCase();
 			
 			String CHECK_IF_TOPIC_EXISTS = "select count(1) from topics where topic=?";
@@ -546,7 +552,15 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 			{
 				try {
 					byte[] originalImage = answer.getAnswerImage().getBytes();
-					byte[] compressedImage = YMessCommonUtility.returnCompressedImage(originalImage);
+					
+					byte[] compressedImage = null;
+					
+					if(YMessCommonUtility.getFileExtension(answer.getAnswerImage().getOriginalFilename()).equalsIgnoreCase("jpg") 
+							|| YMessCommonUtility.getFileExtension(answer.getAnswerImage().getOriginalFilename()).equalsIgnoreCase("jpeg") )
+						compressedImage = YMessCommonUtility.returnCompressedImage(originalImage);
+					else
+						compressedImage = originalImage;
+					
 					
 					String ADD_ANSWER_WITH_IMAGE="insert into answers (question_id,answer_id,answered_time,answer_desc,author_email_id,author_first_name,author_last_name,image_data,is_image_attached) values(?,?,?,?,?,?,?,?,?)";
 					getJdbcTemplate().update(ADD_ANSWER_WITH_IMAGE,
@@ -910,6 +924,7 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 		
 		for (String deletedInterest : deletedInterests) {
 			deletedInterest = deletedInterest.trim().toLowerCase();
+			deletedInterest = YMessCommonUtility.removeExtraneousApostrophe(deletedInterest);
 			
 			/** User Deleted Interests */
 			if(deletedTopicsFlag)
@@ -1016,7 +1031,13 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 			final String INSERT_IMAGE = "update users_data set user_image_name= ? , user_image = ? where email_id = ? ";
 			try {
 				byte [] originalImage = user.getUserImage().getBytes();
-				byte[] compressedImage = YMessCommonUtility.returnCompressedImage(originalImage);
+				
+				byte[] compressedImage = null;
+				if(YMessCommonUtility.getFileExtension(user.getUserImage().getOriginalFilename()).equalsIgnoreCase("jpg") 
+						|| YMessCommonUtility.getFileExtension(user.getUserImage().getOriginalFilename()).equalsIgnoreCase("jpeg") )
+					compressedImage = YMessCommonUtility.returnCompressedImage(originalImage);
+				else
+					compressedImage = originalImage;
 				
 				getJdbcTemplate().update(INSERT_IMAGE,
 						new Object[]{imageName,compressedImage,user.getUserEmailId()},
@@ -1473,6 +1494,7 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 	@Override
 	public List<Question> getQuestionsInTopic(String topicName) throws EmptyResultSetException {
 
+		topicName = YMessCommonUtility.removeExtraneousApostrophe(topicName);
 		String GET_QUESTION_IDS_IN_TOPIC = "select question_ids from topics where topic=?";
 		Set<Long> questionIds = (Set<Long>) getJdbcTemplate().queryForObject(GET_QUESTION_IDS_IN_TOPIC, HashSet.class,topicName);
 		
@@ -1568,10 +1590,16 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 		if(!fileTopics.isEmpty())
 			fileTopics = YMessCommonUtility.removeNullAndEmptyElements(fileTopics);
 		
-		final String UPLOAD_FILE = "insert into files(file_id,user_email_id,file_type,filename,share_flag,topics,filedata,upload_time,file_size,file_description) values (?,?,?,?,?,?,?,?,?,?)";
+		User userDetails = getUserDetailsByEmailId(file.getAuthorEmailId());
+		
+		final String UPLOAD_FILE = "insert into files(file_id,user_email_id,file_type,filename,share_flag,topics,filedata,upload_time,file_size,file_description,user_first_name,user_last_name) values (?,?,?,?,?,?,?,?,?,?,?,?)";
 		getJdbcTemplate().update(UPLOAD_FILE,
-				new Object[]{newFileId,file.getAuthorEmailId(),YMessCommonUtility.getFileExtension(file.getFileData().getOriginalFilename()),file.getFileData().getOriginalFilename(),file.getShared(),fileTopics,file.getFileData().getBytes(),new Date(),file.getFileSize(),file.getFileDescription()},
-				new int[]{Types.BIGINT,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.BOOLEAN,Types.ARRAY,Types.BINARY,Types.TIMESTAMP,Types.VARCHAR,Types.VARCHAR}
+				new Object[]{newFileId,file.getAuthorEmailId(),YMessCommonUtility.getFileExtension(file.getFileData().getOriginalFilename()),file.getFileData().getOriginalFilename(),file.getShared(),fileTopics,file.getFileData().getBytes(),new Date(),file.getFileSize(),file.getFileDescription(),
+				userDetails.getFirstName(),userDetails.getLastName()
+				},
+				new int[]{Types.BIGINT,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.BOOLEAN,Types.ARRAY,Types.BINARY,Types.TIMESTAMP,Types.VARCHAR,Types.VARCHAR,
+				Types.VARCHAR,Types.VARCHAR
+				}
 				);
 		
 		if(file.getShared()!=null && file.getShared())
@@ -1579,6 +1607,7 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 			for (String fileTopic : fileTopics) 
 			{
 				fileTopic = fileTopic.trim().toLowerCase();
+				fileTopic = YMessCommonUtility.removeExtraneousApostrophe(fileTopic);
 				String CHECK_IF_TOPIC_EXISTS = "select count(1) from topics where topic=?";
 				Long topicCount = getJdbcTemplate().queryForLong(CHECK_IF_TOPIC_EXISTS,fileTopic);
 				if(topicCount > 0)
@@ -1753,6 +1782,7 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 		Map<String,List<File>> sharedFiles = new HashMap<String,List<File>>();
 		for (String topic : popularTopics)
 		{
+			topic = YMessCommonUtility.removeExtraneousApostrophe(topic);
 			topics.append("'").append(topic).append("',");
 		}
 		if(topics.length() > 0)
@@ -1814,6 +1844,7 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 		if(! fileTopics.isEmpty())
 		{
 			for (String topic : fileTopics) {
+				topic = YMessCommonUtility.removeExtraneousApostrophe(topic);
 				final String DELETE_REFERENCES_FROM_TOPICS = "delete file_ids["+fileId+"] from topics where topic='"+topic+"'";
 				getJdbcTemplate().update(DELETE_REFERENCES_FROM_TOPICS);
 				
@@ -1855,6 +1886,7 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 		if(! fileTopics.isEmpty())
 		{
 			for (String topic : fileTopics) {
+				topic = YMessCommonUtility.removeExtraneousApostrophe(topic);
 				final String ADD_FILE_TO_TOPICS = "update topics set file_ids = file_ids + {"+ fileIdL +": '"+ authorEmailId +"'} where topic='"+topic+"'";
 				getJdbcTemplate().update(ADD_FILE_TO_TOPICS);
 			}
@@ -1909,6 +1941,7 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 	 */
 	@Override
 	public List<File> getFilesInTopic(String topic) {
+		topic = YMessCommonUtility.removeExtraneousApostrophe(topic);
 		final String GET_FILES_IN_TOPIC = "select file_ids from topics where topic=?";
 		Map<Long,String> fileIdsWithAuthorEmailIds = getJdbcTemplate().queryForObject(GET_FILES_IN_TOPIC, Map.class,topic);
 		

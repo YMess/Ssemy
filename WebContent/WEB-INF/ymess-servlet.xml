@@ -97,7 +97,7 @@ http://www.springframework.org/schema/task/spring-task-3.0.xsd">
  <task:executor id="executor" pool-size="10"/> 
  <task:annotation-driven scheduler="scheduler" executor="executor"/> -->
  
- <bean id="runScheduler" class="com.ymess.scheduler.RunScheduler" /> 
+ <!-- <bean id="runScheduler" class="com.ymess.scheduler.RunScheduler" />  -->
  <!-- Scheduler Configuration -->
  
  
