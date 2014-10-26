@@ -24,6 +24,8 @@ function editQuestionDesc(questionId)
 {
 	alert("Question Id : "+questionId);
 
+	
+	location.href="user_post_question.htm?qId="+questionId;
 	/*  $.ajax({url:"demo_test.txt",success:function(result){
 		    $("#div1").html(result);
 		  }}); */

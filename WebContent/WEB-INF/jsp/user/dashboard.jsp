@@ -48,15 +48,38 @@ $().ready(function(){
 	  .submit( function( e ) {
 		   var formdata = new FormData( this );
 		   formdata.append("questionId",localStorage.getItem("clickedQuestionId"));
+	    	  
+     if(formdata)
+		{
+		var successFlag = false;
 	    $.ajax( {
 	      url: 'user_post_answer.htm',
 	      type: 'POST',
 	      data: formdata,//new FormData( this ),
+	      async:false,
 	      processData: false,
-	      contentType: false
-	    } );
-	    e.preventDefault();
-	  } );
+	      success:function(result){
+		   		successFlag = true;
+		   		//alert("Success1");
+		  }  
+	    });
+	    //e.preventDefault();
+	    
+	    if(successFlag)
+		  {
+			  alert("Success");
+			  $("#dialog-confirm").dialog( "close" );
+			  $("#answerDescription").val("");
+			  $("#answerImage").val("");
+			  location.reload();
+		  }
+			}
+		else
+			{
+				alert("Please post your answer");
+				return false;
+			}
+	  });
 });
 </script>
 </head>

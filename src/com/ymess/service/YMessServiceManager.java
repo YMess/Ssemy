@@ -420,4 +420,33 @@ public class YMessServiceManager implements YMessService {
 	public File getDefaultImage() {
 		return yMessDao.getDefaultImage();
 	}
+
+	/**
+	 * @author RAJ
+	 * @param questionId
+	 * @throws EmptyResultSetException 
+	 */
+	@Override
+	public Question getQuestionDetails(String questionId) throws EmptyResultSetException {
+		return yMessDao.getQuestionDetails(questionId);
+	}
+
+	/**
+	 * @author RAJ
+	 * @param question
+	 */
+	@Override
+	public void uploadQuestionImage(Question question) {
+		yMessDao.uploadQuestionImage(question);	
+	}
+
+	/**
+	 * @author RAJ
+	 * @param question
+	 */
+	@Override
+	public void updateQuestion(Question question) {
+		yMessDao.updateQuestion(question);
+		
+	}
 }

@@ -300,4 +300,29 @@ public interface YMessDao {
 	 */
 	File getDefaultImage();
 
+	/**
+	 * Gets Question Details
+	 * @author RAJ
+	 * @param questionId
+	 * @return
+	 * @throws EmptyResultSetException
+	 */
+	Question getQuestionDetails(String questionId) throws EmptyResultSetException;
+
+	/**
+	 * Uploads Question Image
+	 * @author RAJ
+	 * @param question
+	 * @return
+	 */
+	void uploadQuestionImage(Question question);
+
+	/**
+	 * Update Question Details
+	 * @author RAJ
+	 * @param question
+	 * @return
+	 */
+	void updateQuestion(Question question);
+
 }

@@ -32,6 +32,9 @@ public class URLMappings {
 	public static final String USER_UNFOLLOW =  "user_unfollow.htm"; //UserActivitiesController
 	public static final String USER_ANSWER_DOWNVOTERS = "user_answer_downvoters.htm"; //UserActivitiesController
 	public static final String USER_QUESTION_IMAGE = "user_question_image.htm"; //UserActivitiesController
+	public static final String QUESTION_IMAGE_UPLOAD = "question_image_upload.htm";//UserActivitiesController
+	public static final String QUESTION_IMAGE_UPLOAD_REDIRECTION = "redirect:"+QUESTION_IMAGE_UPLOAD;//UserActivitiesController
+
 	
 	
 	public static final String REDIRECT_SUCCESS_USER_REGISTRATION = "redirect:"+LOGIN_PAGE+"?Success='Youve Successfully Registered at YMess'";

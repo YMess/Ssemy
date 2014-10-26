@@ -426,6 +426,35 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 		}
 	}
 	
+	
+	/**
+	 * 
+	 * This class is used to Map the ResultSet values(student) to Domain/Value Objects(Student)
+	 *
+	 */
+	private static class QuestionDetialsMapper
+			implements
+				ParameterizedRowMapper<Question> {
+		@Override
+		public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
+			Question question = new Question();
+			question.setQuestionId(rs.getLong("question_id"));
+			question.setQuestionTitle(rs.getString("question_title"));
+			question.setQuestionDescription(rs.getString("question_desc"));
+			question.setUpdatedDate(rs.getDate("updated_date"));
+			question.setLastAnswer(rs.getString("last_answer"));
+			question.setAuthorEmailId(rs.getString("author_email_id"));
+			question.setFirstName(rs.getString("author_first_name"));
+			question.setLastName(rs.getString("author_last_name"));
+			question.setIsImageAttached(rs.getBoolean("is_image_attached"));
+			question.setTopics((Set<String>) rs.getObject("topics"));
+			
+			return question;
+		}
+	}
+	
+	
+	
 	/**
 	 * Retrieves All the Questions posted by an User
 	 * @author balaji i
@@ -481,7 +510,7 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 		
 		if(finalQuestionIds.length() > 0)
 		{
-			questions = getQuestionDetails(finalQuestionIds);
+			questions = getQuestionsWithDetails(finalQuestionIds);
 		}
 		return questions;
 	}
@@ -497,7 +526,7 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 		return allQuestionIds;
 	}
 	
-	private List<Question> getQuestionDetails(String finalQuestionIds) throws EmptyResultSetException
+	private List<Question> getQuestionsWithDetails(String finalQuestionIds) throws EmptyResultSetException
 	{
 		List<Question> questions = new ArrayList<Question>();
 		try
@@ -564,7 +593,7 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 					
 					String ADD_ANSWER_WITH_IMAGE="insert into answers (question_id,answer_id,answered_time,answer_desc,author_email_id,author_first_name,author_last_name,image_data,is_image_attached) values(?,?,?,?,?,?,?,?,?)";
 					getJdbcTemplate().update(ADD_ANSWER_WITH_IMAGE,
-							new Object[]{answer.getQuestionId(),newAnswerId,new Date(),answer,answer.getAuthorEmailId(),userDetails.getFirstName(),userDetails.getLastName(),compressedImage,answer.getIsImageAttached()},
+							new Object[]{answer.getQuestionId(),newAnswerId,new Date(),answer.getAnswerDescription(),answer.getAuthorEmailId(),userDetails.getFirstName(),userDetails.getLastName(),compressedImage,answer.getIsImageAttached()},
 							new int[]{Types.BIGINT,Types.BIGINT,Types.TIMESTAMP,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.BINARY,Types.BOOLEAN}
 							);
 					
@@ -574,8 +603,9 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 					final String GET_QUESTION_DESC = "select question_desc from questions where question_id="+answer.getQuestionId()+" allow filtering";
 					String questionDesc = getJdbcTemplate().queryForObject(GET_QUESTION_DESC, String.class);
 						
-					final String UPDATE_QUESTION_LAST_ANSWER = "update questions set last_answer=? where question_id="+answer.getQuestionId()+" and author_email_id=?";
-					getJdbcTemplate().update(UPDATE_QUESTION_LAST_ANSWER,answer,questionAuthorEmailId);
+					//final String UPDATE_QUESTION_LAST_ANSWER = "update questions set last_answer=? where question_id="+answer.getQuestionId()+" and author_email_id="+questionAuthorEmailId;
+					//getJdbcTemplate().update(UPDATE_QUESTION_LAST_ANSWER,new Object[]{answer.getAnswerDescription()},
+					//		new int[]{Types.VARCHAR});
 
 					String ADD_ANSWER_TIMELINE="insert into user_timeline(user_email_id, user_timestamp, activity, user_first_name, user_last_name, answered_question_id, answered_question_desc, answered_question_email_id, answered_answered_id, answered_answered_desc, is_answered_question,answered_answered_is_image_attached) values(?,?,?,?,?,?,?,?,?,?,?,?)";
 					getJdbcTemplate().update(ADD_ANSWER_TIMELINE, new Object[]{answer.getAuthorEmailId(), new Date(), ActivityConstants.ANSWERED_QUESTION, userDetails.getFirstName(),userDetails.getLastName(),answer.getQuestionId(), questionDesc, GET_QUESTION_AUTHOR, newAnswerId, answer,  YMessCommonUtility.IS_ANSWERED_QUESTIONS,true},
@@ -590,7 +620,7 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 			else
 			{
 				getJdbcTemplate().update(ADD_ANSWER,
-					new Object[]{answer.getQuestionId(),newAnswerId,new Date(),answer,answer.getAuthorEmailId(),userDetails.getFirstName(),userDetails.getLastName()},
+					new Object[]{answer.getQuestionId(),newAnswerId,new Date(),answer.getAnswerDescription(),answer.getAuthorEmailId(),userDetails.getFirstName(),userDetails.getLastName()},
 					new int[]{Types.BIGINT,Types.BIGINT,Types.TIMESTAMP,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR}
 					);
 				
@@ -600,8 +630,8 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 				final String GET_QUESTION_DESC = "select question_desc from questions where question_id="+answer.getQuestionId()+" allow filtering";
 				String questionDesc = getJdbcTemplate().queryForObject(GET_QUESTION_DESC, String.class);
 					
-				final String UPDATE_QUESTION_LAST_ANSWER = "update questions set last_answer=? where question_id="+answer.getQuestionId()+" and author_email_id=?";
-			    getJdbcTemplate().update(UPDATE_QUESTION_LAST_ANSWER,answer,questionAuthorEmailId);
+				//final String UPDATE_QUESTION_LAST_ANSWER = "update questions set last_answer=? where question_id="+answer.getQuestionId()+" and author_email_id="+questionAuthorEmailId;
+			    //getJdbcTemplate().update(UPDATE_QUESTION_LAST_ANSWER,answer.getAnswerDescription());
 
 				getJdbcTemplate().update(ADD_ANSWER_TIMELINE, new Object[]{answer.getAuthorEmailId(), new Date(), ActivityConstants.ANSWERED_QUESTION, userDetails.getFirstName(),userDetails.getLastName(),answer.getQuestionId(), questionDesc, GET_QUESTION_AUTHOR, newAnswerId, answer,  YMessCommonUtility.IS_ANSWERED_QUESTIONS},
 					new int[]{Types.VARCHAR,Types.TIMESTAMP,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR, Types.BIGINT,Types.VARCHAR,Types.VARCHAR,Types.BIGINT,Types.VARCHAR,Types.BOOLEAN}
@@ -817,6 +847,7 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 	public void updateUserProfile(User user) {
 
 		final String GET_USER_PREVIOUS_INTERESTS = "select interests from users_data where email_id=?";
+		/** Fetching User's previous Interests to Compare and check if anything has been updated */
 		Set<String> previousInterests = (Set<String>) getJdbcTemplate().queryForObject(GET_USER_PREVIOUS_INTERESTS, Set.class,user.getUserEmailId());
 		
 		Set<String> previousOrganizations = new HashSet<String>();
@@ -886,6 +917,7 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 			}
 				
 			}
+			/** New Interests Added By User in Form */
 			Set<String> newInterests = user.getInterests();
 			Set<String> deletedInterests = new HashSet<String>();
 			Set<String> addedInterests = new HashSet<String>();
@@ -897,8 +929,9 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 			if(newInterests != null)
 				newInterests = YMessCommonUtility.removeNullAndEmptyElements(newInterests);
 			
-			Map<String,Set<String>> mergedSets = YMessCommonUtility.compareSetsAndReturnAddedAndDeletedObjects(previousInterests, newInterests);
+			Map<String,Set<String>> mergedSets = YMessCommonUtility.compareSetsAndReturnAddedAndDeletedObjects(previousInterests,newInterests);
 			
+			/** Nothing has been changed in terms of topics */
 			if(! mergedSets.containsKey(YMessCommonUtility.EQUAL_SET))
 			{
 				//Changes have been made
@@ -1963,6 +1996,131 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 		final String GET_DEFAULT_IMAGE = "select filename,filedata from master_data where identifier=1";
 		File defaultImage = getJdbcTemplate().queryForObject(GET_DEFAULT_IMAGE, new FileDownloadMapper());
 		return defaultImage;
+	}
+
+	/**
+	 * Gets the Question Details
+	 * @author RAJ
+	 * @throws EmptyResultSetException 
+	 */
+	@Override
+	public Question getQuestionDetails(String questionId) throws EmptyResultSetException {
+		Question questionDetails = new Question();
+		try
+		{
+			final String GET_DASHBOARD_QUESTIONS = "select question_id,question_title,question_desc,author_email_id,last_answer,updated_date,author_first_name,author_last_name,is_image_attached from questions where question_id = "+questionId+" allow filtering";
+			questionDetails = getJdbcTemplate().queryForObject(GET_DASHBOARD_QUESTIONS,new QuestionMapper());
+		}
+		catch(EmptyResultDataAccessException emptyResultSet)
+		{
+			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+		}
+		catch(Exception ex)
+		{
+			logger.error(ex.getLocalizedMessage());
+		}
+		return questionDetails;
+	}
+
+	/**
+	 * Uploads Question Image
+	 * @author RAJ
+	 * @param question
+	 */
+	@Override
+	public void uploadQuestionImage(Question question) {
+		
+		if(question.getQuestionImage() != null)
+		{
+			String imageName = question.getQuestionImage().getOriginalFilename();
+			final String UPDATE_QUESTION_IMAGE = "update questions set image_name= ? , image_data = ?,is_image_attached = ? where question_id = ? ";
+			try {
+				byte [] originalImage = question.getQuestionImage().getBytes();
+				byte[] compressedImage = YMessCommonUtility.returnCompressedImage(originalImage);
+				
+				getJdbcTemplate().update(UPDATE_QUESTION_IMAGE,
+						new Object[]{imageName,compressedImage,true,question.getQuestionId()},
+						new int[]{Types.VARCHAR,Types.BINARY,Types.BOOLEAN,Types.BIGINT}
+						);
+			} catch (DataAccessException e) {
+				logger.error(e.getLocalizedMessage());
+				e.printStackTrace();
+			} catch (IOException e) {
+				logger.error(e.getLocalizedMessage());
+			}
+		}
+		
+	}
+
+	@Override
+	public void updateQuestion(Question question) {
+		
+		Date currentTime = new Date();
+		User userDetails = getUserDetailsByEmailId(question.getAuthorEmailId());
+		
+		/** Question Along with Image */
+		if(question.getIsImageAttached() != null && question.getIsImageAttached())
+		{
+			try {
+				byte[] originalImage = question.getQuestionImage().getBytes();
+				byte[] compressedImage = YMessCommonUtility.returnCompressedImage(originalImage);
+				
+				
+				final String UPDATE_QUESTION_WITH_IMAGE = "update table questions set author_email_id=?, question_title=?, question_desc=?, updated_date=?, keywords=?, author_first_name=?, author_last_name=?, is_image_attached=?, image_data=?, image_name=?, topics=?  where question_id = ? ";	
+				getJdbcTemplate().update(UPDATE_QUESTION_WITH_IMAGE,
+								new Object[]{
+								question.getAuthorEmailId(),
+								question.getQuestionTitle(),
+								question.getQuestionDescription(),
+								currentTime,
+								question.getKeywords(),
+								userDetails.getFirstName(),
+								userDetails.getLastName(),
+								true,
+								compressedImage,
+								question.getQuestionImage().getOriginalFilename(),
+								question.getTopics(),
+								question.getQuestionId()
+							},
+								new int[]{
+								Types.VARCHAR,
+								Types.VARCHAR,
+								Types.VARCHAR,
+								Types.TIMESTAMP,
+								Types.VARCHAR,
+								Types.VARCHAR,
+								Types.VARCHAR,
+								Types.BOOLEAN,
+								Types.BINARY,
+								Types.VARCHAR,
+								Types.ARRAY,
+								Types.BIGINT
+								
+						});
+						
+						getJdbcTemplate().update(ADD_QUESTION_TIMELINE, new Object[]{question.getAuthorEmailId(),new Date(),ActivityConstants.POSTED_QUESTION,userDetails.getFirstName(),userDetails.getLastName(),question.getQuestionId(),question.getQuestionTitle(),question.getQuestionDescription(),true,question.getTopics(),currentTime ,YMessCommonUtility.IS_POSTED_QUESTIONS},
+								new int[]{Types.VARCHAR,Types.TIMESTAMP,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR, Types.BIGINT,Types.VARCHAR,Types.VARCHAR,Types.BOOLEAN,Types.ARRAY,Types.TIMESTAMP,Types.BOOLEAN}
+						);
+						
+			} catch (IOException e) {
+				logger.error(e.getStackTrace());
+			}
+			
+		}
+		else /** Only Text Question */
+		{
+			final String UPDATE_QUESTION = "update table questions set author_email_id=?, question_title=?, question_desc=?, updated_date=?,  author_first_name=?, author_last_name=?, is_image_attached=?  where question_id = 3 ";
+			getJdbcTemplate().update(UPDATE_QUESTION,
+					new Object[]{question.getAuthorEmailId(),question.getQuestionTitle(),question.getQuestionDescription(),
+					currentTime,userDetails.getFirstName(),userDetails.getLastName(),false},
+					new int[]{Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.TIMESTAMP,Types.VARCHAR,Types.VARCHAR,Types.BOOLEAN}
+					);
+			
+			getJdbcTemplate().update(ADD_QUESTION_TIMELINE, new Object[]{question.getAuthorEmailId(),new Date(),ActivityConstants.POSTED_QUESTION,userDetails.getFirstName(),userDetails.getLastName(),question.getQuestionId(),question.getQuestionTitle(),question.getQuestionDescription(),false,question.getTopics(),currentTime ,YMessCommonUtility.IS_POSTED_QUESTIONS},
+					new int[]{Types.VARCHAR,Types.TIMESTAMP,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR, Types.BIGINT,Types.VARCHAR,Types.VARCHAR,Types.BOOLEAN,Types.ARRAY,Types.TIMESTAMP,Types.BOOLEAN}
+			);
+		
+		}
 	}
 	
 }

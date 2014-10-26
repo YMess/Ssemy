@@ -299,5 +299,28 @@ public interface YMessService {
 	 */
 	File getDefaultImage();
 
+	/**
+	 * Gets the Question Details
+	 * @author RAJ
+	 * @param questionId
+	 * @return Question(questionDetails)
+	 * @throws EmptyResultSetException 
+	 */
+	Question getQuestionDetails(String questionId) throws EmptyResultSetException;
+
+	/**
+	 * Upload Question Image
+	 * @author RAJ
+	 * @param  question
+	 */
+	void uploadQuestionImage(Question question);
+
+	/**
+	 * Update Question Details
+	 * @author RAJ
+	 * @param  question
+	 */
+	void updateQuestion(Question question);
+
 	
 }

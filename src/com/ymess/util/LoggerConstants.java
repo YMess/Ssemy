@@ -33,6 +33,8 @@ public class LoggerConstants {
 	public static final String USER_PROFILE_IMAGE = "Loaded User Profile Image";
 
 	public static final String USER_UPLOADED_IMAGE = "User Uploaded Image";
+	
+	public static final String QUESTION_UPLOADED_IMAGE = "Question Image Uploaded";
 
 	public static final String USER_VIEW_PROFILE = "User Viewed Profile";
 

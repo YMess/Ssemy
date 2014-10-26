@@ -64,9 +64,19 @@ public class UserActivitiesController {
 	 * @return String(post_question.jsp)
 	 */
 	@RequestMapping(value=URLMappings.USER_POST_QUESTION,method=RequestMethod.GET)
-	public String userPostQuestionPage(Model model)
+	public String userPostQuestionPage(@RequestParam(value="qId",required=false) String questionId,Model model)
 	{
-		model.addAttribute("question", new Question());
+		Question question = new Question();
+		if( null != questionId && questionId.length() > 0)
+		{
+			try {
+				question = yMessService.getQuestionDetails(questionId);
+			} catch (EmptyResultSetException e) {
+				logger.error(MessageConstants.EMPTY_RESULT_SET);
+			}
+		}
+		
+		model.addAttribute("question", question);
 		logger.info(LoggerConstants.USER_POST_QUESTION_PAGE);
 		return JSPMappings.USER_POST_QUESTION;
 	}
@@ -108,12 +118,16 @@ public class UserActivitiesController {
 			question.setKeywords(new ArrayList<String>(keywordsInQuestion));
 
 			/** Adding the Question Details in Database */
-			yMessService.addQuestion(question);
+			if(question.getQuestionId() != null)
+				yMessService.updateQuestion(question);
+			else
+			    yMessService.addQuestion(question);
 			logger.info(LoggerConstants.USER_POSTED_QUESTION +" "+userEmailId);
 		}
 		catch(Exception ex)
 		{
-			logger.error(ex.getLocalizedMessage());
+			//logger.error(ex.getLocalizedMessage());
+			ex.getMessage();
 		}
 		redirectAttributes.addFlashAttribute("successfullyPostedQuestion","You Posted the Question Successfully");
 		return URLMappings.REDIRECT_SUCCESS_POSTING_QUESTION;	
@@ -467,4 +481,33 @@ public class UserActivitiesController {
 		model.addAttribute("questionsInTopic",questionsInTopic);
 		return "user/view_topic_questions";
 	}
+	
+	
+	@RequestMapping(value=URLMappings.QUESTION_IMAGE_UPLOAD,method=RequestMethod.POST)
+	String uploadQuestionImage(@RequestParam(value="qId",required=false) String questionId,@ModelAttribute("question") Question question)
+	{
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String loggedInUserEmail = authentication.getName();
+		
+		if(question.getIsImageAttached() != null && question.getIsImageAttached())
+		{	
+			if(question.getQuestionImage().getOriginalFilename().length() > 0)
+			{
+				question.setAuthorEmailId(loggedInUserEmail);
+				try
+				{
+					yMessService.uploadQuestionImage(question);
+					logger.info(LoggerConstants.QUESTION_UPLOADED_IMAGE +" "+loggedInUserEmail);
+				}
+				catch(Exception ex)
+				{
+				      logger.error(ex.getLocalizedMessage());
+				}
+			}
+		}
+		
+		return URLMappings.QUESTION_IMAGE_UPLOAD_REDIRECTION;
+	}
+	
+
 }
