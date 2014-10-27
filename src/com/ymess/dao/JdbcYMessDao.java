@@ -2066,41 +2066,37 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 				byte[] compressedImage = YMessCommonUtility.returnCompressedImage(originalImage);
 				
 				
-				final String UPDATE_QUESTION_WITH_IMAGE = "update table questions set author_email_id=?, question_title=?, question_desc=?, updated_date=?, keywords=?, author_first_name=?, author_last_name=?, is_image_attached=?, image_data=?, image_name=?, topics=?  where question_id = ? ";	
+				final String UPDATE_QUESTION_WITH_IMAGE = "update questions set question_title=?, question_desc=?, updated_date=?,keywords=?,  is_image_attached=?, image_data=?, image_name=?, topics=?  where question_id = ? and author_email_id=? ";	
 				getJdbcTemplate().update(UPDATE_QUESTION_WITH_IMAGE,
 								new Object[]{
-								question.getAuthorEmailId(),
 								question.getQuestionTitle(),
 								question.getQuestionDescription(),
 								currentTime,
 								question.getKeywords(),
-								userDetails.getFirstName(),
-								userDetails.getLastName(),
 								true,
 								compressedImage,
 								question.getQuestionImage().getOriginalFilename(),
 								question.getTopics(),
-								question.getQuestionId()
+								question.getQuestionId(),
+								question.getAuthorEmailId()
 							},
 								new int[]{
 								Types.VARCHAR,
 								Types.VARCHAR,
-								Types.VARCHAR,
 								Types.TIMESTAMP,
-								Types.VARCHAR,
-								Types.VARCHAR,
-								Types.VARCHAR,
+								Types.ARRAY,
 								Types.BOOLEAN,
 								Types.BINARY,
 								Types.VARCHAR,
 								Types.ARRAY,
-								Types.BIGINT
+								Types.BIGINT,
+								Types.VARCHAR
 								
 						});
 						
-						getJdbcTemplate().update(ADD_QUESTION_TIMELINE, new Object[]{question.getAuthorEmailId(),new Date(),ActivityConstants.POSTED_QUESTION,userDetails.getFirstName(),userDetails.getLastName(),question.getQuestionId(),question.getQuestionTitle(),question.getQuestionDescription(),true,question.getTopics(),currentTime ,YMessCommonUtility.IS_POSTED_QUESTIONS},
-								new int[]{Types.VARCHAR,Types.TIMESTAMP,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR, Types.BIGINT,Types.VARCHAR,Types.VARCHAR,Types.BOOLEAN,Types.ARRAY,Types.TIMESTAMP,Types.BOOLEAN}
-						);
+						//getJdbcTemplate().update(ADD_QUESTION_TIMELINE, new Object[]{question.getAuthorEmailId(),new Date(),ActivityConstants.POSTED_QUESTION,userDetails.getFirstName(),userDetails.getLastName(),question.getQuestionId(),question.getQuestionTitle(),question.getQuestionDescription(),true,question.getTopics(),currentTime ,YMessCommonUtility.IS_POSTED_QUESTIONS},
+						//		new int[]{Types.VARCHAR,Types.TIMESTAMP,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR, Types.BIGINT,Types.VARCHAR,Types.VARCHAR,Types.BOOLEAN,Types.ARRAY,Types.TIMESTAMP,Types.BOOLEAN}
+						//);
 						
 			} catch (IOException e) {
 				logger.error(e.getStackTrace());
@@ -2109,16 +2105,16 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 		}
 		else /** Only Text Question */
 		{
-			final String UPDATE_QUESTION = "update table questions set author_email_id=?, question_title=?, question_desc=?, updated_date=?,  author_first_name=?, author_last_name=?, is_image_attached=?  where question_id = 3 ";
+			final String UPDATE_QUESTION = "update questions set question_title=?, question_desc=?, updated_date=?,keywords=?, topics=? where question_id = ? and author_email_id=?";
 			getJdbcTemplate().update(UPDATE_QUESTION,
-					new Object[]{question.getAuthorEmailId(),question.getQuestionTitle(),question.getQuestionDescription(),
-					currentTime,userDetails.getFirstName(),userDetails.getLastName(),false},
-					new int[]{Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.TIMESTAMP,Types.VARCHAR,Types.VARCHAR,Types.BOOLEAN}
+					new Object[]{question.getQuestionTitle(),question.getQuestionDescription(),
+					currentTime,question.getKeywords(),question.getTopics(),question.getQuestionId(),question.getAuthorEmailId()},
+					new int[]{Types.VARCHAR,Types.VARCHAR,Types.TIMESTAMP,Types.ARRAY,Types.BOOLEAN,Types.ARRAY,Types.BIGINT,Types.VARCHAR}
 					);
 			
-			getJdbcTemplate().update(ADD_QUESTION_TIMELINE, new Object[]{question.getAuthorEmailId(),new Date(),ActivityConstants.POSTED_QUESTION,userDetails.getFirstName(),userDetails.getLastName(),question.getQuestionId(),question.getQuestionTitle(),question.getQuestionDescription(),false,question.getTopics(),currentTime ,YMessCommonUtility.IS_POSTED_QUESTIONS},
-					new int[]{Types.VARCHAR,Types.TIMESTAMP,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR, Types.BIGINT,Types.VARCHAR,Types.VARCHAR,Types.BOOLEAN,Types.ARRAY,Types.TIMESTAMP,Types.BOOLEAN}
-			);
+			//getJdbcTemplate().update(ADD_QUESTION_TIMELINE, new Object[]{question.getAuthorEmailId(),new Date(),ActivityConstants.POSTED_QUESTION,userDetails.getFirstName(),userDetails.getLastName(),question.getQuestionId(),question.getQuestionTitle(),question.getQuestionDescription(),false,question.getTopics(),currentTime ,YMessCommonUtility.IS_POSTED_QUESTIONS},
+			//		new int[]{Types.VARCHAR,Types.TIMESTAMP,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR, Types.BIGINT,Types.VARCHAR,Types.VARCHAR,Types.BOOLEAN,Types.ARRAY,Types.TIMESTAMP,Types.BOOLEAN}
+			//);
 		
 		}
 	}

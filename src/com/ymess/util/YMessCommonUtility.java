@@ -64,7 +64,7 @@ public class YMessCommonUtility {
 	public static final String DELETED_ITEMS = "deletedItems";
 	public static final String ADDED_ITEMS = "addedItems";
 	
-	public static final String INDEX_LOCATION = "F://Ssemy//Indexes";
+	public static final String INDEX_LOCATION = "E://GIT//Ssemy//Indexes";
 	
 	public static final String INDEX_LOCATION_QUESTIONS = INDEX_LOCATION + "//Questions";
 	public static final String INDEX_LOCATION_PEOPLE = INDEX_LOCATION + "//People";
