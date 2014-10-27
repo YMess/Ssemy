@@ -67,15 +67,26 @@ public class UserActivitiesController {
 	public String userPostQuestionPage(@RequestParam(value="qId",required=false) String questionId,Model model)
 	{
 		Question question = new Question();
+		String questionTopics = "";
+		
 		if( null != questionId && questionId.length() > 0)
 		{
 			try {
 				question = yMessService.getQuestionDetails(questionId);
+				for (String  questionTopic : question.getTopics()) {
+					questionTopics = questionTopics.concat(" ").concat(questionTopic).concat(",");
+				}
+				if(questionTopics.length() > 0 && questionTopics.contains(","))
+					questionTopics = questionTopics.substring(0,questionTopics.lastIndexOf(","));
 			} catch (EmptyResultSetException e) {
+				model.addAttribute("emptyResultSet",MessageConstants.EMPTY_RESULT_SET);
 				logger.error(MessageConstants.EMPTY_RESULT_SET);
+			}catch(Exception ex)
+			{
+				logger.error(ex.getLocalizedMessage());
 			}
 		}
-		
+		model.addAttribute("questionTopics",questionTopics);
 		model.addAttribute("question", question);
 		logger.info(LoggerConstants.USER_POST_QUESTION_PAGE);
 		return JSPMappings.USER_POST_QUESTION;

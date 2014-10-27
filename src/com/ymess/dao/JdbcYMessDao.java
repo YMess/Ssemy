@@ -420,7 +420,7 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 			question.setFirstName(rs.getString("author_first_name"));
 			question.setLastName(rs.getString("author_last_name"));
 			question.setIsImageAttached(rs.getBoolean("is_image_attached"));
-			//question.setTopics((Set<String>) rs.getObject("topics"));
+			question.setTopics((Set<String>) rs.getObject("topics"));
 			
 			return question;
 		}
@@ -2008,7 +2008,7 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 		Question questionDetails = new Question();
 		try
 		{
-			final String GET_DASHBOARD_QUESTIONS = "select question_id,question_title,question_desc,author_email_id,last_answer,updated_date,author_first_name,author_last_name,is_image_attached from questions where question_id = "+questionId+" allow filtering";
+			final String GET_DASHBOARD_QUESTIONS = "select question_id,question_title,question_desc,author_email_id,last_answer,updated_date,author_first_name,author_last_name,is_image_attached,topics from questions where question_id = "+questionId+" allow filtering";
 			questionDetails = getJdbcTemplate().queryForObject(GET_DASHBOARD_QUESTIONS,new QuestionMapper());
 		}
 		catch(EmptyResultDataAccessException emptyResultSet)
@@ -2109,7 +2109,7 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 			getJdbcTemplate().update(UPDATE_QUESTION,
 					new Object[]{question.getQuestionTitle(),question.getQuestionDescription(),
 					currentTime,question.getKeywords(),question.getTopics(),question.getQuestionId(),question.getAuthorEmailId()},
-					new int[]{Types.VARCHAR,Types.VARCHAR,Types.TIMESTAMP,Types.ARRAY,Types.BOOLEAN,Types.ARRAY,Types.BIGINT,Types.VARCHAR}
+					new int[]{Types.VARCHAR,Types.VARCHAR,Types.TIMESTAMP,Types.ARRAY,Types.ARRAY,Types.BIGINT,Types.VARCHAR}
 					);
 			
 			//getJdbcTemplate().update(ADD_QUESTION_TIMELINE, new Object[]{question.getAuthorEmailId(),new Date(),ActivityConstants.POSTED_QUESTION,userDetails.getFirstName(),userDetails.getLastName(),question.getQuestionId(),question.getQuestionTitle(),question.getQuestionDescription(),false,question.getTopics(),currentTime ,YMessCommonUtility.IS_POSTED_QUESTIONS},

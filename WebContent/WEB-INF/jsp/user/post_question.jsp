@@ -112,7 +112,8 @@ else
 					<br>
 					
 					<p>Question Topics(Add Topics Separated by Commas)</p>
-					 <textarea id="topics" name="topics"></textarea>
+					 <!-- <textarea id="topics" name="topics" value="${questionTopics}"></textarea> -->
+					 <input id="topics" type="text" name="topics" value="${questionTopics }">
 					 <br>
 					 <br>
 					 <form:errors path="topics"></form:errors>
