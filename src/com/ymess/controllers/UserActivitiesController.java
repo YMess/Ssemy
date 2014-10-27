@@ -520,5 +520,68 @@ public class UserActivitiesController {
 		return URLMappings.QUESTION_IMAGE_UPLOAD_REDIRECTION;
 	}
 	
+	
+	@RequestMapping(value = URLMappings.FETCH_ANSWER_IMAGE)
+	void fetchAnswerImage(@RequestParam("qId") String encodedQuestionId,@RequestParam("aId") String encodedAnswerId,HttpServletResponse response)
+	{
+		String questionId = YMessCommonUtility.decodeEncodedParameter(encodedQuestionId);
+		String answerId = YMessCommonUtility.decodeEncodedParameter(encodedAnswerId);
+		
+		Answer answerImage = yMessService.getAnswerImage(questionId,answerId);
+		
+		byte[] image =  answerImage.getAnswerImageDb();
+		   
+		   try
+		   {
+		    String imageFormat=null;
+		    //Code Added By BalajiI to Accommodate All Image Formats(namely PNG,JPEG,BMP)
+		    
+		   /* if(imageName!=null && !imageName.equals(""))
+		    {
+		     //To check for file format and render accordingly
+		     String fileExtension = YMessCommonUtility.getFileExtension(imageName);
+		     imageFormat="image/"+fileExtension;
+		    }*/
+			    response.setContentType("image/jpg");
+			    response.setContentLength(image.length);
+		     //Setting response headers
+		    //  response.setHeader("Content-Disposition", "inline; filename=\"" +  + "\"");
+		     
+		      BufferedInputStream input = null;
+		      BufferedOutputStream output = null;
+
+		      try 
+		      {
+		          input = new BufferedInputStream(new ByteArrayInputStream(image));
+		          output = new BufferedOutputStream(response.getOutputStream());
+		          byte[] buffer = new byte[8192];
+		          int length;
+		         
+		          while ((length = input.read(buffer)) > 0)
+		          {
+		              output.write(buffer, 0, length);
+		          }
+		      } 
+		      catch (IOException e)
+		      {
+		          System.out.println("There are errors in reading/writing image stream " + e.getMessage());
+		      } 
+		      finally 
+		      {
+		       if (output != null)
+		       { 
+		    	   output.flush();
+		           output.close();
+		       }
+		       if (input != null)
+		           input.close();
+		      }
+		   }
+		   catch(Exception ex)
+		   {
+			   logger.error(ex.getLocalizedMessage());
+		   }
+		
+	}
 
 }

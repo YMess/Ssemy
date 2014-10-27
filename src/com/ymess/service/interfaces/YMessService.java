@@ -322,5 +322,14 @@ public interface YMessService {
 	 */
 	void updateQuestion(Question question);
 
+	/**
+	 * Fetches the Answer Image
+	 * @author balaji i
+	 * @param encodedQuestionId
+	 * @param encodedAnswerId
+	 * @return Answer(answerImageDetails)
+	 */
+	Answer getAnswerImage(String encodedQuestionId, String encodedAnswerId);
+
 	
 }

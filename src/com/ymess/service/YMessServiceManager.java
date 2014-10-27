@@ -449,4 +449,11 @@ public class YMessServiceManager implements YMessService {
 		yMessDao.updateQuestion(question);
 		
 	}
+
+
+	@Override
+	public Answer getAnswerImage(String encodedQuestionId,
+			String encodedAnswerId) {
+		return yMessDao.getAnswerImage(encodedQuestionId,encodedAnswerId);
+	}
 }

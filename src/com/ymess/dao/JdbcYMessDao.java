@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -489,7 +490,6 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 	 */
 	@Override
 	public List<Question> getDashboardQuestions(String userEmailId) throws EmptyResultSetException {
-		
 		List<Long> allQuestionIds = getAllQuestionIds();
 		List<Long> userQuestionIds = getUserQuestionIds(userEmailId);
 		
@@ -497,8 +497,9 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 		{
 			allQuestionIds.removeAll(userQuestionIds);
 		}
-		StringBuilder finalQuestionIdsSB = new StringBuilder();
-			for (Long finalQuestionId : allQuestionIds) {
+		List<Question> questions = new ArrayList<Question>();
+		/*StringBuilder finalQuestionIdsSB = new StringBuilder();
+			for (Long finalQuestionId : allQuestionIds){
 				finalQuestionIdsSB = finalQuestionIdsSB.append(finalQuestionId).append(",");
 			}
 		
@@ -506,19 +507,21 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 		if(finalQuestionIdsSB.length() > 0)
 			finalQuestionIds = finalQuestionIdsSB.substring(0,finalQuestionIdsSB.lastIndexOf(","));
 		
-		List<Question> questions = new ArrayList<Question>();
 		
 		if(finalQuestionIds.length() > 0)
 		{
-			questions = getQuestionsWithDetails(finalQuestionIds);
-		}
+		}*/
+		
+		if(null != allQuestionIds && !allQuestionIds.isEmpty())
+			questions = getQuestionsWithDetails(allQuestionIds);
+		
 		return questions;
 	}
 	
 	/**
 	 * Gets All the Question Ids
 	 * @author balaji i
-	 * @return questionIds(List<String>)
+	 * @return questionIds(List<Long>)
 	 */
 	private List<Long> getAllQuestionIds()
 	{
@@ -526,13 +529,20 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 		return allQuestionIds;
 	}
 	
-	private List<Question> getQuestionsWithDetails(String finalQuestionIds) throws EmptyResultSetException
+	private List<Question> getQuestionsWithDetails(List<Long> finalQuestionIds) throws EmptyResultSetException
 	{
 		List<Question> questions = new ArrayList<Question>();
 		try
 		{
-			final String GET_DASHBOARD_QUESTIONS = "select question_id,question_title,question_desc,author_email_id,last_answer,updated_date,author_first_name,author_last_name,is_image_attached from questions where question_id in ("+finalQuestionIds+") allow filtering";
-			questions = getJdbcTemplate().query(GET_DASHBOARD_QUESTIONS,new QuestionMapper());
+		/*	final String GET_DASHBOARD_QUESTIONS = "select question_id,question_title,question_desc,author_email_id,last_answer,updated_date,author_first_name,author_last_name,is_image_attached from questions where question_id in ("+finalQuestionIds+") allow filtering";
+			questions = getJdbcTemplate().query(GET_DASHBOARD_QUESTIONS,new QuestionMapper());*/
+		
+
+			for (Long questionId : finalQuestionIds) {
+				final String GET_QUESTION_DETAILS = "select * from questions where question_id="+questionId+" allow filtering";
+				questions.add(getJdbcTemplate().queryForObject(GET_QUESTION_DETAILS, new QuestionMapper()));
+			}
+		
 		}
 		catch(EmptyResultDataAccessException emptyResultSet)
 		{
@@ -661,6 +671,7 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 			answer.setLastName(rs.getString("author_last_name"));
 			answer.setUpvotedUsers((Set<String>)rs.getObject("upvoted_users"));
 			answer.setDownvotedUsers((Set<String>)rs.getObject("downvoted_users"));
+			answer.setIsImageAttached(rs.getBoolean("is_image_attached"));
 			
 			return answer;
 		}
@@ -682,7 +693,7 @@ public class JdbcYMessDao extends JdbcDaoSupport implements YMessDao {
 		
 		long questionId = Long.parseLong(decodedQuestionId);
 		try {
-			final String FETCH_USER_ANSWERS_FOR_QUESTION ="select question_id,answer_id,answered_time,answer_desc,author_email_id,downvote_count,upvote_count,author_first_name,author_last_name,upvoted_users,downvoted_users from answers where question_id="+questionId+" order by answer_id desc";
+			final String FETCH_USER_ANSWERS_FOR_QUESTION ="select question_id,answer_id,answered_time,answer_desc,author_email_id,downvote_count,upvote_count,author_first_name,author_last_name,upvoted_users,downvoted_users,is_image_attached from answers where question_id="+questionId+" order by answer_id desc";
 			answers = getJdbcTemplate().query(FETCH_USER_ANSWERS_FOR_QUESTION, new AnswerMapper());
 		}
 		catch(EmptyResultDataAccessException emptyResultSet)
@@ -2036,8 +2047,15 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 			final String UPDATE_QUESTION_IMAGE = "update questions set image_name= ? , image_data = ?,is_image_attached = ? where question_id = ? ";
 			try {
 				byte [] originalImage = question.getQuestionImage().getBytes();
-				byte[] compressedImage = YMessCommonUtility.returnCompressedImage(originalImage);
+				byte[] compressedImage = null;
 				
+				if(null != imageName)
+				{
+					if(YMessCommonUtility.getFileExtension(imageName).equalsIgnoreCase("jpg") || YMessCommonUtility.getFileExtension(imageName).equalsIgnoreCase("jpeg"))
+						compressedImage = YMessCommonUtility.returnCompressedImage(originalImage);
+					else
+						compressedImage = originalImage;
+				}
 				getJdbcTemplate().update(UPDATE_QUESTION_IMAGE,
 						new Object[]{imageName,compressedImage,true,question.getQuestionId()},
 						new int[]{Types.VARCHAR,Types.BINARY,Types.BOOLEAN,Types.BIGINT}
@@ -2063,9 +2081,15 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 		{
 			try {
 				byte[] originalImage = question.getQuestionImage().getBytes();
-				byte[] compressedImage = YMessCommonUtility.returnCompressedImage(originalImage);
+				byte[] compressedImage = null;
 				
-				
+				if(null !=  question.getQuestionImage().getOriginalFilename())
+				{
+					if(YMessCommonUtility.getFileExtension(question.getQuestionImage().getOriginalFilename()).equalsIgnoreCase("jpg") || YMessCommonUtility.getFileExtension(question.getQuestionImage().getOriginalFilename()).equalsIgnoreCase("jpeg"))
+						compressedImage = YMessCommonUtility.returnCompressedImage(originalImage);
+					else
+						compressedImage = originalImage;
+				}
 				final String UPDATE_QUESTION_WITH_IMAGE = "update questions set question_title=?, question_desc=?, updated_date=?,keywords=?,  is_image_attached=?, image_data=?, image_name=?, topics=?  where question_id = ? and author_email_id=? ";	
 				getJdbcTemplate().update(UPDATE_QUESTION_WITH_IMAGE,
 								new Object[]{
@@ -2117,6 +2141,35 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 			//);
 		
 		}
+	}
+
+	private class AnswerImageMapper implements ParameterizedRowMapper<Answer>
+	{
+		@Override
+		public Answer mapRow(ResultSet rs, int arg1) throws SQLException {
+			Answer answer = new Answer();
+			answer.setAnswerImageDb(rs.getBytes("image_data"));
+			return answer;
+		}
+		
+		
+	}
+	/**
+	 * Fetches the Answer Image
+	 * @author balaji i
+	 * @param encodedQuestionId
+	 * @param encodedAnswerId
+	 * @return Answer(answerImageDetails)
+	 */
+	@Override
+	public Answer getAnswerImage(String encodedQuestionId,String encodedAnswerId) {
+		Long questionId = Long.parseLong(encodedQuestionId);
+		Long answerId = Long.parseLong(encodedAnswerId);
+		
+		final String GET_ANSWER_IMAGE = "select image_data from answers where question_id="+questionId +" and answer_id="+answerId;
+		Answer answerDetails = getJdbcTemplate().queryForObject(GET_ANSWER_IMAGE, new AnswerImageMapper());
+		
+		return answerDetails;
 	}
 	
 }

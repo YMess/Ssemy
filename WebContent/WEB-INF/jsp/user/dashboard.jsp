@@ -33,6 +33,7 @@ $().ready(function(){
 	{
 		localStorage.setItem("clickedQuestionId",$(this).attr('id'));
 
+		$('input[name=questionId]').val($(this).attr('id'));
 		// Define the Dialog and its properties.
 	    $("#dialog-confirm").dialog({
 	        resizable: false,
@@ -44,41 +45,42 @@ $().ready(function(){
 		
 	}
 
-	$( '#postAnswerForm' )
-	  .submit( function( e ) {
-		   var formdata = new FormData( this );
-		   formdata.append("questionId",localStorage.getItem("clickedQuestionId"));
+	$( '#postAnswerForm' ).submit( function( e ) {
 	    	  
-     if(formdata)
-		{
-		var successFlag = false;
-	    $.ajax( {
-	      url: 'user_post_answer.htm',
-	      type: 'POST',
-	      data: formdata,//new FormData( this ),
-	      async:false,
-	      processData: false,
-	      success:function(result){
-		   		successFlag = true;
-		   		//alert("Success1");
-		  }  
-	    });
-	    //e.preventDefault();
-	    
-	    if(successFlag)
-		  {
-			  alert("Success");
-			  $("#dialog-confirm").dialog( "close" );
-			  $("#answerDescription").val("");
-			  $("#answerImage").val("");
-			  location.reload();
-		  }
-			}
-		else
+     	/* if(formdata)
+		{ */
+     		
+     		 /*  $.ajax({
+		      url: 'user_post_answer.htm',
+		      type: 'POST',
+		      data:  new FormData( this ),//new FormData( this ),
+		      async:false,
+		      contentType: "application/json; charset=utf-8",
+		      success:function(result){
+			   		successFlag = true;
+			   		//alert("Success1");
+			  }  
+		    }); */
+			/* }
+			else
 			{
 				alert("Please post your answer");
 				return false;
-			}
+		    } */
+			var successFlag = false;
+		  
+		    
+		    var form = new FormData(this);
+
+		    var xhrForm = new XMLHttpRequest();
+		    xhrForm.open("POST", "user_post_answer.htm");
+		    xhrForm.send(form);
+	    
+				  $("#dialog-confirm").dialog( "close" );
+				  $("#answerDescription").val("");
+				  $("#answerImage").val("");
+				  window.location.href= "userdashboard.htm";
+	
 	  });
 });
 </script>
@@ -104,21 +106,22 @@ $().ready(function(){
 						<button id="postAnswer">Post Answer</button>
 					</div> -->
 					
-					<div id="dialog-confirm" align="center" style="display: none">
-                                        <form:form action="userdashboard.htm" modelAttribute="answer" enctype="multipart/form-data" id="postAnswerForm">
-                                                        <form:textarea path="answerDescription" ></form:textarea>
-                                                <br>
-                                            <br>
-                                             <input id="addImage" type="checkbox" name="isImageAttached"> Add Image
-                                            <br><br>
-                                              <div class="imageDiv"  style="display: none;">
-                                                	<input type="file"  accept="image/*" name="answerImage" id="answerImage">
-                                              </div>
-                                                <form:errors path="answerImage"></form:errors>
-                                        <br>
-                                                <br>
-                                                <button id="postAnswer">Post Answer</button>
-                                        </form:form>
+										<div id="dialog-confirm" align="center" style="display: none">
+	                                        <form:form action="userdashboard.htm" modelAttribute="answer" enctype="multipart/form-data" id="postAnswerForm">
+	                                                        <form:hidden path="questionId" />
+	                                                        <form:textarea path="answerDescription" />
+	                                            <br>
+	                                            <br>
+	                                             <input id="addImage" type="checkbox" name="isImageAttached"> Add Image
+	                                            <br><br>
+	                                              <div class="imageDiv"  style="display: none;">
+	                                                	<input type="file"  accept="image/*" name="answerImage" id="answerImage">
+	                                              </div>
+	                                                <form:errors path="answerImage"></form:errors>
+	                                       			<br>
+	                                                <br>
+	                                                <button id="postAnswer">Post Answer</button>
+	                                        </form:form>
                                         </div>	
 		
 				<c:choose>
@@ -133,31 +136,32 @@ $().ready(function(){
 								<c:forEach items="${questions}" var="question">
 								 	
 								 	<li>
-								 	<c:set var="questionId" value="${question.questionId}"/>
-								 	<c:set var="emailId" value="${question.authorEmailId }"></c:set>
-								 	
-									<a class="pure-menu-heading" href="user_question_responses.htm?qId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("questionId")).getBytes()))%>">
-									<span><c:out value="${question.questionTitle }"></c:out></span></a>
+									 	<c:set var="questionId" value="${question.questionId}"/>
+									 	<c:set var="emailId" value="${question.authorEmailId }"></c:set>
+									 	
+									 	
+										<a class="pure-menu-heading" href="user_question_responses.htm?qId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("questionId")).getBytes()))%>">
+										<span><c:out value="${question.questionTitle }"></c:out></span></a>
+										
+										 <c:if test="${question.isImageAttached eq true }">
+							  				<img height="60%" width="50%" src="user_question_image.htm?qId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("questionId")).getBytes()))%>">
+							 				 <br>
+							 			 </c:if>
+							 			<c:out value="${question.questionDescription }"></c:out>
+							 			<br/>
+										<span>Posted By :</span> <a class="pure-menu-heading" href="user_view_profile.htm?aId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("emailId")).getBytes()))%>">
+										<c:out value="${question.firstName }"></c:out>&nbsp;<c:out value="${question.lastName }"></c:out></a>
+										
+										<span>Last Updated :</span> <c:out value="${question.updatedDate }"></c:out>  
+										<%-- <button onclick="editQuestionDesc('${question.questionId}')">Edit</button> --%>
+										
+										<br>
+										<h3><c:out value="${question.lastAnswer}"/></h3>
+										
+										<input type="button" class="btnOpenDialog" value="Add Answer" id="${question.questionId}"/>
 									
-									 <c:if test="${question.isImageAttached eq true }">
-						  				<img height="60%" width="50%" src="user_question_image.htm?qId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("questionId")).getBytes()))%>">
-						 				 <br>
-						 			 </c:if>
-						 			<c:out value="${question.questionDescription }"></c:out>
-						 			<br/>
-									<span>Posted By :</span> <a class="pure-menu-heading" href="user_view_profile.htm?aId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("emailId")).getBytes()))%>">
-									<c:out value="${question.firstName }"></c:out>&nbsp;<c:out value="${question.lastName }"></c:out></a>
-									
-									<span>Last Updated :</span> <c:out value="${question.updatedDate }"></c:out>  
-									<%-- <button onclick="editQuestionDesc('${question.questionId}')">Edit</button> --%>
-									
-									<br>
-									<h3><c:out value="${question.lastAnswer}"/></h3>
-									
-									<input type="button" class="btnOpenDialog" value="Add Answer" id="${question.questionId}"/>
-								
-									<br>
-									<br>
+										<br>
+										<br>
 									</li>
 								</c:forEach>
 							</ul>
