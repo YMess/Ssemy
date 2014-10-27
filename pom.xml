@@ -23,7 +23,7 @@
 <!-- For Cassandra 1.2.x -->
 
 
-  <dependency>
+ <!--  <dependency>
 	<groupId>org.apache.cassandra</groupId>
 	<artifactId>cassandra-all</artifactId>
 	<version>1.2.19</version>
@@ -35,7 +35,7 @@
 		<scope>system</scope>
 		<version>1.2.5</version>
 		<systemPath>${basedir}\WebContent\WEB-INF\lib\cassandra-jdbc-1.2.5.jar</systemPath>
-	</dependency>
+	</dependency> -->
 
 <!-- <dependency>
 	<groupId>org.apache.cassandra</groupId>
@@ -64,42 +64,50 @@
      
 <!-- For Cassandra 1.2.x -->    
 
-
-    
-<!-- For Cassandra 2.0.x -->    
- <!-- -->
-    <!--  <dependency>
-	<groupId>org.apache.cassandra</groupId>
-	<artifactId>cassandra-all</artifactId>
-	<version>2.0.6</version>
-</dependency>  -->
-
-<!-- <dependency>
+<!-- Extraneous Jars -->
+<!-- 
+ <dependency>
 	<groupId>org.apache.cassandra</groupId>
 	<artifactId>cassandra-clientutil</artifactId>
 	<version>2.0.6</version>
-</dependency> -->
+</dependency>-->
+<!-- Extraneous Jars -->
 
-<!-- <dependency>
+<!-- --><dependency>
 	<groupId>org.apache.cassandra</groupId>
 	<artifactId>cassandra-clientutil</artifactId>
 	<version>1.2.9</version>
 </dependency>
+ 
+ 
+     
+<!-- For Cassandra 2.0.x -->    
+ <!-- -->
+     <dependency>
+	<groupId>org.apache.cassandra</groupId>
+	<artifactId>cassandra-all</artifactId>
+	<version>2.0.6</version>
+</dependency> <!--  -->
 
 <dependency>
 	<groupId>org.apache.cassandra</groupId>
 	<artifactId>cassandra-thrift</artifactId>
 	<version>2.0.6</version>
+</dependency>
+<!-- <dependency>
+	<groupId>org.springframework.data</groupId>
+	<artifactId>spring-data-cassandra</artifactId>
+	<version>1.0.0.RELEASE</version>
 </dependency> -->
 
    
-<!-- 	<dependency>
+	<dependency>
 		<groupId>cassandra-jdbc</groupId>
 		<artifactId>org.apache.cassandra</artifactId>
 		<scope>system</scope>
 		<version>2.1</version>
 		<systemPath>${basedir}\WebContent\WEB-INF\lib\cassandra-jdbc-2.1.jar</systemPath>
-	</dependency> -->
+	</dependency> 
 	
 <!-- For Cassandra 2.0.x -->
 	
@@ -385,6 +393,12 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
 			<version>${spring.version}</version>
+			 <exclusions>
+            <exclusion>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+            </exclusion>
+        </exclusions>
 		</dependency>
  
 		<dependency>
@@ -430,9 +444,9 @@
 	
 <!--Spring Mobile Library Starts -->
 <dependency>
-  <groupId>org.springframework.mobile</groupId>
-  <artifactId>spring-mobile-device</artifactId>
-  <version>1.1.0.M3</version>
+	<groupId>org.springframework.mobile</groupId>
+	<artifactId>spring-mobile-device</artifactId>
+	<version>1.1.3.RELEASE</version>
 </dependency>
 	
 <!--Spring Mobile Library  Ends -->

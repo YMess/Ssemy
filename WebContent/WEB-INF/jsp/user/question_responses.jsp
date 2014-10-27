@@ -91,6 +91,13 @@ function downvote(questionId,answerId)
 									 
 									 <p><c:out value="${answer.questionDescription }"></c:out></p>
 									Answer: <p><c:out value="${answer.answerDescription }"></c:out></p>
+									<div>
+										<c:if test="${not empty answer.isImageAttached && answer.isImageAttached }">
+											<img alt="Answer Image" src="fetch_answer_image.htm?qId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("questionId")).getBytes()))%>&aId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("answerId")).getBytes()))%>">
+										</c:if>
+									</div>
+									
+									
 									Answered By :<a href="user_view_profile.htm?aId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("authorEmailId")).getBytes()))%>"> <p><c:out value="${answer.firstName}"></c:out>&nbsp;<c:out value="${answer.lastName}"></c:out></p></a>
 									Answered Time :	<legend> <c:out value="${answer.answeredTime }"></c:out>  </legend>
 									Upvoters : <c:choose><c:when test="${answer.upvoteCount != 0 }"><a href="user_answer_upvoters.htm?aId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("answerId")).getBytes()))%>&qId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("questionId")).getBytes()))%>"><c:out value="${answer.upvoteCount }"></c:out></a></c:when> 

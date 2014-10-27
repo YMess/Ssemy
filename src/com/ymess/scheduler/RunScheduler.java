@@ -10,7 +10,7 @@ import com.ymess.util.LuceneIndexer;
 @Component
 public class RunScheduler {
  
-	@Scheduled(cron="0 0/1 * * * ?") 
+	/*@Scheduled(cron="0 0/1 * * * ?") */
 	public void execute() { 
 		System.out.println("Creating Indexes "+new Date()); 
 		//LuceneIndexer.invokeIndexing();
