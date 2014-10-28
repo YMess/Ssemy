@@ -93,7 +93,7 @@ function downvote(questionId,answerId)
 									Answer: <p><c:out value="${answer.answerDescription }"></c:out></p>
 									<div>
 										<c:if test="${not empty answer.isImageAttached && answer.isImageAttached }">
-											<img alt="Answer Image" src="fetch_answer_image.htm?qId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("questionId")).getBytes()))%>&aId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("answerId")).getBytes()))%>">
+											<img height=" 500px" width=" 500px" alt="Answer Image" src="fetch_answer_image.htm?qId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("questionId")).getBytes()))%>&aId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("answerId")).getBytes()))%>">
 										</c:if>
 									</div>
 									

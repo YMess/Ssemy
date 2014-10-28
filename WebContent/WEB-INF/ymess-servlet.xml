@@ -25,7 +25,9 @@ http://www.springframework.org/schema/task/spring-task-3.0.xsd">
 
 	<!-- Message Properties -->
 	
-	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver" />
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver" >
+		 <property name="maxUploadSize" value="50000000" />
+	</bean>
 	
 
 	 <mvc:annotation-driven>

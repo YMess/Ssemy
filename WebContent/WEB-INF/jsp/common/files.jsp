@@ -78,6 +78,9 @@ border: medium;
 							<div style="width:40%;float:left;">
 								<input type="file" name="fileData">
 								<c:out value="${filename }"/>
+								<c:if test="${not empty filename}">
+										<form:hidden path="filename" value="${filename }"/>
+								</c:if>
 									<form:errors path="fileSize" cssClass="errormessage"></form:errors>
 								<br>
 								<br>	  
@@ -99,6 +102,7 @@ border: medium;
 								 		 <c:choose>
 											 <c:when test="${not empty shared}">
 											 	  <input type="checkbox" name="shared" checked="checked"> &nbsp;<span> Already Shared </span>
+											 	  <form:hidden path="editFlag" value="true" />
 											 </c:when>
 											 <c:otherwise>
 											  <input type="checkbox" name="shared"> &nbsp;<span> Share the File with the World! </span>

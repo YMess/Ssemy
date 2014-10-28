@@ -9,7 +9,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -1626,9 +1625,14 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 	 */
 	@Override
 	public void uploadFile(File file) throws DataAccessException, IOException {
-		
-		Long lastInsertedFileId = getLastFileId();
-		Long newFileId = lastInsertedFileId + 1;
+		Long lastInsertedFileId = 0L,newFileId = 0L;
+		if(null == file.getEditFlag())
+		{
+			lastInsertedFileId = getLastFileId();
+		    newFileId = lastInsertedFileId + 1;
+		}
+		else
+			newFileId = file.getFileId();
 		
 		Set<String> fileTopics = file.getTopics();
 		if(!fileTopics.isEmpty())
@@ -1654,6 +1658,7 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 				fileTopic = YMessCommonUtility.removeExtraneousApostrophe(fileTopic);
 				String CHECK_IF_TOPIC_EXISTS = "select count(1) from topics where topic=?";
 				Long topicCount = getJdbcTemplate().queryForLong(CHECK_IF_TOPIC_EXISTS,fileTopic);
+				
 				if(topicCount > 0)
 				{
 					final String PREVIOUS_FILE_COUNT = "select file_count from topics where topic=?";
@@ -1673,6 +1678,29 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 							new int[]{Types.VARCHAR,Types.OTHER,Types.BIGINT}
 							);
 				}	
+				
+			}
+		}
+		/** While Editing,If The User Unchecks the Share File Checkbox */
+		else
+		{
+			final String UPDATE_FILE_SHARED_FLAG ="update files set share_flag=false where user_email_id=? and file_id="+newFileId;
+			getJdbcTemplate().update(UPDATE_FILE_SHARED_FLAG,file.getAuthorEmailId());
+			
+			for (String fileTopic : fileTopics) 
+			{
+				fileTopic = fileTopic.trim().toLowerCase();
+				fileTopic = YMessCommonUtility.removeExtraneousApostrophe(fileTopic);
+					
+				final String PREVIOUS_FILE_COUNT = "select file_count from topics where topic=?";
+				Long previousFileCount = getJdbcTemplate().queryForLong(PREVIOUS_FILE_COUNT,fileTopic);
+				
+				
+				final String DELETE_FILE_FROM_TOPICS = "DELETE file_ids[" +newFileId +"] FROM topics WHERE topic = ?";
+				getJdbcTemplate().update(DELETE_FILE_FROM_TOPICS,fileTopic);
+				
+				final String UPDATE_FILE_COUNT = "update topics set file_count ="+(previousFileCount - 1)+" where topic =?";
+				getJdbcTemplate().update(UPDATE_FILE_COUNT,fileTopic);
 				
 			}
 		}

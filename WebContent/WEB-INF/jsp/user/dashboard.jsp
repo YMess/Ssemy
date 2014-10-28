@@ -69,6 +69,7 @@ $().ready(function(){
 		    } */
 			var successFlag = false;
 		  
+		    alert($('input[name=questionId]').val());
 		    
 		    var form = new FormData(this);
 
@@ -79,7 +80,11 @@ $().ready(function(){
 				  $("#dialog-confirm").dialog( "close" );
 				  $("#answerDescription").val("");
 				  $("#answerImage").val("");
-				  window.location.href= "userdashboard.htm";
+				 // window.location.href= "userdashboard.htm";
+				  
+				    var xhrForm = new XMLHttpRequest();
+				    xhrForm.open("GET", "user_question_responses.htm?qId="+<%= new String(Base64.encodeBase64(String.valueOf("$('input[name=questionId]').val()").getBytes()))%>);
+				    xhrForm.send();
 	
 	  });
 });

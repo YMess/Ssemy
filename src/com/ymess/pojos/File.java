@@ -25,6 +25,7 @@ public class File {
 	private String fileSize;
 	private String fileDescription;
 	
+	private Boolean editFlag;
 	private MultipartFile fileData;
 	private byte[] fileDataDb;
 	
@@ -115,6 +116,12 @@ public class File {
 	}
 	public void setAuthorLastName(String authorLastName) {
 		this.authorLastName = authorLastName;
+	}
+	public Boolean getEditFlag() {
+		return editFlag;
+	}
+	public void setEditFlag(Boolean editFlag) {
+		this.editFlag = editFlag;
 	}
 	
 

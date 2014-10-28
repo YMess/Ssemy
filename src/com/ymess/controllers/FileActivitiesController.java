@@ -89,22 +89,25 @@ public class FileActivitiesController {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		file.setAuthorEmailId(authentication.getName());
 		
-		if(file.getFileData() != null && file.getFileData().getOriginalFilename().length() > 0)
+		if(file.getEditFlag() != null || (file.getFileData() != null && file.getFileData().getOriginalFilename().length() > 0))
 		{
-			double bytes = file.getFileData().getSize();
-			double kilobytes = (bytes / 1024);
-			double megabytes = 0.0d;
-
-			if(kilobytes > 1024)
-			{	
-				megabytes = (kilobytes / 1024);
-				file.setFileSize(Math.ceil(megabytes)+" MB");
-			}
-			else
-			{
-				file.setFileSize(Math.ceil(kilobytes)+" KB");
-			}
 			
+			double megabytes = 0.0d;
+			if(file.getFileData().getOriginalFilename().length() > 0)
+			{
+				double bytes = file.getFileData().getSize();
+				double kilobytes = (bytes / 1024);
+	
+				if(kilobytes > 1024)
+				{	
+					megabytes = (kilobytes / 1024);
+					file.setFileSize(Math.ceil(megabytes)+" MB");
+				}
+				else
+				{
+					file.setFileSize(Math.ceil(kilobytes)+" KB");
+				}
+			}
 			if(megabytes > 35)
 			{
 				result.rejectValue("fileSize", "File.fileSize","Please Upload a file within 35 MB");
