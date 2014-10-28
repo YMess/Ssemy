@@ -22,7 +22,7 @@
 <script type="text/javascript">
 function editQuestionDesc(questionId)
 {
-	alert("Question Id : "+questionId);
+	//alert("Question Id : "+questionId);
 
 	
 	location.href="user_post_question.htm?qId="+questionId;

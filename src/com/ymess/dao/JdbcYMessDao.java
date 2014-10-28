@@ -2070,8 +2070,129 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 		
 	}
 
+	/*@Override
+	public void updateQuestion(Question question) {
+		
+		Date currentTime = new Date();
+		User userDetails = getUserDetailsByEmailId(question.getAuthorEmailId());
+		
+		*//** Question Along with Image *//*
+		if(question.getIsImageAttached() != null && question.getIsImageAttached())
+		{
+			try {
+				byte[] originalImage = question.getQuestionImage().getBytes();
+				byte[] compressedImage = null;
+				
+				if(null !=  question.getQuestionImage().getOriginalFilename())
+				{
+					if(YMessCommonUtility.getFileExtension(question.getQuestionImage().getOriginalFilename()).equalsIgnoreCase("jpg") || YMessCommonUtility.getFileExtension(question.getQuestionImage().getOriginalFilename()).equalsIgnoreCase("jpeg"))
+						compressedImage = YMessCommonUtility.returnCompressedImage(originalImage);
+					else
+						compressedImage = originalImage;
+				}
+				final String UPDATE_QUESTION_WITH_IMAGE = "update questions set question_title=?, question_desc=?, updated_date=?,keywords=?,  is_image_attached=?, image_data=?, image_name=?, topics=?  where question_id = ? and author_email_id=? ";	
+				getJdbcTemplate().update(UPDATE_QUESTION_WITH_IMAGE,
+								new Object[]{
+								question.getQuestionTitle(),
+								question.getQuestionDescription(),
+								currentTime,
+								question.getKeywords(),
+								true,
+								compressedImage,
+								question.getQuestionImage().getOriginalFilename(),
+								question.getTopics(),
+								question.getQuestionId(),
+								question.getAuthorEmailId()
+							},
+								new int[]{
+								Types.VARCHAR,
+								Types.VARCHAR,
+								Types.TIMESTAMP,
+								Types.ARRAY,
+								Types.BOOLEAN,
+								Types.BINARY,
+								Types.VARCHAR,
+								Types.ARRAY,
+								Types.BIGINT,
+								Types.VARCHAR
+								
+						});
+						
+						//getJdbcTemplate().update(ADD_QUESTION_TIMELINE, new Object[]{question.getAuthorEmailId(),new Date(),ActivityConstants.POSTED_QUESTION,userDetails.getFirstName(),userDetails.getLastName(),question.getQuestionId(),question.getQuestionTitle(),question.getQuestionDescription(),true,question.getTopics(),currentTime ,YMessCommonUtility.IS_POSTED_QUESTIONS},
+						//		new int[]{Types.VARCHAR,Types.TIMESTAMP,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR, Types.BIGINT,Types.VARCHAR,Types.VARCHAR,Types.BOOLEAN,Types.ARRAY,Types.TIMESTAMP,Types.BOOLEAN}
+						//);
+						
+			} catch (IOException e) {
+				logger.error(e.getStackTrace());
+			}
+			
+		}
+		else *//** Only Text Question *//*
+		{
+			final String UPDATE_QUESTION = "update questions set question_title=?, question_desc=?, updated_date=?,keywords=?, topics=? where question_id = ? and author_email_id=?";
+			getJdbcTemplate().update(UPDATE_QUESTION,
+					new Object[]{question.getQuestionTitle(),question.getQuestionDescription(),
+					currentTime,question.getKeywords(),question.getTopics(),question.getQuestionId(),question.getAuthorEmailId()},
+					new int[]{Types.VARCHAR,Types.VARCHAR,Types.TIMESTAMP,Types.ARRAY,Types.ARRAY,Types.BIGINT,Types.VARCHAR}
+					);
+			
+			//getJdbcTemplate().update(ADD_QUESTION_TIMELINE, new Object[]{question.getAuthorEmailId(),new Date(),ActivityConstants.POSTED_QUESTION,userDetails.getFirstName(),userDetails.getLastName(),question.getQuestionId(),question.getQuestionTitle(),question.getQuestionDescription(),false,question.getTopics(),currentTime ,YMessCommonUtility.IS_POSTED_QUESTIONS},
+			//		new int[]{Types.VARCHAR,Types.TIMESTAMP,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR, Types.BIGINT,Types.VARCHAR,Types.VARCHAR,Types.BOOLEAN,Types.ARRAY,Types.TIMESTAMP,Types.BOOLEAN}
+			//);
+		
+		}
+	}*/
+
+	private class AnswerImageMapper implements ParameterizedRowMapper<Answer>
+	{
+		@Override
+		public Answer mapRow(ResultSet rs, int arg1) throws SQLException {
+			Answer answer = new Answer();
+			answer.setAnswerImageDb(rs.getBytes("image_data"));
+			return answer;
+		}
+		
+		
+	}
+	/**
+	 * Fetches the Answer Image
+	 * @author balaji i
+	 * @param encodedQuestionId
+	 * @param encodedAnswerId
+	 * @return Answer(answerImageDetails)
+	 */
+	@Override
+	public Answer getAnswerImage(String encodedQuestionId,String encodedAnswerId) {
+		Long questionId = Long.parseLong(encodedQuestionId);
+		Long answerId = Long.parseLong(encodedAnswerId);
+		
+		final String GET_ANSWER_IMAGE = "select image_data from answers where question_id="+questionId +" and answer_id="+answerId;
+		Answer answerDetails = getJdbcTemplate().queryForObject(GET_ANSWER_IMAGE, new AnswerImageMapper());
+		
+		return answerDetails;
+	}
+	
+	
+	/**
+	 * Updates Question Topics in DB
+	 * @author rvishwakarma
+	 * @param user
+	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public void updateQuestion(Question question) {
+        //Id is not allowing
+		final String GET_QUESTIONS_PREVIOUS_TOPICS = "select topics from questions where question_id="+question.getQuestionId()+" and author_email_id=?";
+		/** Fetching Question's previous Topics to Compare and check if anything has been updated */
+		Set<String> previousTopics = (Set<String>) getJdbcTemplate().queryForObject(GET_QUESTIONS_PREVIOUS_TOPICS, Set.class,question.getAuthorEmailId());
+		
+		Set<String> topics = new HashSet<String>();
+		
+		if(question.getTopics() != null && ! question.getTopics().isEmpty())
+		{
+			topics.addAll(question.getTopics()); 
+			topics = YMessCommonUtility.removeNullAndEmptyElements(topics);
+		}
 		
 		Date currentTime = new Date();
 		User userDetails = getUserDetailsByEmailId(question.getAuthorEmailId());
@@ -2141,35 +2262,81 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 			//);
 		
 		}
-	}
-
-	private class AnswerImageMapper implements ParameterizedRowMapper<Answer>
-	{
-		@Override
-		public Answer mapRow(ResultSet rs, int arg1) throws SQLException {
-			Answer answer = new Answer();
-			answer.setAnswerImageDb(rs.getBytes("image_data"));
-			return answer;
-		}
 		
+		if(!topics.isEmpty())
+		{
+			for (String topic : topics) {
+				
+				topic = topic.toLowerCase();
+				
+				if(topic.trim().length() > 0)
+				{
+					topic = YMessCommonUtility.removeExtraneousApostrophe(topic);
+					topic = topic.trim().toLowerCase();
+				
+				String CHECK_IF_TOPIC_EXISTS = "select count(1) from topics where topic=?";
+				long topicCount = getJdbcTemplate().queryForLong(CHECK_IF_TOPIC_EXISTS,topic);
+				
+				if(topicCount != 0)
+				{
+					long questionCount = getJdbcTemplate().queryForLong("select question_count from topics where topic=?",topic);
+					
+					String UPDATE_TOPIC = "update topics set question_count="+(questionCount+1)+",question_ids=question_ids + {"+question.getQuestionId()+"} where topic=?";
+					try{
+						getJdbcTemplate().update(UPDATE_TOPIC,topic);
+					}
+					catch(Exception ex)
+					{
+						logger.error(ex.getStackTrace());
+					}
+				}
+				else
+				{
+					String INSERT_NEW_TOPIC = "insert into topics (topic,question_ids,question_count) values ('"+topic+"',"+ "{"+ question.getQuestionId() +"},1)";
+					try{
+						getJdbcTemplate().update(INSERT_NEW_TOPIC);
+					}
+					catch(Exception ex)
+					{
+						logger.error(ex.getStackTrace());
+					}
+				}
+			}
+				
+			}
+			/** New Interests Added By User in Form */
+			Set<String> newTopics = question.getTopics();
+			Set<String> deletedTopics = new HashSet<String>();
+			Set<String> addedTopics = new HashSet<String>();
+			
+			
+			if(previousTopics != null)
+				previousTopics = YMessCommonUtility.removeNullAndEmptyElements(previousTopics);
+			
+			if(newTopics != null)
+				newTopics = YMessCommonUtility.removeNullAndEmptyElements(newTopics);
+			
+			Map<String,Set<String>> mergedSets = YMessCommonUtility.compareSetsAndReturnAddedAndDeletedObjects(previousTopics,newTopics);
+			
+			/** Nothing has been changed in terms of topics */
+			if(! mergedSets.containsKey(YMessCommonUtility.EQUAL_SET))
+			{
+				//Changes have been made
+				deletedTopics = mergedSets.get(YMessCommonUtility.DELETED_ITEMS);
+				addedTopics = mergedSets.get(YMessCommonUtility.ADDED_ITEMS);
+				
+				if(! deletedTopics.isEmpty())
+				{
+					updateUserInterestsInTopics(deletedTopics,question.getAuthorEmailId(),true);
+				}
+				
+				if(! addedTopics.isEmpty())
+				{
+					updateUserInterestsInTopics(addedTopics,question.getAuthorEmailId(),false);
+				}
+			}
+		}	
 		
-	}
-	/**
-	 * Fetches the Answer Image
-	 * @author balaji i
-	 * @param encodedQuestionId
-	 * @param encodedAnswerId
-	 * @return Answer(answerImageDetails)
-	 */
-	@Override
-	public Answer getAnswerImage(String encodedQuestionId,String encodedAnswerId) {
-		Long questionId = Long.parseLong(encodedQuestionId);
-		Long answerId = Long.parseLong(encodedAnswerId);
-		
-		final String GET_ANSWER_IMAGE = "select image_data from answers where question_id="+questionId +" and answer_id="+answerId;
-		Answer answerDetails = getJdbcTemplate().queryForObject(GET_ANSWER_IMAGE, new AnswerImageMapper());
-		
-		return answerDetails;
 	}
 	
 }

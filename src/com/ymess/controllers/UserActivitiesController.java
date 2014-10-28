@@ -138,7 +138,8 @@ public class UserActivitiesController {
 		catch(Exception ex)
 		{
 			//logger.error(ex.getLocalizedMessage());
-			ex.getMessage();
+			//ex.getMessage();
+			ex.printStackTrace();
 		}
 		redirectAttributes.addFlashAttribute("successfullyPostedQuestion","You Posted the Question Successfully");
 		return URLMappings.REDIRECT_SUCCESS_POSTING_QUESTION;	
