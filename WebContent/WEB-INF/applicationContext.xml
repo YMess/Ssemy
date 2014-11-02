@@ -28,6 +28,13 @@ http://www.springframework.org/schema/task/spring-task-3.0.xsd">
 		<property name="dataSource" ref="dataSource" />
 	</bean>
 	
+	<bean id="yMailManager" class="com.ymess.ymail.service.YMailServiceManager">
+		<property name="yMailDao" ref="yMailDao" />
+	</bean>
+
+	<bean id="yMailDao" class="com.ymess.ymail.dao.JdbcYMailDao">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
 	
 
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
