@@ -1,5 +1,5 @@
 package com.ymess.ymail.service.interfaces;
 
-public class YMailService {
+public interface YMailService {
 
 }
