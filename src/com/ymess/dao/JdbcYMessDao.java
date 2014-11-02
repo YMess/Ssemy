@@ -1617,6 +1617,84 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 		return topics;
 	}
 
+	
+	private boolean updateTopicsInFiles(Set<String> deletedTopics,Long fileId,Boolean deletedTopicsFlag,String authorEmaild) {
+		boolean success = false;
+		
+		for (String deletedInterest : deletedTopics) {
+			deletedInterest = deletedInterest.trim().toLowerCase();
+			deletedInterest = YMessCommonUtility.removeExtraneousApostrophe(deletedInterest);
+			
+			/** User Deleted Interests */
+			if(deletedTopicsFlag)
+			{
+				try{
+			
+				final String GET_FILE_COUNT_FOR_TOPIC = "select file_count from topics where topic=?";
+				Long oldFileCount = getJdbcTemplate().queryForLong(GET_FILE_COUNT_FOR_TOPIC,deletedInterest);	
+					
+				final String REMOVE_USER_FROM_TOPICS = "Delete file_ids["+fileId+"] from topics where topic ='"+deletedInterest+"'";
+				getJdbcTemplate().update(REMOVE_USER_FROM_TOPICS);
+				
+				final String UPDATE_FILE_COUNT = "update topics set file_count = "+(oldFileCount - 1)+" where topic ='"+deletedInterest+"'";
+				getJdbcTemplate().update(UPDATE_FILE_COUNT);
+				
+				success = true;
+				}
+				catch(Exception ex)
+				{
+					logger.error(ex.getMessage());
+				}
+			}
+			/** User Added Interests */
+			else
+			{
+				String GET_TOPIC_COUNT = "select count(1) from topics where topic=?";
+				Long topicCount = getJdbcTemplate().queryForLong(GET_TOPIC_COUNT,deletedInterest);
+				
+				if(topicCount > 0)
+				{
+					try{
+						
+						final String GET_FILE_COUNT_FOR_TOPIC = "select file_count from topics where topic=?";
+						Long oldFileCount = getJdbcTemplate().queryForLong(GET_FILE_COUNT_FOR_TOPIC,deletedInterest);
+						
+						String ADD_FILE_TO_TOPICS = "UPDATE topics SET file_ids = file_ids + {"+ fileId +":'"+ authorEmaild +"'},file_count="+(oldFileCount + 1)+" WHERE topic = '"+deletedInterest+"'";
+						getJdbcTemplate().update(ADD_FILE_TO_TOPICS);
+						success = true;
+						}
+						catch(Exception ex)
+						{
+							logger.error(ex.getMessage());
+						}
+				}
+				else
+				{
+					Map<Long,String> fileIds = new HashMap<Long,String>();
+					fileIds.put(fileId,authorEmaild);
+					
+					String ADD_USER_INTEREST = "insert into topics(topic,file_count,file_ids) values(?,?,?)";
+					try{
+					getJdbcTemplate().update(ADD_USER_INTEREST,
+								new Object[]{deletedInterest,1,fileIds},
+								new int[]{Types.VARCHAR,Types.BIGINT,Types.OTHER}
+							);
+					}
+					catch(Exception ex)
+					{
+						logger.error(ex.getMessage());
+					}
+				}
+				
+			}
+			
+		}
+		return success;
+	}
+
+	
+	
+	
 	/**
 	 * Facilitates User File Upload
 	 * @param file
@@ -1634,15 +1712,47 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 		else
 			newFileId = file.getFileId();
 		
-		Set<String> fileTopics = file.getTopics();
-		if(!fileTopics.isEmpty())
-			fileTopics = YMessCommonUtility.removeNullAndEmptyElements(fileTopics);
+		Set<String> newFileTopics = file.getTopics();
+		if(!newFileTopics.isEmpty())
+			newFileTopics = YMessCommonUtility.removeNullAndEmptyElements(newFileTopics);
+		
+		
+		if(null != file.getEditFlag() && file.getEditFlag())
+		{
+			final String GET_FILE_TOPICS = "select topics from files where user_email_id=? and file_id="+newFileId;
+			Set<String> oldTopics = getJdbcTemplate().queryForObject(GET_FILE_TOPICS, Set.class,file.getAuthorEmailId());
+			
+			if(!oldTopics.isEmpty())
+				oldTopics = YMessCommonUtility.removeNullAndEmptyElements(oldTopics);
+			
+			if(! oldTopics.isEmpty() && !newFileTopics.isEmpty())
+			{
+				Map<String,Set<String>> mergedSets = YMessCommonUtility.compareSetsAndReturnAddedAndDeletedObjects(oldTopics, newFileTopics);
+				
+				if(! mergedSets.isEmpty() && ! mergedSets.containsKey(YMessCommonUtility.EQUAL_SET))
+				{
+					//Changes have been made
+					Set<String> deletedTopics = mergedSets.get(YMessCommonUtility.DELETED_ITEMS);
+					Set<String> addedTopics = mergedSets.get(YMessCommonUtility.ADDED_ITEMS);
+					
+					if(! deletedTopics.isEmpty())
+					{
+						updateTopicsInFiles(deletedTopics,newFileId,true,file.getAuthorEmailId());
+					}
+					
+					if(! addedTopics.isEmpty())
+					{
+						updateTopicsInFiles(addedTopics,newFileId,false,file.getAuthorEmailId());
+					}
+				}
+			}
+		}
 		
 		User userDetails = getUserDetailsByEmailId(file.getAuthorEmailId());
 		
 		final String UPLOAD_FILE = "insert into files(file_id,user_email_id,file_type,filename,share_flag,topics,filedata,upload_time,file_size,file_description,user_first_name,user_last_name) values (?,?,?,?,?,?,?,?,?,?,?,?)";
 		getJdbcTemplate().update(UPLOAD_FILE,
-				new Object[]{newFileId,file.getAuthorEmailId(),YMessCommonUtility.getFileExtension(file.getFileData().getOriginalFilename()),file.getFileData().getOriginalFilename(),file.getShared(),fileTopics,file.getFileData().getBytes(),new Date(),file.getFileSize(),file.getFileDescription(),
+				new Object[]{newFileId,file.getAuthorEmailId(),YMessCommonUtility.getFileExtension(file.getFileData().getOriginalFilename()),file.getFileData().getOriginalFilename(),file.getShared(),newFileTopics,file.getFileData().getBytes(),new Date(),file.getFileSize(),file.getFileDescription(),
 				userDetails.getFirstName(),userDetails.getLastName()
 				},
 				new int[]{Types.BIGINT,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.BOOLEAN,Types.ARRAY,Types.BINARY,Types.TIMESTAMP,Types.VARCHAR,Types.VARCHAR,
@@ -1652,7 +1762,7 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 		
 		if(file.getShared()!=null && file.getShared())
 		{
-			for (String fileTopic : fileTopics) 
+			for (String fileTopic : newFileTopics) 
 			{
 				fileTopic = fileTopic.trim().toLowerCase();
 				fileTopic = YMessCommonUtility.removeExtraneousApostrophe(fileTopic);
@@ -1687,7 +1797,7 @@ public Question mapRow(ResultSet rs, int rowCount) throws SQLException {
 			final String UPDATE_FILE_SHARED_FLAG ="update files set share_flag=false where user_email_id=? and file_id="+newFileId;
 			getJdbcTemplate().update(UPDATE_FILE_SHARED_FLAG,file.getAuthorEmailId());
 			
-			for (String fileTopic : fileTopics) 
+			for (String fileTopic : newFileTopics) 
 			{
 				fileTopic = fileTopic.trim().toLowerCase();
 				fileTopic = YMessCommonUtility.removeExtraneousApostrophe(fileTopic);
