@@ -23,7 +23,7 @@
 <!-- For Cassandra 1.2.x -->
 
 
- <!--  <dependency>
+   <dependency>
 	<groupId>org.apache.cassandra</groupId>
 	<artifactId>cassandra-all</artifactId>
 	<version>1.2.19</version>
@@ -35,7 +35,7 @@
 		<scope>system</scope>
 		<version>1.2.5</version>
 		<systemPath>${basedir}\WebContent\WEB-INF\lib\cassandra-jdbc-1.2.5.jar</systemPath>
-	</dependency> -->
+	</dependency> 
 
 <!-- <dependency>
 	<groupId>org.apache.cassandra</groupId>
@@ -59,6 +59,13 @@
 	<artifactId>cassandra-jdbc</artifactId>
 	<version>1.2.1</version>
 </dependency> -->
+<!-- 	<dependency>
+		<groupId>cassandra-jdbc</groupId>
+		<artifactId>org.apache.cassandra</artifactId>
+		<scope>system</scope>
+		<version>2.1</version>
+		<systemPath>${basedir}\WebContent\WEB-INF\lib\cassandra-jdbc-2.1.jar</systemPath>
+	</dependency>   -->
  
 	 
      
@@ -73,27 +80,27 @@
 </dependency>-->
 <!-- Extraneous Jars -->
 
-<!-- --><dependency>
+<!-- --><!-- <dependency>
 	<groupId>org.apache.cassandra</groupId>
 	<artifactId>cassandra-clientutil</artifactId>
 	<version>1.2.9</version>
-</dependency>
+</dependency> -->
  
  
      
 <!-- For Cassandra 2.0.x -->    
  <!-- -->
-     <dependency>
+    <!--  <dependency>
 	<groupId>org.apache.cassandra</groupId>
 	<artifactId>cassandra-all</artifactId>
 	<version>2.0.6</version>
-</dependency> <!--  -->
+</dependency> 
 
 <dependency>
 	<groupId>org.apache.cassandra</groupId>
 	<artifactId>cassandra-thrift</artifactId>
 	<version>2.0.6</version>
-</dependency>
+</dependency> -->
 <!-- <dependency>
 	<groupId>org.springframework.data</groupId>
 	<artifactId>spring-data-cassandra</artifactId>
@@ -101,13 +108,7 @@
 </dependency> -->
 
    
-	<dependency>
-		<groupId>cassandra-jdbc</groupId>
-		<artifactId>org.apache.cassandra</artifactId>
-		<scope>system</scope>
-		<version>2.1</version>
-		<systemPath>${basedir}\WebContent\WEB-INF\lib\cassandra-jdbc-2.1.jar</systemPath>
-	</dependency> 
+
 	
 <!-- For Cassandra 2.0.x -->
 	

@@ -14,7 +14,7 @@
     <li><a href="user_followed_by.htm">Followed By</a></li>
     <li><a href="user_timeline.htm">Timeline</a></li>
     <li><a href="files.htm">Share Files</a></li>
-    <li><a href="mail.htm">Mail</a></li>
+    <li><a href="inbox.htm">Mail</a></li>
 						       
 	 </ul>
 </div>	

@@ -59,4 +59,16 @@ public class LoggerConstants {
 	public static final String FILE_DELETED = "File Successfully Deleted";
 
 	public static final String FILE_SHARED = "File Successfully Shared";
+	
+	public static final String INBOX_PAGE = "Loaded Inbox Mail Page";
+	
+	public static final String SENT_PAGE = "Loaded Sent Mail Page";
+	
+	public static final String IMPORTANT_PAGE = "Loaded Important Mail Page";
+	
+	public static final String DRAFTS_PAGE = "Loaded Drafts Mail Page";
+	
+	public static final String TRASH_PAGE = "Loaded Trash Mail Page";
+	
+	public static final String COMPOSE_MAIL_PAGE = "Loaded Compose Mail Page";
 }
