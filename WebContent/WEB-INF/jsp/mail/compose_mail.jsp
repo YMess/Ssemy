@@ -42,7 +42,7 @@
 			        <br/>
 					<br/>
 					<div>
-					<input id="addAttachment" type="checkbox" name="isImageAttached"> Change Image
+
 					<br><br>
 					 <div class="imageDiv"  style="display: none;">
 					 	<input type="file"  accept="image/*" name="questionImage">
