@@ -20,7 +20,9 @@ public class Mail {
 	  private Set<String> mailCC;
 	  private Set<String> mailBCC;
 	  private Set<MultipartFile> mailAttachment;
+	  private boolean isMailAttachmentAttached;
 	  private Set<MultipartFile> mailPicture;
+	  private boolean isMailPictureAttached;
 	  private Date mailSavedTimestamp;
 	  private Date mailSentTimestamp;
 	  private Set<String> mailThread;
@@ -32,6 +34,7 @@ public class Mail {
 	  private boolean mailTrash;
 	  private String userFirstName;
 	  private String userLastName;
+	  
 	public long getMailId() {
 		return mailId;
 	}
@@ -151,6 +154,18 @@ public class Mail {
 	}
 	public void setUserLastName(String userLastName) {
 		this.userLastName = userLastName;
+	}
+	public boolean isMailAttachmentAttached() {
+		return isMailAttachmentAttached;
+	}
+	public void setMailAttachmentAttached(boolean isMailAttachmentAttached) {
+		this.isMailAttachmentAttached = isMailAttachmentAttached;
+	}
+	public boolean isMailPictureAttached() {
+		return isMailPictureAttached;
+	}
+	public void setMailPictureAttached(boolean isMailPictureAttached) {
+		this.isMailPictureAttached = isMailPictureAttached;
 	}
       
 	  

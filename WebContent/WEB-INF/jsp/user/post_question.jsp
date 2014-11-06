@@ -101,6 +101,7 @@ else
 				    </c:if>
 				    <br>
 				    
+				    
 					<input id="addImage" type="checkbox" name="isImageAttached"> Change Image
 					<br><br>
 					 <div class="imageDiv"  style="display: none;">
@@ -111,6 +112,7 @@ else
 					 	<form:errors path="questionImage"></form:errors>
 					<br>
 					
+										
 					<p>Question Topics(Add Topics Separated by Commas)</p>
 					 <!-- <textarea id="topics" name="topics" value="${questionTopics}"></textarea> -->
 					 <input id="topics" type="text" name="topics" value="${questionTopics }">

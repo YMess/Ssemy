@@ -24,7 +24,47 @@
 	<div>
 		<div class="userleft"><%@include file="/WEB-INF/jsp/include/mail_navigation.jsp" %></div>
 		<div class="usercenter">
-
+				<div class="pure-menu pure-menu-open">
+		        <a class="pure-menu-heading">Compose Mail</a>
+		
+			
+				    <form:textarea style="width: 70%;height: 30px;" path="mailTo" placeholder="To"></form:textarea>
+			        <br/>	
+			        <form:errors path="mailTo"></form:errors>
+			        <br/>
+			        <form:textarea style="width: 70%;height: 30px;" path="mailCC" placeholder="CC"></form:textarea>
+			        <br/>	
+			        <form:errors path="mailCC"></form:errors>
+			        <br/>
+			        <form:textarea style="width: 70%;height: 30px;" path="mailBCC" placeholder="BCC"></form:textarea>
+			        <br/>	
+			        <form:errors path="mailBCC"></form:errors>
+			        <br/>
+					<br/>
+					<div>
+					<input id="addAttachment" type="checkbox" name="isImageAttached"> Change Image
+					<br><br>
+					 <div class="imageDiv"  style="display: none;">
+					 	<input type="file"  accept="image/*" name="questionImage">
+					 	<input type="submit" id=uploadQuestionImage value="Upload Photo">
+					 </div>
+					</div>
+					<form:textarea style="width: 70%;height: 30px;" path="mailSubject" placeholder="Subject"></form:textarea>
+			        <br/>	
+			        <form:errors path="mailSubject"></form:errors>
+			        <br/>
+					<br/>
+					
+					<form:textarea style="width: 70%;height: 200px;" path="mailBody" placeholder="Body"></form:textarea>
+					<br>
+					<br>
+					<form:errors path="mailBody"></form:errors>
+					<br>
+					<br>
+				 
+		
+					<input type="submit" value="Post" style="height: 50px;width: 250px;"/>
+				</div>
 		</div>
 		<div class="userright"><%@include file="/WEB-INF/jsp/include/right.jsp" %></div>
 	</div>
