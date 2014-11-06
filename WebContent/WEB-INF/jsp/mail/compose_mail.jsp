@@ -26,7 +26,7 @@
 		<div class="usercenter">
 				<div class="pure-menu pure-menu-open">
 		        <a class="pure-menu-heading">Compose Mail</a>
-		
+		            <form:form action="compose_mail.htm" modelAttribute="mail" enctype="multipart/form-data" id="sendMail">
 			
 				    <form:textarea style="width: 70%;height: 30px;" path="mailTo" placeholder="To"></form:textarea>
 			        <br/>	
@@ -45,8 +45,8 @@
 
 					<br><br>
 					 <div class="imageDiv"  style="display: none;">
-					 	<input type="file"  accept="image/*" name="questionImage">
-					 	<input type="submit" id=uploadQuestionImage value="Upload Photo">
+					 	<input type="file"  accept="image/*" name="mailAttachment">
+					 	<input type="submit" id=uploadAttachment value="Upload Photo">
 					 </div>
 					</div>
 					<form:textarea style="width: 70%;height: 30px;" path="mailSubject" placeholder="Subject"></form:textarea>
@@ -64,6 +64,8 @@
 				 
 		
 					<input type="submit" value="Post" style="height: 50px;width: 250px;"/>
+				</form:form>
+					
 				</div>
 		</div>
 		<div class="userright"><%@include file="/WEB-INF/jsp/include/right.jsp" %></div>

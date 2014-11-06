@@ -6,12 +6,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.ymess.util.JSPMappings;
 import com.ymess.util.LoggerConstants;
 import com.ymess.util.URLMappings;
+import com.ymess.ymail.pojos.Mail;
 import com.ymess.ymail.service.interfaces.YMailService;
 
 @Controller
@@ -32,8 +34,12 @@ public class MailActivitiesController {
 	 * @return InboxPage
 	 */
 	@RequestMapping(value=URLMappings.INBOX_PAGE,method=RequestMethod.GET)
-	public String showInboxPage(HttpServletRequest httpServletRequest,HttpServletResponse httpServletResponse)
+	public String showInboxPage(Model model)
 	{
+		Mail mail = new Mail();
+		
+		
+		model.addAttribute("mail", mail);
 		logger.info(LoggerConstants.INBOX_PAGE);
 		return JSPMappings.INBOX_PAGE;
 	}
