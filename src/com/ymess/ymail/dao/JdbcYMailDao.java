@@ -13,7 +13,6 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 
-import com.ymess.dao.JdbcYMessDao.QuestionMapper;
 import com.ymess.exceptions.EmptyResultSetException;
 import com.ymess.pojos.Question;
 import com.ymess.pojos.User;
