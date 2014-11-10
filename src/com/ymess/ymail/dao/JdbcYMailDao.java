@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -12,7 +13,11 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 
+import com.ymess.dao.JdbcYMessDao.QuestionMapper;
+import com.ymess.exceptions.EmptyResultSetException;
+import com.ymess.pojos.Question;
 import com.ymess.pojos.User;
+import com.ymess.util.MessageConstants;
 import com.ymess.ymail.dao.interfaces.YMailDao;
 import com.ymess.ymail.pojos.Mail;
 
@@ -20,6 +25,7 @@ public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 
 	
 	private static final String GET_MAIL_IDS = "select mail_id from mail";
+	private static final String GET_INBOX_MAILS = "select mail_id,mail_from,mail_subject,mail_body,_mail_sent_timestamp where mail_id in ";
 	
 	
 	/**
@@ -43,6 +49,33 @@ public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 				new Object[]{newMailId,mail.getMailFrom(),mail.getMailTo(),mail.getMailCC(),mail.getMailBCC(),mail.getMailSubject(),mail.getMailBody(),true,currentTime,userDetails.getFirstName(),userDetails.getLastName()},
 				new int[]{Types.BIGINT,Types.VARCHAR,Types.ARRAY,Types.ARRAY,Types.ARRAY,Types.VARCHAR,Types.VARCHAR,Types.BOOLEAN,Types.TIMESTAMP,Types.VARCHAR,Types.VARCHAR}
 				);
+		
+		for (String toEmailId : mail.getMailTo()) {
+		
+			String SEND_MAIL_TO_DETAILS = "insert into mail_attributes(mail_id,mail_from,mail_to,user_first_name,user_last_name) values(?,?,?,?,?)";
+			getJdbcTemplate().update(SEND_MAIL_TO_DETAILS,
+					new Object[]{newMailId,mail.getMailFrom(),toEmailId,userDetails.getFirstName(),userDetails.getLastName()},
+					new int[]{Types.BIGINT,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR}
+					);
+		}
+		
+		for (String  ccEmailId : mail.getMailCC()) {
+			
+			String SEND_MAIL_CC_DETAILS = "insert into mail_attributes(mail_id,mail_from,mail_cc,user_first_name,user_last_name) values(?,?,?,?,?)";
+			getJdbcTemplate().update(SEND_MAIL_CC_DETAILS,
+					new Object[]{newMailId,mail.getMailFrom(),ccEmailId,userDetails.getFirstName(),userDetails.getLastName()},
+					new int[]{Types.BIGINT,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR}
+					);	
+		}
+		
+		for (String  bccEmailId : mail.getMailBCC()) {
+			
+			String SEND_MAIL_BCC_DETAILS = "insert into mail_attributes(mail_id,mail_from,mail_bcc,user_first_name,user_last_name) values(?,?,?,?,?)";
+			getJdbcTemplate().update(SEND_MAIL_BCC_DETAILS,
+					new Object[]{newMailId,mail.getMailFrom(),bccEmailId,userDetails.getFirstName(),userDetails.getLastName()},
+					new int[]{Types.BIGINT,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR}
+					);
+		}
 	}
 	
 	/**
@@ -98,6 +131,25 @@ public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 				logger.error(emptyRS.getLocalizedMessage());
 			}
 		return String.valueOf(maxMailId);
+	}
+
+	@Override
+	public List<Mail> getInboxMails(String userEmailId) {
+		
+	    List<Mail> mail = new ArrayList<Mail>();
+		
+		try {
+			//mail = getJdbcTemplate().query(GET_INBOX_MAILS,new QuestionMapper(),userEmailId);
+		} 
+		catch (EmptyResultDataAccessException  emptyEx) {
+			logger.warn(MessageConstants.EMPTY_RESULT_SET);
+			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e.getLocalizedMessage());
+		}
+		return null;
 	}
 
 }

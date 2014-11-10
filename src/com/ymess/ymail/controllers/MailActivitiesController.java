@@ -1,5 +1,8 @@
 package com.ymess.ymail.controllers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -12,7 +15,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.ymess.exceptions.EmptyResultSetException;
+import com.ymess.pojos.Question;
 import com.ymess.util.JSPMappings;
 import com.ymess.util.LoggerConstants;
 import com.ymess.util.URLMappings;
@@ -37,10 +43,21 @@ public class MailActivitiesController {
 	 * @return InboxPage
 	 */
 	@RequestMapping(value=URLMappings.INBOX_PAGE,method=RequestMethod.GET)
-	public String showInboxPage(Model model)
+	public String showInboxPage(Model model) throws EmptyResultSetException
 	{
-
-		logger.info(LoggerConstants.INBOX_PAGE);
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String userEmailId = authentication.getName();
+		
+		List<Mail> mail = new ArrayList<Mail>();
+		
+		try {
+			mail = yMailService.getInboxMails(userEmailId);
+			logger.info(LoggerConstants.INBOX_PAGE +" "+ userEmailId);
+		} catch (Exception e) {
+			logger.error(e.getLocalizedMessage());
+		}
+		
+		model.addAttribute("mail",mail);
 		return JSPMappings.INBOX_PAGE;
 	}
 
@@ -63,7 +80,7 @@ public class MailActivitiesController {
 	}
 
 	@RequestMapping(value =URLMappings.COMPOSE_MAIL_PAGE,method = RequestMethod.POST)
-	public Boolean sendMail(@ModelAttribute("mail") Mail mail)
+	public String sendMail(@ModelAttribute("mail") Mail mail,RedirectAttributes redirectAttributes)
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		String loggedInUserEmailId = authentication.getName();
@@ -80,6 +97,7 @@ public class MailActivitiesController {
 		{
 		logger.error(ex.getLocalizedMessage());
 		}
-		return successFlag;
+		redirectAttributes.addFlashAttribute("successfullyMailSend","Mail Send Successfully");
+		return URLMappings.REDIRECT_SUCCESS_MAIL_SEND;
 	}
 }
