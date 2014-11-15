@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.suggest.Lookup.LookupResult;
+import org.codehaus.jackson.JsonProcessingException;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,8 +24,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ymess.pojos.Question;
 import com.ymess.pojos.SearchParameters;
 import com.ymess.pojos.User;
@@ -127,7 +126,7 @@ public class SearchController {
 	 */
 	@RequestMapping(value = URLMappings.GET_RELATED_TOPICS, produces = MediaType.APPLICATION_JSON_VALUE,method = RequestMethod.GET,headers="Accept=*/*")
 	@ResponseBody
-	public String getRelatedTopics(@RequestParam("topic") String topic,HttpServletRequest request,HttpServletResponse response) throws JsonProcessingException
+	public String getRelatedTopics(@RequestParam("topic") String topic,HttpServletRequest request,HttpServletResponse response) 
 	{
 		AutoSuggest autoSuggest = new AutoSuggest();
 		List<LookupResult> words = autoSuggest.returnSuggestedWords(topic);
@@ -141,8 +140,7 @@ public class SearchController {
 			}
 		}
 		
-		ObjectMapper mapper = new ObjectMapper(); 
-		return mapper.writeValueAsString(suggestions);
+		return suggestions.toString();
 	}
 	
 }

@@ -68,23 +68,28 @@ $().ready(function(){
 				return false;
 		    } */
 			var successFlag = false;
-		  
-		    alert($('input[name=questionId]').val());
-		    
 		    var form = new FormData(this);
 
-		    var xhrForm = new XMLHttpRequest();
-		    xhrForm.open("POST", "user_post_answer.htm");
-		    xhrForm.send(form);
+
+			  $("#dialog-confirm").dialog( "close" );
+			  $("#answerDescription").val("");
+			  $("#answerImage").val("");
+			  
+		    var xmlhttp = new XMLHttpRequest();
+		    xmlhttp.open("POST", "user_post_answer.htm",false);
+		    xmlhttp.send(form);
 	    
-				  $("#dialog-confirm").dialog( "close" );
-				  $("#answerDescription").val("");
-				  $("#answerImage").val("");
-				 // window.location.href= "userdashboard.htm";
+		    
+		    xmlhttp.onreadystatechange=function()
+		   {
+			    if (xmlhttp.readyState==4 && xmlhttp.status==200)
+		        {
+				      alert("Success");
+			    }
+		   }
+		window.location.reload();
+	 // window.location.href= "userdashboard.htm";
 				  
-				    var xhrForm = new XMLHttpRequest();
-				    xhrForm.open("GET", "user_question_responses.htm?qId="+<%= new String(Base64.encodeBase64(String.valueOf("$('input[name=questionId]').val()").getBytes()))%>);
-				    xhrForm.send();
 	
 	  });
 });

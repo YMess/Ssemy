@@ -22,7 +22,7 @@
 
 <!-- For Cassandra 1.2.x -->
 
-
+<!-- 
    <dependency>
 	<groupId>org.apache.cassandra</groupId>
 	<artifactId>cassandra-all</artifactId>
@@ -36,7 +36,7 @@
 		<version>1.2.5</version>
 		<systemPath>${basedir}\WebContent\WEB-INF\lib\cassandra-jdbc-1.2.5.jar</systemPath>
 	</dependency> 
-
+ -->
 <!-- <dependency>
 	<groupId>org.apache.cassandra</groupId>
 	<artifactId>cassandra-clientutil</artifactId>
@@ -59,13 +59,13 @@
 	<artifactId>cassandra-jdbc</artifactId>
 	<version>1.2.1</version>
 </dependency> -->
-<!-- 	<dependency>
+	<dependency>
 		<groupId>cassandra-jdbc</groupId>
 		<artifactId>org.apache.cassandra</artifactId>
 		<scope>system</scope>
 		<version>2.1</version>
 		<systemPath>${basedir}\WebContent\WEB-INF\lib\cassandra-jdbc-2.1.jar</systemPath>
-	</dependency>   -->
+	</dependency>  
  
 	 
      
@@ -80,17 +80,17 @@
 </dependency>-->
 <!-- Extraneous Jars -->
 
-<!-- --><!-- <dependency>
+<dependency>
 	<groupId>org.apache.cassandra</groupId>
 	<artifactId>cassandra-clientutil</artifactId>
 	<version>1.2.9</version>
-</dependency> -->
+</dependency>
  
  
      
 <!-- For Cassandra 2.0.x -->    
  <!-- -->
-    <!--  <dependency>
+     <dependency>
 	<groupId>org.apache.cassandra</groupId>
 	<artifactId>cassandra-all</artifactId>
 	<version>2.0.6</version>
@@ -100,7 +100,8 @@
 	<groupId>org.apache.cassandra</groupId>
 	<artifactId>cassandra-thrift</artifactId>
 	<version>2.0.6</version>
-</dependency> -->
+</dependency>
+
 <!-- <dependency>
 	<groupId>org.springframework.data</groupId>
 	<artifactId>spring-data-cassandra</artifactId>
@@ -303,8 +304,27 @@
     <version>2.0.4</version>
 </dependency> -->
 
+<!-- Jackson JSON Mapper -->
+<!-- 		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-mapper-asl</artifactId>
+			<version>1.9.10</version>
+		</dependency> 
+ -->
 
+<dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-core</artifactId>
+    <version>2.3.0</version>
+</dependency>
+ 
+<dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+    <version>2.3.0</version>
+</dependency>
 
+<!-- 
  <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-core</artifactId>
@@ -319,7 +339,7 @@
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-annotations</artifactId>
         <version>2.2.3</version>
-    </dependency> 
+    </dependency>  -->
 
 <!-- <dependency>
     <groupId>com.fasterxml.jackson.core</groupId>
@@ -420,6 +440,12 @@
 			<version>${spring.version}</version>
 		</dependency>
  
+ 
+<dependency>
+	<groupId>org.springframework</groupId>
+	<artifactId>spring-context-support</artifactId>
+	<version>${spring.version}</version>
+</dependency>
 		<!-- Spring Security -->
 		<dependency>
 			<groupId>org.springframework.security</groupId>
@@ -439,6 +465,7 @@
 			<artifactId>spring-security-taglibs</artifactId>
 			<version>${spring.security.version}</version>
 		</dependency>
+
 
 <!--Spring 3.1.2 Library Ends -->
 	

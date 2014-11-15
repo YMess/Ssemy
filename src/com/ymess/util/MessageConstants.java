@@ -10,5 +10,6 @@ package com.ymess.util;
 public class MessageConstants {
 	
 	public static final String EMPTY_RESULT_SET = "No Records Found";
+	public static final String MAIL_SENT_SUCCESSFULLY = "Mail Sent to ";
 
 }

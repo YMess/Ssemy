@@ -23,7 +23,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,7 +31,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.ymess.exceptions.EmptyResultSetException;
 import com.ymess.pojos.Answer;
-import com.ymess.pojos.File;
 import com.ymess.pojos.Question;
 import com.ymess.pojos.User;
 import com.ymess.service.interfaces.YMessService;
@@ -184,11 +182,10 @@ public class UserActivitiesController {
 	 */
 	@RequestMapping(value=URLMappings.USER_POST_ANSWER,method=RequestMethod.POST)
 	@ResponseBody
-	Boolean addAnswer(@ModelAttribute("answer") Answer answer)
+	void addAnswer(@ModelAttribute("answer") Answer answer,BindingResult bindingResult)
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		String loggedInUserEmailId = authentication.getName();
-		Boolean successFlag = false;
 		answer.setAuthorEmailId(loggedInUserEmailId);
 		
 		try
@@ -200,7 +197,6 @@ public class UserActivitiesController {
 		{
 			logger.error(ex.getLocalizedMessage());
 		}
-		return successFlag;
 	}
 	
 	@RequestMapping(value=URLMappings.USER_QUESTION_RESPONSES)
