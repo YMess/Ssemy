@@ -16,13 +16,13 @@ public class Mail {
 	  private String mailSubject;
 	  private String mailBody;
 	  private Set<String> mailTo;
-	  private Set<String> mailFrom;
+	  private String mailFrom;
 	  private Set<String> mailCC;
 	  private Set<String> mailBCC;
 	  private Set<MultipartFile> mailAttachment;
-	  private boolean isMailAttachmentAttached;
+	  private boolean isAttachmentAttached;
 	  private Set<MultipartFile> mailPicture;
-	  private boolean isMailPictureAttached;
+	  private boolean isPictureAttached;
 	  private Date mailSavedTimestamp;
 	  private Date mailSentTimestamp;
 	  private Set<String> mailThread;
@@ -59,10 +59,10 @@ public class Mail {
 	public void setMailTo(Set<String> mailTo) {
 		this.mailTo = mailTo;
 	}
-	public Set<String> getMailFrom() {
+	public String getMailFrom() {
 		return mailFrom;
 	}
-	public void setMailFrom(Set<String> mailFrom) {
+	public void setMailFrom(String mailFrom) {
 		this.mailFrom = mailFrom;
 	}
 	public Set<String> getMailCC() {
@@ -155,18 +155,19 @@ public class Mail {
 	public void setUserLastName(String userLastName) {
 		this.userLastName = userLastName;
 	}
-	public boolean isMailAttachmentAttached() {
-		return isMailAttachmentAttached;
+	public boolean isAttachmentAttached() {
+		return isAttachmentAttached;
 	}
-	public void setMailAttachmentAttached(boolean isMailAttachmentAttached) {
-		this.isMailAttachmentAttached = isMailAttachmentAttached;
+	public void setAttachmentAttached(boolean isAttachmentAttached) {
+		this.isAttachmentAttached = isAttachmentAttached;
 	}
-	public boolean isMailPictureAttached() {
-		return isMailPictureAttached;
+	public boolean isPictureAttached() {
+		return isPictureAttached;
 	}
-	public void setMailPictureAttached(boolean isMailPictureAttached) {
-		this.isMailPictureAttached = isMailPictureAttached;
+	public void setPictureAttached(boolean isPictureAttached) {
+		this.isPictureAttached = isPictureAttached;
 	}
+	
       
 	  
 }

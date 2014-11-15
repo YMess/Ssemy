@@ -71,4 +71,6 @@ public class LoggerConstants {
 	public static final String TRASH_PAGE = "Loaded Trash Mail Page";
 	
 	public static final String COMPOSE_MAIL_PAGE = "Loaded Compose Mail Page";
+	
+	public static final String USER_SEND_MAIL = "User Send Mail";
 }

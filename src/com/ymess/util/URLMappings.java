@@ -74,6 +74,7 @@ public class URLMappings {
 	public static final String SENT_PAGE = "sent.htm"; //MailController
 	public static final String TRASH_PAGE = "trash.htm"; //MailController
 	public static final String COMPOSE_MAIL_PAGE = "compose_mail.htm"; //MailController
+	public static final String REDIRECT_SUCCESS_MAIL_SEND = "redirect:"+INBOX_PAGE;  //MailController
 	
 
 
