@@ -26,6 +26,9 @@
 		
  
 		<intercept-url pattern="/user*.htm" access="ROLE_REGISTERED" />
+		<intercept-url pattern="/ticket*.htm" access="ROLE_REGISTERED" />
+		
+		<intercept-url pattern="/admin*.htm" access="ROLE_ADMIN" />
 		
 		<form-login login-page="/home.htm"
 			default-target-url="/userdashboard.htm" authentication-failure-url="/loginfailed.htm" />

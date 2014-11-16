@@ -48,6 +48,8 @@ public class User {
 	private byte[] userImageData;
 	private String imageName;
 	
+	private Map<Long,Date> userTickets;
+	
 	public String getTagline() {
 		return tagline;
 	}
@@ -167,6 +169,14 @@ public class User {
 
 	public void setUserImageData(byte[] userImageData) {
 		this.userImageData = userImageData;
+	}
+
+	public Map<Long, Date> getUserTickets() {
+		return userTickets;
+	}
+
+	public void setUserTickets(Map<Long, Date> userTickets) {
+		this.userTickets = userTickets;
 	}
 
 	

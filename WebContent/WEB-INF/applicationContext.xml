@@ -35,6 +35,15 @@ http://www.springframework.org/schema/task/spring-task-3.0.xsd">
 		<property name="dataSource" ref="dataSource" />
 	</bean>
 	
+	
+	
+	<bean id="yTicketManager" class="com.ymess.yticket.service.YTicketManager">
+		<property name="yTicketDao" ref="yTicketDao" />
+	</bean>
+
+	<bean id="yTicketDao" class="com.ymess.yticket.dao.JDBCYTicketDAO">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
 
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
 		destroy-method="close">
