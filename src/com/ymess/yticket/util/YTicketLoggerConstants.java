@@ -10,6 +10,7 @@ package com.ymess.yticket.util;
 public class YTicketLoggerConstants {
 
 	public static final String LOADED_TICKETS = "Loaded Tickets";
+	public static final String ADDED_TICKET = "Ticket Added";
 
 	
 }

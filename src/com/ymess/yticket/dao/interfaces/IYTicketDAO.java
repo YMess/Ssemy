@@ -13,4 +13,12 @@ public interface IYTicketDAO {
 	 */
 	List<Ticket> getUserTickets(String loggedInUserEmail);
 
+	/**
+	 * Adds a Ticket posted by User
+	 * @author balaji i
+	 * @param ticketDetails
+	 * @return flag(Boolean)
+	 */
+	Boolean addTicket(Ticket ticketDetails);
+
 }

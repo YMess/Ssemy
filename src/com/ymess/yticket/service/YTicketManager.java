@@ -27,6 +27,16 @@ public class YTicketManager  implements IYTicket{
 	public List<Ticket> getUserTickets(String loggedInUserEmail) {
 		return yTicketDao.getUserTickets(loggedInUserEmail);
 	}
+	/**
+	 * Adds a Ticket posted by User
+	 * @author balaji i
+	 * @param ticketDetails
+	 * @return flag(Boolean)
+	 */
+	@Override
+	public Boolean addTicket(Ticket ticketDetails) {
+		return yTicketDao.addTicket(ticketDetails);
+	}
 
 	
 	
