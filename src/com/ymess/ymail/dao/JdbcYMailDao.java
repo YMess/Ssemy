@@ -7,21 +7,15 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.ymess.exceptions.EmptyResultSetException;
-import com.ymess.pojos.Question;
 import com.ymess.pojos.User;
 import com.ymess.util.MessageConstants;
-import com.ymess.util.YMessCommonUtility;
 import com.ymess.ymail.dao.interfaces.YMailDao;
 import com.ymess.ymail.pojos.Mail;
 import com.ymess.ymail.util.YMailMailStatus;
@@ -50,27 +44,12 @@ public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 		User userDetails = getUserDetailsByEmailId(mail.getMailFrom());
 		
 		List<MultipartFile> attachments = mail.getMailAttachment();
-		HashMap<String, byte[]> mailAttachment =  new HashMap<String, byte[]>();
-			
 		
-		for (MultipartFile attachmentFile : attachments) {
-			try {
-				mailAttachment.put(attachmentFile.getOriginalFilename(), attachmentFile.getBytes());
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+		
 		if(mail.getIsAttachmentAttached())
 		{
 			
-			String SEND_MAIL = "insert into mail (mail_id,mail_from) values (?,?)";
-			getJdbcTemplate().update(SEND_MAIL,
-					new Object[]{1,"balaji"},
-					new int[]{Types.BIGINT,Types.VARCHAR});
-			
-			
-			
-		/*	String SEND_MAIL_WITH_ATTACHMENTS = "insert into mail(mail_id,mail_from,mail_to,mail_cc,mail_bcc,mail_subject,mail_body,mail_attachment,is_mail_attachment_attached,mail_status,mail_sent_timestamp,user_first_name,user_last_name) values(?,?,?,?,?,?,?,?,?,?,?,?,?)";
+	    	String SEND_MAIL_WITH_ATTACHMENTS = "insert into mail(mail_id,mail_from,mail_to,mail_cc,mail_bcc,mail_subject,mail_body,is_mail_attachment_attached,mail_status,mail_sent_timestamp,user_first_name,user_last_name) values(?,?,?,?,?,?,?,?,?,?,?,?)";
 			getJdbcTemplate().update(SEND_MAIL_WITH_ATTACHMENTS,
 					new Object[]{
 					newMailId,
@@ -80,10 +59,9 @@ public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 					mail.getMailBCC(),
 					mail.getMailSubject(),
 					mail.getMailBody(),
-					mailAttachment,
 					true,
 					YMailMailStatus.MAIL_SENT,
-					currentTime.getTime(),
+					currentTime,
 					userDetails.getFirstName(),
 					userDetails.getLastName()},
 					new int[]{
@@ -94,13 +72,30 @@ public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 					Types.ARRAY,
 					Types.VARCHAR,
 					Types.VARCHAR,
-					Types.OTHER,
 					Types.BOOLEAN,
 					Types.VARCHAR,
 					Types.TIMESTAMP,
 					Types.VARCHAR,
 					Types.VARCHAR
-					});*/	
+					});	
+			
+			for (MultipartFile attachmentFile : attachments) {
+				try {
+					String SEND_MAIL_ATTACHMENTS = "insert into mail_attachments(mail_id,mail_file_name,mail_attachment) values(?,?,?)";
+					getJdbcTemplate().update(SEND_MAIL_WITH_ATTACHMENTS,
+							new Object[]{
+							newMailId,
+                            attachmentFile.getName(),
+                            attachmentFile.getBytes()},
+							new int[]{
+							Types.BIGINT,
+							Types.VARCHAR,
+							Types.BINARY,
+							});	
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		else	
 		{
