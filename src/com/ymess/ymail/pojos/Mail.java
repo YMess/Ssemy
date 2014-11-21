@@ -1,6 +1,7 @@
 package com.ymess.ymail.pojos;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -19,19 +20,15 @@ public class Mail {
 	  private String mailFrom;
 	  private Set<String> mailCC;
 	  private Set<String> mailBCC;
-	  private Set<MultipartFile> mailAttachment;
-	  private boolean isAttachmentAttached;
+	  private List<MultipartFile>  mailAttachment;
+	  private Boolean isAttachmentAttached;
 	  private Set<MultipartFile> mailPicture;
-	  private boolean isPictureAttached;
+	  private Boolean isPictureAttached;
 	  private Date mailSavedTimestamp;
 	  private Date mailSentTimestamp;
 	  private Set<String> mailThread;
-	  private boolean mailSent;
-	  private boolean mailDraft;
-	  private boolean mailInbox;
-	  private boolean mailStarred;
-	  private boolean mailImportant;
-	  private boolean mailTrash;
+	  private Boolean mailStatus;
+	  private Boolean mailRead;
 	  private String userFirstName;
 	  private String userLastName;
 	  
@@ -77,17 +74,29 @@ public class Mail {
 	public void setMailBCC(Set<String> mailBCC) {
 		this.mailBCC = mailBCC;
 	}
-	public Set<MultipartFile> getMailAttachment() {
+	public List<MultipartFile> getMailAttachment() {
 		return mailAttachment;
 	}
-	public void setMailAttachment(Set<MultipartFile> mailAttachment) {
+	public void setMailAttachment(List<MultipartFile> mailAttachment) {
 		this.mailAttachment = mailAttachment;
+	}
+	public boolean getIsAttachmentAttached() {
+		return isAttachmentAttached;
+	}
+	public void setIsAttachmentAttached(boolean isAttachmentAttached) {
+		this.isAttachmentAttached = isAttachmentAttached;
 	}
 	public Set<MultipartFile> getMailPicture() {
 		return mailPicture;
 	}
 	public void setMailPicture(Set<MultipartFile> mailPicture) {
 		this.mailPicture = mailPicture;
+	}
+	public boolean getIsPictureAttached() {
+		return isPictureAttached;
+	}
+	public void setPictureAttached(boolean isPictureAttached) {
+		this.isPictureAttached = isPictureAttached;
 	}
 	public Date getMailSavedTimestamp() {
 		return mailSavedTimestamp;
@@ -107,41 +116,17 @@ public class Mail {
 	public void setMailThread(Set<String> mailThread) {
 		this.mailThread = mailThread;
 	}
-	public boolean isMailSent() {
-		return mailSent;
+	public boolean isMailStatus() {
+		return mailStatus;
 	}
-	public void setMailSent(boolean mailSent) {
-		this.mailSent = mailSent;
+	public void setMailStatus(boolean mailStatus) {
+		this.mailStatus = mailStatus;
 	}
-	public boolean isMailDraft() {
-		return mailDraft;
+	public boolean isMailRead() {
+		return mailRead;
 	}
-	public void setMailDraft(boolean mailDraft) {
-		this.mailDraft = mailDraft;
-	}
-	public boolean isMailInbox() {
-		return mailInbox;
-	}
-	public void setMailInbox(boolean mailInbox) {
-		this.mailInbox = mailInbox;
-	}
-	public boolean isMailStarred() {
-		return mailStarred;
-	}
-	public void setMailStarred(boolean mailStarred) {
-		this.mailStarred = mailStarred;
-	}
-	public boolean isMailImportant() {
-		return mailImportant;
-	}
-	public void setMailImportant(boolean mailImportant) {
-		this.mailImportant = mailImportant;
-	}
-	public boolean isMailTrash() {
-		return mailTrash;
-	}
-	public void setMailTrash(boolean mailTrash) {
-		this.mailTrash = mailTrash;
+	public void setMailRead(boolean mailRead) {
+		this.mailRead = mailRead;
 	}
 	public String getUserFirstName() {
 		return userFirstName;
@@ -155,19 +140,5 @@ public class Mail {
 	public void setUserLastName(String userLastName) {
 		this.userLastName = userLastName;
 	}
-	public boolean isAttachmentAttached() {
-		return isAttachmentAttached;
-	}
-	public void setAttachmentAttached(boolean isAttachmentAttached) {
-		this.isAttachmentAttached = isAttachmentAttached;
-	}
-	public boolean isPictureAttached() {
-		return isPictureAttached;
-	}
-	public void setPictureAttached(boolean isPictureAttached) {
-		this.isPictureAttached = isPictureAttached;
-	}
 	
-      
-	  
 }

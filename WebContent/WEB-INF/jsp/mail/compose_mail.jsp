@@ -14,6 +14,28 @@
   <script src="js/jquery-ui.js" type="text/javascript"></script>
   <LINK REL=Stylesheet TYPE ="text/css" HREF="css/style.css">
 <LINK REL=Stylesheet TYPE ="text/css" HREF="css/pure-min.css">
+<script
+src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+<script>
+$(document).ready(function() {
+    //add more file components if Add is clicked
+    $('#addFile').click(function() {
+        var fileIndex = $('#fileTable tr').children().length - 1;
+        $('#fileTable').append(
+                '<tr><td>'+
+                '   <input type="file" name="mailAttachment['+ fileIndex +']" />'+
+                '</td></tr>');
+    });  
+});
+</script>
+  <script type="text/javascript">
+  $().ready(function(){
+	  
+	   $('input[type="checkbox"]').click(function(){
+              $(".imageDiv").toggle();
+      });
+	});
+  </script>
 </head>
 <body>
 <div class="header">
@@ -26,8 +48,21 @@
 		<div class="usercenter">
 				<div class="pure-menu pure-menu-open">
 		        <a class="pure-menu-heading">Compose Mail</a>
-		            <form:form action="compose_mail.htm" modelAttribute="mail" enctype="multipart/form-data" id="sendMail">
-			
+		<form:form action="compose_mail.htm" modelAttribute="mail" enctype="multipart/form-data" id="sendMail">
+		
+		<input id="addImage" type="checkbox" name="isAttachmentAttached"> Change Image
+		<br><br>
+		<div class="imageDiv"  style="display: none;">
+		<p>Select files to upload. Press Add button to add more file inputs.</p>
+ 
+    	<input id="addFile" type="button" value="Add File" />
+   		<table id="fileTable">
+       	<tr>
+           <td><input name="mailAttachment[0]" type="file" /></td>
+        </tr>
+    	</table>
+					 </div>	
+		
 				    <form:textarea style="width: 70%;height: 30px;" path="mailTo" placeholder="To"></form:textarea>
 			        <br/>	
 			        <form:errors path="mailTo"></form:errors>
@@ -43,11 +78,6 @@
 					<br/>
 					<div>
 
-					<br><br>
-					 <div class="imageDiv"  style="display: none;">
-					 	<input type="file"  accept="image/*" name="mailAttachment">
-					 	<input type="submit" id=uploadAttachment value="Upload Photo">
-					 </div>
 					</div>
 					<form:textarea style="width: 70%;height: 30px;" path="mailSubject" placeholder="Subject"></form:textarea>
 			        <br/>	

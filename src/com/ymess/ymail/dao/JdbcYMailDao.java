@@ -7,18 +7,24 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.ymess.exceptions.EmptyResultSetException;
 import com.ymess.pojos.Question;
 import com.ymess.pojos.User;
 import com.ymess.util.MessageConstants;
+import com.ymess.util.YMessCommonUtility;
 import com.ymess.ymail.dao.interfaces.YMailDao;
 import com.ymess.ymail.pojos.Mail;
+import com.ymess.ymail.util.YMailMailStatus;
 
 public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 
@@ -43,13 +49,71 @@ public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 		
 		User userDetails = getUserDetailsByEmailId(mail.getMailFrom());
 		
-		String SEND_MAIL = "insert into mail(mail_id,mail_from,mail_to,mail_cc,mail_bcc,mail_subject,mail_body,mail_sent,mail_sent_timestamp,user_first_name,user_last_name) values(?,?,?,?,?,?,?,?,?,?,?)";
-		getJdbcTemplate().update(SEND_MAIL,
-				new Object[]{newMailId,mail.getMailFrom(),mail.getMailTo(),mail.getMailCC(),mail.getMailBCC(),mail.getMailSubject(),mail.getMailBody(),true,currentTime,userDetails.getFirstName(),userDetails.getLastName()},
-				new int[]{Types.BIGINT,Types.VARCHAR,Types.ARRAY,Types.ARRAY,Types.ARRAY,Types.VARCHAR,Types.VARCHAR,Types.BOOLEAN,Types.TIMESTAMP,Types.VARCHAR,Types.VARCHAR}
-				);
+		List<MultipartFile> attachments = mail.getMailAttachment();
+		HashMap<String, byte[]> mailAttachment =  new HashMap<String, byte[]>();
+			
 		
-		for (String toEmailId : mail.getMailTo()) {
+		for (MultipartFile attachmentFile : attachments) {
+			try {
+				mailAttachment.put(attachmentFile.getOriginalFilename(), attachmentFile.getBytes());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		if(mail.getIsAttachmentAttached())
+		{
+			
+			String SEND_MAIL = "insert into mail (mail_id,mail_from) values (?,?)";
+			getJdbcTemplate().update(SEND_MAIL,
+					new Object[]{1,"balaji"},
+					new int[]{Types.BIGINT,Types.VARCHAR});
+			
+			
+			
+		/*	String SEND_MAIL_WITH_ATTACHMENTS = "insert into mail(mail_id,mail_from,mail_to,mail_cc,mail_bcc,mail_subject,mail_body,mail_attachment,is_mail_attachment_attached,mail_status,mail_sent_timestamp,user_first_name,user_last_name) values(?,?,?,?,?,?,?,?,?,?,?,?,?)";
+			getJdbcTemplate().update(SEND_MAIL_WITH_ATTACHMENTS,
+					new Object[]{
+					newMailId,
+					mail.getMailFrom(),
+					mail.getMailTo(),
+					mail.getMailCC(),
+					mail.getMailBCC(),
+					mail.getMailSubject(),
+					mail.getMailBody(),
+					mailAttachment,
+					true,
+					YMailMailStatus.MAIL_SENT,
+					currentTime.getTime(),
+					userDetails.getFirstName(),
+					userDetails.getLastName()},
+					new int[]{
+					Types.BIGINT,
+					Types.VARCHAR,
+					Types.ARRAY,
+					Types.ARRAY,
+					Types.ARRAY,
+					Types.VARCHAR,
+					Types.VARCHAR,
+					Types.OTHER,
+					Types.BOOLEAN,
+					Types.VARCHAR,
+					Types.TIMESTAMP,
+					Types.VARCHAR,
+					Types.VARCHAR
+					});*/	
+		}
+		else	
+		{
+			String SEND_MAIL_WITHOUT_ATTACHMENTS = "insert into mail(mail_id,mail_from,mail_to,mail_cc,mail_bcc,mail_subject,mail_body,mail_status,mail_sent_timestamp,user_first_name,user_last_name) values(?,?,?,?,?,?,?,?,?,?,?)";
+			getJdbcTemplate().update(SEND_MAIL_WITHOUT_ATTACHMENTS,
+					new Object[]{newMailId,mail.getMailFrom(),mail.getMailTo(),mail.getMailCC(),mail.getMailBCC(),mail.getMailSubject(),mail.getMailBody(),YMailMailStatus.MAIL_SENT,currentTime,userDetails.getFirstName(),userDetails.getLastName()},
+					new int[]{Types.BIGINT,Types.VARCHAR,Types.ARRAY,Types.ARRAY,Types.ARRAY,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.TIMESTAMP,Types.VARCHAR,Types.VARCHAR}
+					);
+		}
+
+	
+		
+/*		for (String toEmailId : mail.getMailTo()) {
 		
 			String SEND_MAIL_TO_DETAILS = "insert into mail_attributes(mail_id,mail_from,mail_to,user_first_name,user_last_name) values(?,?,?,?,?)";
 			getJdbcTemplate().update(SEND_MAIL_TO_DETAILS,
@@ -74,7 +138,7 @@ public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 					new Object[]{newMailId,mail.getMailFrom(),bccEmailId,userDetails.getFirstName(),userDetails.getLastName()},
 					new int[]{Types.BIGINT,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR}
 					);
-		}
+		}*/
 	}
 	
 	/**
@@ -142,7 +206,6 @@ public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 		} 
 		catch (EmptyResultDataAccessException  emptyEx) {
 			logger.warn(MessageConstants.EMPTY_RESULT_SET);
-			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
