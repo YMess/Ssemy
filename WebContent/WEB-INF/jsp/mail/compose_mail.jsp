@@ -14,8 +14,6 @@
   <script src="js/jquery-ui.js" type="text/javascript"></script>
   <LINK REL=Stylesheet TYPE ="text/css" HREF="css/style.css">
 <LINK REL=Stylesheet TYPE ="text/css" HREF="css/pure-min.css">
-<script
-src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 <script>
 $(document).ready(function() {
     //add more file components if Add is clicked
@@ -50,8 +48,7 @@ $(document).ready(function() {
 		        <a class="pure-menu-heading">Compose Mail</a>
 		<form:form action="compose_mail.htm" modelAttribute="mail" enctype="multipart/form-data" id="sendMail">
 		
-		<input id="addImage" type="checkbox" name="isAttachmentAttached"> Change Image
-		<br><br>
+		<input id="addImage" type="checkbox" name="isAttachmentAttached"> Add File 
 		<div class="imageDiv"  style="display: none;">
 		<p>Select files to upload. Press Add button to add more file inputs.</p>
  

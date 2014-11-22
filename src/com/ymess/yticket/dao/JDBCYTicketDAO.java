@@ -6,13 +6,14 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.ymess.yticket.dao.interfaces.IYTicketDAO;
 import com.ymess.yticket.pojos.Ticket;
@@ -30,13 +31,12 @@ public class JDBCYTicketDAO extends JdbcDaoSupport implements IYTicketDAO{
 			ticketDetails.setTicketId(rs.getLong("ticket_id"));
 			ticketDetails.setTicketSubject(rs.getString("ticket_subject"));
 			ticketDetails.setTicketBody(rs.getString("ticket_body"));
-			ticketDetails.setTicketAttachments((Map<String,byte[]>)rs.getObject("ticket_attachments"));
 			ticketDetails.setTicketAssignedTo(rs.getString("ticket_assigned_to"));
 			ticketDetails.setTicketAssignedBy(rs.getString("ticket_assigned_by"));
 			ticketDetails.setTicketPostedOn(rs.getDate("ticket_posted_on"));
 			ticketDetails.setTicketPostedBy(rs.getString("ticket_posted_by"));
 			ticketDetails.setTicketStatus(rs.getString("ticket_status"));
-			
+
 			return ticketDetails;
 		}
 		
@@ -47,14 +47,15 @@ public class JDBCYTicketDAO extends JdbcDaoSupport implements IYTicketDAO{
 	 * @param loggedInUserEmail
 	 * @return List<Ticket>(tickets)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<Ticket> getUserTickets(String loggedInUserEmail){
 		List<Ticket> userTickets = new ArrayList<Ticket>();
-		Map<Long,Date> tickets = new HashMap<Long, Date>();
+		Set<Long> tickets = new HashSet<Long>();
 		
-		final String GET_USER_TICKETS = "select tickets from user_tickets where email_id="+loggedInUserEmail;
+		final String GET_USER_TICKETS = "select tickets from user_tickets where email_id='"+loggedInUserEmail+"'";
 		try{
-			tickets = getJdbcTemplate().queryForObject(GET_USER_TICKETS,Map.class);
+			tickets = getJdbcTemplate().queryForObject(GET_USER_TICKETS,Set.class);
 		}
 		catch(EmptyResultDataAccessException emptyRS)
 		{
@@ -64,9 +65,9 @@ public class JDBCYTicketDAO extends JdbcDaoSupport implements IYTicketDAO{
 		StringBuilder ticketsSB = new StringBuilder();
 		if(null != tickets && !tickets.isEmpty())
 		{
-			List<Long> ticketIds = new ArrayList<Long>(tickets.keySet());
-			Collections.reverse(ticketIds);
-			for (Long ticketId : ticketIds) {
+			List<Long> ticketsList = new ArrayList<Long>(tickets);
+			Collections.reverse(ticketsList);
+			for (Long ticketId : ticketsList) {
 				ticketsSB.append(ticketId);
 			}
 			String ticketIdsStr = ticketsSB.toString();
@@ -83,7 +84,7 @@ public class JDBCYTicketDAO extends JdbcDaoSupport implements IYTicketDAO{
 				}
 			}
 		}
-		return userTickets;
+		return userTickets == null ? new ArrayList<Ticket>() : userTickets ;
 	}
 
 	/**
@@ -98,23 +99,22 @@ public class JDBCYTicketDAO extends JdbcDaoSupport implements IYTicketDAO{
 		Long ticketId = getTicketId();
 		incrementTicketId();
 		
-		final String GET_USER_TICKET_COUNT = "select count(*) from user_ticket where email_id=?";
+		final String GET_USER_TICKET_COUNT = "select count(*) from user_tickets where email_id=?";
 		Long ticketCount = getJdbcTemplate().queryForObject(GET_USER_TICKET_COUNT,Long.class,ticketDetails.getTicketPostedBy());
 		
 		try{
 		if(ticketCount > 0){
-			final String ADD_TICKET_TO_USER_ACCOUNT = "update user_ticket set"
-					+ " tickets = tickets + {"+ticketId +":" +new Date().getTime()+"} where email_id=?";
+			final String ADD_TICKET_TO_USER_ACCOUNT = "update user_tickets set tickets = tickets + {"+ticketId+"} where email_id=?";
 			getJdbcTemplate().update(ADD_TICKET_TO_USER_ACCOUNT,ticketDetails.getTicketPostedBy());
 		}
 		else{
-			Map<Long,Long> ticketEntry = new HashMap<Long, Long>();
-			ticketEntry.put(ticketId, new Date().getTime());
+			Set<Long> ticketEntry = new HashSet<Long>();
+			ticketEntry.add(ticketId);
 			
-			final String ADD_TICKET_DETAILS_IN_USER = "insert into user_ticket(email_id,tickets) values (?,?)";
+			final String ADD_TICKET_DETAILS_IN_USER = "insert into user_tickets(email_id,tickets) values (?,?)";
 			getJdbcTemplate().update(ADD_TICKET_DETAILS_IN_USER,
 					new Object[]{ticketDetails.getTicketPostedBy(),ticketEntry},
-					new int[]{Types.VARCHAR,Types.OTHER});
+					new int[]{Types.VARCHAR,Types.ARRAY});
 			
 		}
 		final String ADD_TICKET_DETAILS = "insert into ticket_details(ticket_id,ticket_subject,ticket_body,ticket_posted_by,ticket_posted_on,ticket_status) values (?,?,?,?,?,?) ";
@@ -124,14 +124,29 @@ public class JDBCYTicketDAO extends JdbcDaoSupport implements IYTicketDAO{
 				ticketDetails.getTicketSubject(),
 				ticketDetails.getTicketBody(),
 				ticketDetails.getTicketPostedBy(),
-				new Date().getTime(),
+				new Date(),
 				YTicketStringConstants.TICKET_STATUS_OPEN},
 				new int[]{Types.BIGINT,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.TIMESTAMP,Types.VARCHAR}
 				);
+		
+		if(ticketDetails.getIsAttachmentAttached() != null && ticketDetails.getIsAttachmentAttached())
+		{
+			
+			for (MultipartFile file : ticketDetails.getAttachments()) {
+				
+				final String INSERT_TICKET_ATTACHMENTS = "insert into ticket_attachments (ticket_id,file_name,file_data,file_mime_type) values (?,?,?,?)";
+				getJdbcTemplate().update(INSERT_TICKET_ATTACHMENTS,
+						new Object[]{ticketId,file.getOriginalFilename(),file.getBytes(),file.getContentType()},
+						new int[]{Types.BIGINT,Types.VARCHAR,Types.BINARY,Types.VARCHAR});
+			}
+		}
+		
+		
 		flag = true;
 		}
 		catch(Exception ex)
 		{
+			ex.printStackTrace();
 			logger.error(ex.getStackTrace().toString());
 		}
 		

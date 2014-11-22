@@ -7,7 +7,9 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
@@ -82,16 +84,17 @@ public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 			for (MultipartFile attachmentFile : attachments) {
 				try {
 					String SEND_MAIL_ATTACHMENTS = "insert into mail_attachments(mail_id,mail_file_name,mail_attachment) values(?,?,?)";
-					getJdbcTemplate().update(SEND_MAIL_WITH_ATTACHMENTS,
+					getJdbcTemplate().update(SEND_MAIL_ATTACHMENTS,
 							new Object[]{
 							newMailId,
-                            attachmentFile.getName(),
+                            attachmentFile.getOriginalFilename(),
                             attachmentFile.getBytes()},
 							new int[]{
 							Types.BIGINT,
 							Types.VARCHAR,
 							Types.BINARY,
 							});	
+				
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

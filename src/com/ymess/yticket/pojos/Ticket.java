@@ -1,7 +1,10 @@
 package com.ymess.yticket.pojos;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
+
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Contains all the Attributes of Ticket
@@ -19,6 +22,9 @@ public class Ticket {
 	private String ticketAssignedTo;
 	private String ticketAssignedBy;
 	private String ticketStatus;
+	
+	private List<MultipartFile> attachments;
+	private Boolean isAttachmentAttached;
 	
 	
 	@Override
@@ -79,6 +85,22 @@ public class Ticket {
 	}
 	public void setTicketStatus(String ticketStatus) {
 		this.ticketStatus = ticketStatus;
+	}
+
+	public List<MultipartFile> getAttachments() {
+		return attachments;
+	}
+
+	public void setAttachments(List<MultipartFile> attachments) {
+		this.attachments = attachments;
+	}
+
+	public Boolean getIsAttachmentAttached() {
+		return isAttachmentAttached;
+	}
+
+	public void setIsAttachmentAttached(Boolean isAttachmentAttached) {
+		this.isAttachmentAttached = isAttachmentAttached;
 	}
 	
 }
