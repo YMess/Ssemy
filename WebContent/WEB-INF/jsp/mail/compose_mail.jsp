@@ -20,7 +20,7 @@ src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 $(document).ready(function() {
     //add more file components if Add is clicked
     $('#addFile').click(function() {
-        var fileIndex = $('#fileTable tr').children().length - 1;
+        var fileIndex = $('#fileTable tr').children().length ;
         $('#fileTable').append(
                 '<tr><td>'+
                 '   <input type="file" name="mailAttachment['+ fileIndex +']" />'+
