@@ -27,7 +27,7 @@ public class Mail {
 	  private Date mailSavedTimestamp;
 	  private Date mailSentTimestamp;
 	  private Set<String> mailThread;
-	  private Boolean mailStatus;
+	  private String mailStatus;
 	  private Boolean mailRead;
 	  private String userFirstName;
 	  private String userLastName;
@@ -95,7 +95,7 @@ public class Mail {
 	public boolean getIsPictureAttached() {
 		return isPictureAttached;
 	}
-	public void setPictureAttached(boolean isPictureAttached) {
+	public void setIsPictureAttached(boolean isPictureAttached) {
 		this.isPictureAttached = isPictureAttached;
 	}
 	public Date getMailSavedTimestamp() {
@@ -116,12 +116,7 @@ public class Mail {
 	public void setMailThread(Set<String> mailThread) {
 		this.mailThread = mailThread;
 	}
-	public boolean isMailStatus() {
-		return mailStatus;
-	}
-	public void setMailStatus(boolean mailStatus) {
-		this.mailStatus = mailStatus;
-	}
+	
 	public boolean isMailRead() {
 		return mailRead;
 	}
@@ -140,5 +135,16 @@ public class Mail {
 	public void setUserLastName(String userLastName) {
 		this.userLastName = userLastName;
 	}
-	
+	public String getMailStatus() {
+		return mailStatus;
+	}
+	public void setMailStatus(String mailStatus) {
+		this.mailStatus = mailStatus;
+	}
+	public Boolean getMailRead() {
+		return mailRead;
+	}
+	public void setMailRead(Boolean mailRead) {
+		this.mailRead = mailRead;
+	}
 }

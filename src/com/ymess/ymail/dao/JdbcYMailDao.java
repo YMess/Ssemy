@@ -7,13 +7,16 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.ymess.pojos.Question;
 import com.ymess.pojos.User;
 import com.ymess.util.MessageConstants;
 import com.ymess.ymail.dao.interfaces.YMailDao;
@@ -24,7 +27,6 @@ public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 
 	
 	private static final String GET_MAIL_IDS = "select mail_id from mail_details";
-	private static final String GET_INBOX_MAILS = "select mail_id,mail_from,mail_subject,mail_body,_mail_sent_timestamp where mail_id in ";
 	
 	
 	/**
@@ -49,7 +51,7 @@ public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 		if(mail.getIsAttachmentAttached())
 		{
 			
-	    	String SEND_MAIL_WITH_ATTACHMENTS = "insert into mail_details(mail_id,mail_from,mail_to,mail_cc,mail_bcc,mail_subject,mail_body,is_mail_attachment_attached,mail_status,mail_sent_timestamp,user_first_name,user_last_name) values(?,?,?,?,?,?,?,?,?,?,?,?)";
+	    	String SEND_MAIL_WITH_ATTACHMENTS = "insert into mail_details(mail_id,mail_from,mail_to,mail_cc,mail_bcc,mail_subject,mail_body,is_mail_attachment_attached,mail_status,mail_read,mail_sent_timestamp,user_first_name,user_last_name) values(?,?,?,?,?,?,?,?,?,?,?,?)";
 			getJdbcTemplate().update(SEND_MAIL_WITH_ATTACHMENTS,
 					new Object[]{
 					newMailId,
@@ -61,6 +63,7 @@ public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 					mail.getMailBody(),
 					true,
 					YMailMailStatus.MAIL_SENT,
+					false,
 					currentTime,
 					userDetails.getFirstName(),
 					userDetails.getLastName()},
@@ -74,6 +77,7 @@ public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 					Types.VARCHAR,
 					Types.BOOLEAN,
 					Types.VARCHAR,
+					Types.BOOLEAN,
 					Types.TIMESTAMP,
 					Types.VARCHAR,
 					Types.VARCHAR
@@ -107,11 +111,96 @@ public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 		}
 		
 		String CHECK_IF_USER_EXISTS = "select count(1) from mail_user_mapper where user_email_id=?";
+		
+		for (String mailIdTo : mail.getMailTo()) {
+			long userCountTo = getJdbcTemplate().queryForLong(CHECK_IF_USER_EXISTS,mailIdTo);
+			
+			if(userCountTo != 0)
+			{
+				String UPDATE_EXISTING_USER_INBOX = "update mail_user_mapper set mail_inbox=mail_inbox + {"+newMailId+"} where user_email_id=?";
+				try{
+					getJdbcTemplate().update(UPDATE_EXISTING_USER_INBOX,mailIdTo);
+				}
+				catch(Exception ex)
+				{
+					logger.error(ex.getStackTrace());
+				}
+			}
+			else	
+			{
+				String INSERT_NEW_USER_INBOX = "insert into mail_user_mapper (user_email_id,mail_inbox ,user_first_name,user_last_name) values ('"+mailIdTo+"',"+ "{"+ newMailId +"},'"+userDetails.getFirstName()+"','"+userDetails.getLastName()+"')";
+				try{
+					getJdbcTemplate().update(INSERT_NEW_USER_INBOX);
+				}
+				catch(Exception ex)
+				{
+					logger.error(ex.getStackTrace());
+				}
+			}
+		}
+		
+		
+		for (String mailIdCC : mail.getMailCC()) {
+			long userCountCC = getJdbcTemplate().queryForLong(CHECK_IF_USER_EXISTS,mailIdCC);
+			
+			if(userCountCC != 0)
+			{
+				String UPDATE_EXISTING_USER_INBOX = "update mail_user_mapper set mail_inbox=mail_inbox + {"+newMailId+"} where user_email_id=?";
+				try{
+					getJdbcTemplate().update(UPDATE_EXISTING_USER_INBOX,mailIdCC);
+				}
+				catch(Exception ex)
+				{
+					logger.error(ex.getStackTrace());
+				}
+			}
+			else	
+			{
+				String INSERT_NEW_USER_INBOX = "insert into mail_user_mapper (user_email_id,mail_inbox ,user_first_name,user_last_name) values ('"+mailIdCC+"',"+ "{"+ newMailId +"},'"+userDetails.getFirstName()+"','"+userDetails.getLastName()+"')";
+				try{
+					getJdbcTemplate().update(INSERT_NEW_USER_INBOX);
+				}
+				catch(Exception ex)
+				{
+					logger.error(ex.getStackTrace());
+				}
+			}
+		}
+		
+		for (String mailIdBCC : mail.getMailBCC()) {
+			long userCountBCC = getJdbcTemplate().queryForLong(CHECK_IF_USER_EXISTS,mailIdBCC);
+			
+			if(userCountBCC != 0)
+			{
+				String UPDATE_EXISTING_USER_INBOX = "update mail_user_mapper set mail_inbox=mail_inbox + {"+newMailId+"} where user_email_id=?";
+				try{
+					getJdbcTemplate().update(UPDATE_EXISTING_USER_INBOX,mailIdBCC);
+				}
+				catch(Exception ex)
+				{
+					logger.error(ex.getStackTrace());
+				}
+			}
+			else	
+			{
+				String INSERT_NEW_USER_INBOX = "insert into mail_user_mapper (user_email_id,mail_inbox ,user_first_name,user_last_name) values ('"+mailIdBCC+"',"+ "{"+ newMailId +"},'"+userDetails.getFirstName()+"','"+userDetails.getLastName()+"')";
+				try{
+					getJdbcTemplate().update(INSERT_NEW_USER_INBOX);
+				}
+				catch(Exception ex)
+				{
+					logger.error(ex.getStackTrace());
+				}
+			}
+		}
+		
+		
+
 		long userCount = getJdbcTemplate().queryForLong(CHECK_IF_USER_EXISTS,mail.getMailFrom());
 		
 		if(userCount != 0)
 		{
-			String UPDATE_EXISTING_USER = "update mail_user_mapper set mail_inbox=mail_inbox + {"+newMailId+"} where user_email_id=?";
+			String UPDATE_EXISTING_USER = "update mail_user_mapper set mail_sent=mail_sent + {"+newMailId+"} where user_email_id=?";
 			try{
 				getJdbcTemplate().update(UPDATE_EXISTING_USER,mail.getMailFrom());
 			}
@@ -122,7 +211,7 @@ public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 		}
 		else	
 		{
-			String INSERT_NEW_USER = "insert into mail_user_mapper (user_email_id,mail_inbox ,user_first_name,user_last_name) values ('"+mail.getMailFrom()+"',"+ "{"+ newMailId +"},'"+userDetails.getFirstName()+"','"+userDetails.getLastName()+"')";
+			String INSERT_NEW_USER = "insert into mail_user_mapper (user_email_id,mail_sent ,user_first_name,user_last_name) values ('"+mail.getMailFrom()+"',"+ "{"+ newMailId +"},'"+userDetails.getFirstName()+"','"+userDetails.getLastName()+"')";
 			try{
 				getJdbcTemplate().update(INSERT_NEW_USER);
 			}
@@ -191,10 +280,24 @@ public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 	@Override
 	public List<Mail> getInboxMails(String userEmailId) {
 		
-	    List<Mail> mail = new ArrayList<Mail>();
+	    List<Mail> inboxMails = new ArrayList<Mail>();
 		
 		try {
-			//mail = getJdbcTemplate().query(GET_INBOX_MAILS,new QuestionMapper(),userEmailId);
+			String GET_INBOX_MAIL_IDS = "select mail_inbox from mail_user_mapper where user_email_id='"+userEmailId+"'";
+			Set<Long> inboxMailIds = getJdbcTemplate().queryForObject(GET_INBOX_MAIL_IDS,Set.class);
+			
+			
+			StringBuilder inboxMailIdsSB = new StringBuilder();
+			for (Long inboxMailId : inboxMailIds) {
+				inboxMailIdsSB.append(inboxMailId).append(",");
+			}
+			String inboxMailIdsStr = "";
+			if(inboxMailIdsSB.length() > 0)
+				inboxMailIdsStr = inboxMailIdsSB.substring(0,inboxMailIdsSB.lastIndexOf(","));
+				
+			
+			String GET_INBOX_MAILS = "Select * from mail_details where mail_id in ("+inboxMailIdsStr+")";
+			inboxMails = getJdbcTemplate().query(GET_INBOX_MAILS,new MailDetailsMapper());
 		} 
 		catch (EmptyResultDataAccessException  emptyEx) {
 			logger.warn(MessageConstants.EMPTY_RESULT_SET);
@@ -203,7 +306,73 @@ public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 			e.printStackTrace();
 			logger.error(e.getLocalizedMessage());
 		}
-		return null;
+		return inboxMails;
 	}
 
+	/**
+	 * 
+	 * This class is used to Map the ResultSet values(mail) to Domain/Value Objects(Mail)
+	 *
+	 */
+	private static class MailDetailsMapper
+			implements
+				ParameterizedRowMapper<Mail> {
+		@Override
+		public Mail mapRow(ResultSet rs, int rowCount) throws SQLException {
+			Mail mail = new Mail();
+			mail.setMailId(rs.getLong("mail_id"));
+			mail.setMailFrom(rs.getString("mail_from"));
+			mail.setMailCC((Set<String>) rs.getObject("mail_cc"));
+			mail.setMailBCC((Set<String>) rs.getObject("mail_bcc"));
+			mail.setMailSubject(rs.getString("mail_subject"));
+			mail.setMailBody(rs.getString("mail_body"));
+			
+			/*if(rs.getDate("mail_saved_timestamp") != null)
+				mail.setMailSavedTimestamp(rs.getDate("mail_saved_timestamp "));
+			
+			if(rs.getDate("mail_sent_timestamp") != null)	
+				mail.setMailSentTimestamp(rs.getDate("mail_sent_timestamp "));*/
+			
+			//mail.setIsAttachmentAttached(rs.getBoolean("is_mail_attachment_attached "));
+			//mail.setIsPictureAttached(rs.getBoolean("is_mail_picture_attached "));
+			mail.setMailStatus(rs.getString("mail_status"));
+			mail.setMailRead(rs.getBoolean("mail_read"));
+			mail.setUserFirstName(rs.getString("user_first_name"));
+			mail.setUserLastName(rs.getString("user_last_name"));
+			
+			return mail;
+		}
+	}
+
+	@Override
+	public List<Mail> getSentMails(String userEmailId) {
+		
+		List<Mail> sentMails = new ArrayList<Mail>();
+		try {
+			String GET_SENT_MAIL_IDS = "select mail_sent from mail_user_mapper where user_email_id='"+userEmailId+"'";
+			Set<Long> sentMailIds = getJdbcTemplate().queryForObject(GET_SENT_MAIL_IDS,Set.class);
+			
+			
+			StringBuilder sentMailIdsSB = new StringBuilder();
+			for (Long sentMailId : sentMailIds) {
+				sentMailIdsSB.append(sentMailId).append(",");
+			}
+			String sentMailIdsStr = "";
+			if(sentMailIdsSB.length() > 0)
+				sentMailIdsStr = sentMailIdsSB.substring(0,sentMailIdsSB.lastIndexOf(","));
+				
+			
+			String GET_SENT_MAILS = "Select * from mail_details where mail_id in ("+sentMailIdsStr+")";
+			sentMails = getJdbcTemplate().query(GET_SENT_MAILS,new MailDetailsMapper());
+		} 
+		catch (EmptyResultDataAccessException  emptyEx) {
+			logger.warn(MessageConstants.EMPTY_RESULT_SET);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e.getLocalizedMessage());
+		}
+		return sentMails;
+	}
+	
 }

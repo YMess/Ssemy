@@ -50,7 +50,7 @@ $(document).ready(function() {
 		        <a class="pure-menu-heading">Compose Mail</a>
 		<form:form action="compose_mail.htm" modelAttribute="mail" enctype="multipart/form-data" id="sendMail">
 		
-		<input id="addImage" type="checkbox" name="isAttachmentAttached"> Change Image
+		<input id="addImage" type="checkbox" name="isAttachmentAttached"> Add Attachments
 		<br><br>
 		<div class="imageDiv"  style="display: none;">
 		<p>Select files to upload. Press Add button to add more file inputs.</p>

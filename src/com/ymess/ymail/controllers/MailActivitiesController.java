@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
+import org.omg.CORBA.MARSHAL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -69,6 +70,32 @@ public class MailActivitiesController {
 		model.addAttribute("mail",mail);
 		return YMailJSPMappings.INBOX_PAGE;
 	}
+	
+	/**
+	 * Displays the Sent Page
+	 * @author rvishwakarma
+	 * @param httpServletRequest
+	 * @param httpServletResponse
+	 * @return SentPage
+	 */
+	@RequestMapping(value=YMailURLMappings.SENT_PAGE,method=RequestMethod.GET)
+	public String showSentPage(Model model)
+	{
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String userEmailId = authentication.getName();
+		
+		List<Mail> mail = new ArrayList<Mail>();
+		
+		try {
+			mail = yMailService.getSentMails(userEmailId);
+			logger.info(YMailLoggerConstants.SENT_PAGE +" "+ userEmailId);
+		} catch (Exception e) {
+			logger.error(e.getLocalizedMessage());
+		}
+		
+		model.addAttribute("mail",mail);
+		return YMailJSPMappings.SENT_PAGE;
+	}
 
 
 	/**
@@ -110,4 +137,7 @@ public class MailActivitiesController {
 		redirectAttributes.addFlashAttribute("successfullyMailSend","Mail Send Successfully");
 		return YMailURLMappings.REDIRECT_SUCCESS_MAIL_SEND;
 	}
+	
+	
+	
 }

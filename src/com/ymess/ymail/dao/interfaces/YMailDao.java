@@ -16,11 +16,17 @@ public interface YMailDao {
 	/**
 	 * @author RVishwakarma
 	 * @param userEmailId
-	 * @return
+	 * @return List<Mail>
 	 */
 	List<Mail> getInboxMails(String userEmailId);
 
+
+	/**
+	 * @author RVishwakarma
+	 * @param userEmailId
+	 * @return List<Mail>
+	 */
+	List<Mail> getSentMails(String userEmailId);
+
 	
-
-
 }
