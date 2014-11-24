@@ -23,7 +23,7 @@ import com.ymess.ymail.util.YMailMailStatus;
 public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 
 	
-	private static final String GET_MAIL_IDS = "select mail_id from mail";
+	private static final String GET_MAIL_IDS = "select mail_id from mail_details";
 	private static final String GET_INBOX_MAILS = "select mail_id,mail_from,mail_subject,mail_body,_mail_sent_timestamp where mail_id in ";
 	
 	
@@ -49,7 +49,7 @@ public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 		if(mail.getIsAttachmentAttached())
 		{
 			
-	    	String SEND_MAIL_WITH_ATTACHMENTS = "insert into mail(mail_id,mail_from,mail_to,mail_cc,mail_bcc,mail_subject,mail_body,is_mail_attachment_attached,mail_status,mail_sent_timestamp,user_first_name,user_last_name) values(?,?,?,?,?,?,?,?,?,?,?,?)";
+	    	String SEND_MAIL_WITH_ATTACHMENTS = "insert into mail_details(mail_id,mail_from,mail_to,mail_cc,mail_bcc,mail_subject,mail_body,is_mail_attachment_attached,mail_status,mail_sent_timestamp,user_first_name,user_last_name) values(?,?,?,?,?,?,?,?,?,?,?,?)";
 			getJdbcTemplate().update(SEND_MAIL_WITH_ATTACHMENTS,
 					new Object[]{
 					newMailId,
@@ -82,7 +82,7 @@ public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 			for (MultipartFile attachmentFile : attachments) {
 				try {
 					String SEND_MAIL_ATTACHMENTS = "insert into mail_attachments(mail_id,mail_file_name,mail_attachment) values(?,?,?)";
-					getJdbcTemplate().update(SEND_MAIL_WITH_ATTACHMENTS,
+					getJdbcTemplate().update(SEND_MAIL_ATTACHMENTS,
 							new Object[]{
 							newMailId,
                             attachmentFile.getName(),
@@ -99,41 +99,38 @@ public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 		}
 		else	
 		{
-			String SEND_MAIL_WITHOUT_ATTACHMENTS = "insert into mail(mail_id,mail_from,mail_to,mail_cc,mail_bcc,mail_subject,mail_body,mail_status,mail_sent_timestamp,user_first_name,user_last_name) values(?,?,?,?,?,?,?,?,?,?,?)";
+			String SEND_MAIL_WITHOUT_ATTACHMENTS = "insert into mail_details(mail_id,mail_from,mail_to,mail_cc,mail_bcc,mail_subject,mail_body,mail_status,mail_sent_timestamp,user_first_name,user_last_name) values(?,?,?,?,?,?,?,?,?,?,?)";
 			getJdbcTemplate().update(SEND_MAIL_WITHOUT_ATTACHMENTS,
 					new Object[]{newMailId,mail.getMailFrom(),mail.getMailTo(),mail.getMailCC(),mail.getMailBCC(),mail.getMailSubject(),mail.getMailBody(),YMailMailStatus.MAIL_SENT,currentTime,userDetails.getFirstName(),userDetails.getLastName()},
 					new int[]{Types.BIGINT,Types.VARCHAR,Types.ARRAY,Types.ARRAY,Types.ARRAY,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.TIMESTAMP,Types.VARCHAR,Types.VARCHAR}
 					);
 		}
-
-	
 		
-/*		for (String toEmailId : mail.getMailTo()) {
+		String CHECK_IF_USER_EXISTS = "select count(1) from mail_user_mapper where user_email_id=?";
+		long userCount = getJdbcTemplate().queryForLong(CHECK_IF_USER_EXISTS,mail.getMailFrom());
 		
-			String SEND_MAIL_TO_DETAILS = "insert into mail_attributes(mail_id,mail_from,mail_to,user_first_name,user_last_name) values(?,?,?,?,?)";
-			getJdbcTemplate().update(SEND_MAIL_TO_DETAILS,
-					new Object[]{newMailId,mail.getMailFrom(),toEmailId,userDetails.getFirstName(),userDetails.getLastName()},
-					new int[]{Types.BIGINT,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR}
-					);
+		if(userCount != 0)
+		{
+			String UPDATE_EXISTING_USER = "update mail_user_mapper set mail_inbox=mail_inbox + {"+newMailId+"} where user_email_id=?";
+			try{
+				getJdbcTemplate().update(UPDATE_EXISTING_USER,mail.getMailFrom());
+			}
+			catch(Exception ex)
+			{
+				logger.error(ex.getStackTrace());
+			}
 		}
-		
-		for (String  ccEmailId : mail.getMailCC()) {
-			
-			String SEND_MAIL_CC_DETAILS = "insert into mail_attributes(mail_id,mail_from,mail_cc,user_first_name,user_last_name) values(?,?,?,?,?)";
-			getJdbcTemplate().update(SEND_MAIL_CC_DETAILS,
-					new Object[]{newMailId,mail.getMailFrom(),ccEmailId,userDetails.getFirstName(),userDetails.getLastName()},
-					new int[]{Types.BIGINT,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR}
-					);	
+		else	
+		{
+			String INSERT_NEW_USER = "insert into mail_user_mapper (user_email_id,mail_inbox ,user_first_name,user_last_name) values ('"+mail.getMailFrom()+"',"+ "{"+ newMailId +"},'"+userDetails.getFirstName()+"','"+userDetails.getLastName()+"')";
+			try{
+				getJdbcTemplate().update(INSERT_NEW_USER);
+			}
+			catch(Exception ex)
+			{
+				logger.error(ex.getStackTrace());
+			}
 		}
-		
-		for (String  bccEmailId : mail.getMailBCC()) {
-			
-			String SEND_MAIL_BCC_DETAILS = "insert into mail_attributes(mail_id,mail_from,mail_bcc,user_first_name,user_last_name) values(?,?,?,?,?)";
-			getJdbcTemplate().update(SEND_MAIL_BCC_DETAILS,
-					new Object[]{newMailId,mail.getMailFrom(),bccEmailId,userDetails.getFirstName(),userDetails.getLastName()},
-					new int[]{Types.BIGINT,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR}
-					);
-		}*/
 	}
 	
 	/**
