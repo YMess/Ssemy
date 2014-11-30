@@ -40,4 +40,15 @@ public class YMailServiceManager implements YMailService {
 	public List<Mail> getInboxMails(String userEmailId) {
 		return yMailDao.getInboxMails(userEmailId);
 	}
+
+	/**
+	 * Load Sent Email page
+	 * @author RVishwakarma
+	 * @param userEmailId
+	 * @return List<Mail>
+	 */
+	@Override
+	public List<Mail> getSentMails(String userEmailId) {
+		return yMailDao.getSentMails(userEmailId);
+	}
 }

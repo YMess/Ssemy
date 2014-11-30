@@ -20,4 +20,11 @@ public interface YMailService {
 	 */
 	List<Mail> getInboxMails(String userEmailId);
 
+	/**
+	 *@author RVishwakarma
+	 * @param userEmailId
+	 * @return List<Mail>
+	 */
+	List<Mail> getSentMails(String userEmailId);
+
 }
