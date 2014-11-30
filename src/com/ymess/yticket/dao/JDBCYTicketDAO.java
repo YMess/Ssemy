@@ -1,46 +1,26 @@
 package com.ymess.yticket.dao;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
-import org.springframework.jdbc.core.support.JdbcDaoSupport;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.data.cassandra.core.CassandraTemplate;
 
+import com.datastax.driver.core.querybuilder.Insert;
+import com.datastax.driver.core.querybuilder.QueryBuilder;
+import com.datastax.driver.core.querybuilder.Select;
 import com.ymess.yticket.dao.interfaces.IYTicketDAO;
 import com.ymess.yticket.pojos.Ticket;
-import com.ymess.yticket.util.YTicketStringConstants;
 
-public class JDBCYTicketDAO extends JdbcDaoSupport implements IYTicketDAO{
+public class JDBCYTicketDAO implements IYTicketDAO{
 
-	private class TicketDetailsMapper implements ParameterizedRowMapper<Ticket>
-	{
-		@SuppressWarnings("unchecked")
-		@Override
-		public Ticket mapRow(ResultSet rs, int rowCount) throws SQLException {
-			Ticket ticketDetails = new Ticket();
-			
-			ticketDetails.setTicketId(rs.getLong("ticket_id"));
-			ticketDetails.setTicketSubject(rs.getString("ticket_subject"));
-			ticketDetails.setTicketBody(rs.getString("ticket_body"));
-			ticketDetails.setTicketAssignedTo(rs.getString("ticket_assigned_to"));
-			ticketDetails.setTicketAssignedBy(rs.getString("ticket_assigned_by"));
-			ticketDetails.setTicketPostedOn(rs.getDate("ticket_posted_on"));
-			ticketDetails.setTicketPostedBy(rs.getString("ticket_posted_by"));
-			ticketDetails.setTicketStatus(rs.getString("ticket_status"));
-
-			return ticketDetails;
-		}
-		
-	}
+	private CassandraTemplate cassandraTemplate;
+	
+	private Logger logger = Logger.getLogger(getClass());
 	
 	/***
 	 * Gets all the Tickets Posted By User
@@ -51,11 +31,11 @@ public class JDBCYTicketDAO extends JdbcDaoSupport implements IYTicketDAO{
 	@Override
 	public List<Ticket> getUserTickets(String loggedInUserEmail){
 		List<Ticket> userTickets = new ArrayList<Ticket>();
-		Set<Long> tickets = new HashSet<Long>();
-		
+
+		Set<Long> ticketIds = new HashSet<Long>();
 		final String GET_USER_TICKETS = "select tickets from user_tickets where email_id='"+loggedInUserEmail+"'";
 		try{
-			tickets = getJdbcTemplate().queryForObject(GET_USER_TICKETS,Set.class);
+			ticketIds = cassandraTemplate.queryForObject(GET_USER_TICKETS,Set.class);
 		}
 		catch(EmptyResultDataAccessException emptyRS)
 		{
@@ -63,20 +43,23 @@ public class JDBCYTicketDAO extends JdbcDaoSupport implements IYTicketDAO{
 		}
 		
 		StringBuilder ticketsSB = new StringBuilder();
-		if(null != tickets && !tickets.isEmpty())
+		if(null != ticketIds && !ticketIds.isEmpty())
 		{
-			List<Long> ticketsList = new ArrayList<Long>(tickets);
+			List<Long> ticketsList = new ArrayList<Long>(ticketIds);
 			Collections.reverse(ticketsList);
 			for (Long ticketId : ticketsList) {
-				ticketsSB.append(ticketId);
+				ticketsSB.append(ticketId).append(",");
 			}
-			String ticketIdsStr = ticketsSB.toString();
+			String ticketIdsStr = "";
+			
+			if(ticketsSB.length() > 0)
+				ticketIdsStr = ticketsSB.substring(0,ticketsSB.lastIndexOf(","));
 		
 			if(ticketIdsStr != null && ticketIdsStr.length() > 0)
 			{
 				final String GET_TICKET_DETAILS = "select * from ticket_details where ticket_id in ("+ticketIdsStr+")";
 				try{
-					userTickets = getJdbcTemplate().query(GET_TICKET_DETAILS,new TicketDetailsMapper());
+					userTickets = cassandraTemplate.select(GET_TICKET_DETAILS,Ticket.class);
 				}
 				catch(EmptyResultDataAccessException emptyRS)
 				{
@@ -100,23 +83,34 @@ public class JDBCYTicketDAO extends JdbcDaoSupport implements IYTicketDAO{
 		incrementTicketId();
 		
 		final String GET_USER_TICKET_COUNT = "select count(*) from user_tickets where email_id=?";
-		Long ticketCount = getJdbcTemplate().queryForObject(GET_USER_TICKET_COUNT,Long.class,ticketDetails.getTicketPostedBy());
+		
+		Select selectQuery = QueryBuilder.select().countAll().from("user_tickets");
+		selectQuery.where(QueryBuilder.eq("email_id", "'"+ticketDetails.getTicketPostedBy()+"'"));
+		
+		
+		Long ticketCount = cassandraTemplate.queryForObject(GET_USER_TICKET_COUNT,Long.class);
 		
 		try{
 		if(ticketCount > 0){
-			final String ADD_TICKET_TO_USER_ACCOUNT = "update user_tickets set tickets = tickets + {"+ticketId+"} where email_id=?";
-			getJdbcTemplate().update(ADD_TICKET_TO_USER_ACCOUNT,ticketDetails.getTicketPostedBy());
+			final String ADD_TICKET_TO_USER_ACCOUNT = "update user_tickets set tickets = tickets + {"+ticketId+"} where email_id='"+ticketDetails.getTicketPostedBy()+"'";
+			//getJdbcTemplate().update(ADD_TICKET_TO_USER_ACCOUNT,ticketDetails.getTicketPostedBy());
+			
+			cassandraTemplate.execute(ADD_TICKET_TO_USER_ACCOUNT);
 		}
 		else{
 			Set<Long> ticketEntry = new HashSet<Long>();
 			ticketEntry.add(ticketId);
 			
 			final String ADD_TICKET_DETAILS_IN_USER = "insert into user_tickets(email_id,tickets) values (?,?)";
-			getJdbcTemplate().update(ADD_TICKET_DETAILS_IN_USER,
-					new Object[]{ticketDetails.getTicketPostedBy(),ticketEntry},
-					new int[]{Types.VARCHAR,Types.ARRAY});
+			
+			Insert insert = QueryBuilder.insertInto("user_tickets").values(
+					new String[]{"email_id","tickets"},
+					new Object[]{ticketDetails.getTicketPostedBy(),"{"+ticketDetails.getTicketId()+"}"});
+			
+			cassandraTemplate.execute(insert);
 			
 		}
+		/*
 		final String ADD_TICKET_DETAILS = "insert into ticket_details(ticket_id,ticket_subject,ticket_body,ticket_posted_by,ticket_posted_on,ticket_status) values (?,?,?,?,?,?) ";
 		getJdbcTemplate().update(ADD_TICKET_DETAILS,
 				new Object[]{
@@ -140,7 +134,7 @@ public class JDBCYTicketDAO extends JdbcDaoSupport implements IYTicketDAO{
 						new int[]{Types.BIGINT,Types.VARCHAR,Types.BINARY,Types.VARCHAR});
 			}
 		}
-		
+		*/
 		
 		flag = true;
 		}
@@ -155,21 +149,21 @@ public class JDBCYTicketDAO extends JdbcDaoSupport implements IYTicketDAO{
 
 	private Long getTicketId() {
 		Long ticketId = 1L;
-		final String GET_TICKET_ID = "select ticket_id from ticket_counter";
+		/*final String GET_TICKET_ID = "select ticket_id from ticket_counter";
 		try{
 			ticketId = getJdbcTemplate().queryForObject(GET_TICKET_ID, Long.class);
 		}
 		catch(EmptyResultDataAccessException emptyRS)
 		{
 			logger.error(emptyRS.getStackTrace().toString());
-		}
+		}*/
 		return ticketId;
 	}
 	
 	Boolean incrementTicketId()
 	{
 		Boolean flag = false;
-		final String INCREMENT_TICKET_ID = "update ticket_counter set ticket_id = ticket_id + 1 where master_value=1";
+		/*final String INCREMENT_TICKET_ID = "update ticket_counter set ticket_id = ticket_id + 1 where master_value=1";
 		try{
 			getJdbcTemplate().update(INCREMENT_TICKET_ID);
 			flag = true;
@@ -177,8 +171,16 @@ public class JDBCYTicketDAO extends JdbcDaoSupport implements IYTicketDAO{
 		catch(Exception ex)
 		{
 			logger.error(ex.getStackTrace().toString());
-		}
+		}*/
 		return flag;
+	}
+
+	public CassandraTemplate getCassandraTemplate() {
+		return cassandraTemplate;
+	}
+
+	public void setCassandraTemplate(CassandraTemplate cassandraTemplate) {
+		this.cassandraTemplate = cassandraTemplate;
 	}
 
 }

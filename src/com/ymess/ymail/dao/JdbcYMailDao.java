@@ -7,23 +7,31 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+import org.apache.log4j.Logger;
+import org.springframework.cassandra.core.RowMapper;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
-import org.springframework.jdbc.core.support.JdbcDaoSupport;
+import org.springframework.data.cassandra.core.CassandraTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.datastax.driver.core.Row;
+import com.datastax.driver.core.exceptions.DriverException;
+import com.datastax.driver.core.querybuilder.Insert;
 import com.ymess.pojos.User;
 import com.ymess.util.MessageConstants;
+import com.ymess.util.YMessCommonUtility;
 import com.ymess.ymail.dao.interfaces.YMailDao;
 import com.ymess.ymail.pojos.Mail;
 import com.ymess.ymail.util.YMailMailStatus;
 
-public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
+public class JdbcYMailDao  implements YMailDao {
 
+	
+	Logger logger = Logger.getLogger(getClass());
+	
+	CassandraTemplate cassandraTemplate;
+	
 	
 	private static final String GET_MAIL_IDS = "select mail_id from mail";
 	private static final String GET_INBOX_MAILS = "select mail_id,mail_from,mail_subject,mail_body,_mail_sent_timestamp where mail_id in ";
@@ -51,21 +59,9 @@ public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 		if(mail.getIsAttachmentAttached())
 		{
 			
-	    	String SEND_MAIL_WITH_ATTACHMENTS = "insert into mail(mail_id,mail_from,mail_to,mail_cc,mail_bcc,mail_subject,mail_body,is_mail_attachment_attached,mail_status,mail_sent_timestamp,user_first_name,user_last_name) values(?,?,?,?,?,?,?,?,?,?,?,?)";
+	    /*	String SEND_MAIL_WITH_ATTACHMENTS = "insert into mail(mail_id,mail_from,mail_to,mail_cc,mail_bcc,mail_subject,mail_body,is_mail_attachment_attached,mail_status,mail_sent_timestamp,user_first_name,user_last_name) values(?,?,?,?,?,?,?,?,?,?,?,?)";
 			getJdbcTemplate().update(SEND_MAIL_WITH_ATTACHMENTS,
-					new Object[]{
-					newMailId,
-					mail.getMailFrom(),
-					mail.getMailTo(),
-					mail.getMailCC(),
-					mail.getMailBCC(),
-					mail.getMailSubject(),
-					mail.getMailBody(),
-					true,
-					YMailMailStatus.MAIL_SENT,
-					currentTime,
-					userDetails.getFirstName(),
-					userDetails.getLastName()},
+				,
 					new int[]{
 					Types.BIGINT,
 					Types.VARCHAR,
@@ -79,11 +75,39 @@ public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 					Types.TIMESTAMP,
 					Types.VARCHAR,
 					Types.VARCHAR
-					});	
+					});	*/
+			Insert insertIntoMail = YMessCommonUtility.getFormattedInsertQuery("mail", "mail_id,mail_from,mail_to,mail_cc,"
+					+ "mail_bcc,mail_subject,mail_body,is_mail_attachment_attached,"
+					+ "mail_status,mail_sent_timestamp,user_first_name,user_last_name",
+					new Object[]{
+					newMailId,
+					mail.getMailFrom(),
+					mail.getMailTo(),
+					mail.getMailCC(),
+					mail.getMailBCC(),
+					mail.getMailSubject(),
+					mail.getMailBody(),
+					true,
+					YMailMailStatus.MAIL_SENT,
+					currentTime,
+					userDetails.getFirstName(),
+					userDetails.getLastName()});
+			
+			cassandraTemplate.insert(insertIntoMail);
+			
 			
 			for (MultipartFile attachmentFile : attachments) {
+				
 				try {
-					String SEND_MAIL_ATTACHMENTS = "insert into mail_attachments(mail_id,mail_file_name,mail_attachment) values(?,?,?)";
+					
+					Insert insertAttachments = YMessCommonUtility.getFormattedInsertQuery("mail_attachments", "mail_id,mail_file_name,mail_attachment", new Object[]{
+							newMailId,
+                            attachmentFile.getOriginalFilename(),
+                            attachmentFile.getBytes()});
+					
+					cassandraTemplate.insert(insertAttachments);
+					
+					/*String SEND_MAIL_ATTACHMENTS = "insert into mail_attachments(mail_id,mail_file_name,mail_attachment) values(?,?,?)";
 					getJdbcTemplate().update(SEND_MAIL_ATTACHMENTS,
 							new Object[]{
 							newMailId,
@@ -93,7 +117,7 @@ public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 							Types.BIGINT,
 							Types.VARCHAR,
 							Types.BINARY,
-							});	
+							});	*/
 				
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -103,10 +127,16 @@ public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 		else	
 		{
 			String SEND_MAIL_WITHOUT_ATTACHMENTS = "insert into mail(mail_id,mail_from,mail_to,mail_cc,mail_bcc,mail_subject,mail_body,mail_status,mail_sent_timestamp,user_first_name,user_last_name) values(?,?,?,?,?,?,?,?,?,?,?)";
-			getJdbcTemplate().update(SEND_MAIL_WITHOUT_ATTACHMENTS,
+			Insert insertMailWithoutAttachments = YMessCommonUtility.getFormattedInsertQuery("mail", "mail_id,mail_from,mail_to,mail_cc"
+					+ ",mail_bcc,mail_subject,mail_body,mail_status,"
+					+ "mail_sent_timestamp,user_first_name,user_last_name", 
+					new Object[]{newMailId,mail.getMailFrom(),mail.getMailTo(),mail.getMailCC(),mail.getMailBCC(),mail.getMailSubject(),mail.getMailBody(),YMailMailStatus.MAIL_SENT,currentTime,userDetails.getFirstName(),userDetails.getLastName()});
+			
+			
+			/*	getJdbcTemplate().update(SEND_MAIL_WITHOUT_ATTACHMENTS,
 					new Object[]{newMailId,mail.getMailFrom(),mail.getMailTo(),mail.getMailCC(),mail.getMailBCC(),mail.getMailSubject(),mail.getMailBody(),YMailMailStatus.MAIL_SENT,currentTime,userDetails.getFirstName(),userDetails.getLastName()},
 					new int[]{Types.BIGINT,Types.VARCHAR,Types.ARRAY,Types.ARRAY,Types.ARRAY,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.TIMESTAMP,Types.VARCHAR,Types.VARCHAR}
-					);
+					);*/
 		}
 
 	
@@ -147,10 +177,10 @@ public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 	 */
 	private User getUserDetailsByEmailId(String mailFrom) {
 		
-		String GET_USER_DETAILS = "select first_name,last_name from users_data where email_id=?";
+		String GET_USER_DETAILS = "select first_name,last_name from users_data where email_id='"+mailFrom+"'";
 		User user = new User();
 		try{
-		user = getJdbcTemplate().queryForObject(GET_USER_DETAILS, new UserDetailsMapper(),mailFrom);
+		user = cassandraTemplate.queryForObject(GET_USER_DETAILS, new UserDetailsMapper());
 		}
 		catch(Exception ex)
 		{
@@ -159,10 +189,10 @@ public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 		return user;
 	}
 
-	private class UserDetailsMapper implements ParameterizedRowMapper<User>
+	private class UserDetailsMapper implements RowMapper<User>
 	{
 		@Override
-		public User mapRow(ResultSet rs, int arg1) throws SQLException {
+		public User mapRow(Row rs, int arg1) throws DriverException {
 			User user = new User();
 			user.setFirstName(rs.getString("first_name"));
 			user.setLastName(rs.getString("last_name"));
@@ -181,7 +211,7 @@ public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 		
 		long maxMailId = 0;
 		
-		List<String> mailIds = getJdbcTemplate().queryForList(GET_MAIL_IDS,String.class);
+		List<String> mailIds = cassandraTemplate.queryForList(GET_MAIL_IDS,String.class);
 			try
 			{
 				if(!mailIds.isEmpty())
@@ -210,6 +240,14 @@ public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 			logger.error(e.getLocalizedMessage());
 		}
 		return null;
+	}
+
+	public CassandraTemplate getCassandraTemplate() {
+		return cassandraTemplate;
+	}
+
+	public void setCassandraTemplate(CassandraTemplate cassandraTemplate) {
+		this.cassandraTemplate = cassandraTemplate;
 	}
 
 }

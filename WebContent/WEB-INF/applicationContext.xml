@@ -6,10 +6,12 @@
 	xmlns:jee="http://www.springframework.org/schema/jee"
 	xmlns:task="http://www.springframework.org/schema/task" 
 	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:cassandra="http://www.springframework.org/schema/data/cassandra"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
 http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
 http://www.springframework.org/schema/aop
 http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+
 http://www.springframework.org/schema/tx
 http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
 http://www.springframework.org/schema/jee
@@ -17,14 +19,50 @@ http://www.springframework.org/schema/jee/spring-jee-4/0.xsd
 http://www.springframework.org/schema/context 
 http://www.springframework.org/schema/context/spring-context-4.0.xsd 
 http://www.springframework.org/schema/task 
-http://www.springframework.org/schema/task/spring-task-3.0.xsd">
+http://www.springframework.org/schema/task/spring-task-3.0.xsd
+http://www.springframework.org/schema/cql
+http://www.springframework.org/schema/data/cassandra/spring-cql-1.0.xsd
+http://www.springframework.org/schema/data/cassandra
+http://www.springframework.org/schema/data/cassandra/spring-cassandra-1.0.xsd">
 
+
+
+  <!-- Cassandra Template Bean Registration -->
+
+
+	<context:property-placeholder location="classpath:cassandra.properties" />
+
+  <!-- REQUIRED: The Cassandra Cluster -->
+  <cassandra:cluster contact-points="${cassandra.contactpoints}" port="${cassandra.port}" />
+
+  <!-- REQUIRED: The Cassandra Session, built from the Cluster, and attaching 
+    to a keyspace -->
+  <cassandra:session keyspace-name="${cassandra.keyspace}" />
+
+  <!-- REQUIRED: The Default Cassandra Mapping Context used by CassandraConverter -->
+  <cassandra:mapping />
+
+  <!-- REQUIRED: The Default Cassandra Converter used by CassandraTemplate -->
+  <cassandra:converter />
+
+  <!-- REQUIRED: The Cassandra Template is the building block of all Spring 
+    Data Cassandra -->
+  <cassandra:template id="cassandraTemplate" />
+
+  <!-- OPTIONAL: If you are using Spring Data Cassandra Repositories, add 
+    your base packages to scan here -->
+  <cassandra:repositories base-package="com.ymess" />
+  
+  <!-- Cassandra Template Bean Registration -->
+  
+  
 	 <bean id="yMessManager" class="com.ymess.service.YMessServiceManager">
 		<property name="yMessDao" ref="yMessDao" />
 	</bean>
 
 	<bean id="yMessDao" class="com.ymess.dao.JdbcYMessDao">
-		<property name="dataSource" ref="dataSource" />
+		<!-- <property name="dataSource" ref="dataSource" /> -->
+		<property name="cassandraTemplate" ref="cassandraTemplate" />
 	</bean>
 	
 	<bean id="yMailManager" class="com.ymess.ymail.service.YMailServiceManager">
@@ -32,7 +70,8 @@ http://www.springframework.org/schema/task/spring-task-3.0.xsd">
 	</bean>
 
 	<bean id="yMailDao" class="com.ymess.ymail.dao.JdbcYMailDao">
-		<property name="dataSource" ref="dataSource" />
+		<!-- <property name="dataSource" ref="dataSource" /> -->
+		<property name="cassandraTemplate" ref="cassandraTemplate" />
 	</bean>
 	
 	
@@ -42,24 +81,28 @@ http://www.springframework.org/schema/task/spring-task-3.0.xsd">
 	</bean>
 
 	<bean id="yTicketDao" class="com.ymess.yticket.dao.JDBCYTicketDAO">
-		<property name="dataSource" ref="dataSource" />
+		<property name="cassandraTemplate" ref="cassandraTemplate" />
 	</bean>
 
-	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
-		destroy-method="close">
-		<property name="driverClassName" value="${jdbc.driverClassName}" />
-		<property name="url" value="${jdbc.url}" />
-		<property name="username" value="${jdbc.username}" />
-		<property name="password" value="${jdbc.password}" />
-	</bean>
 
-	<bean id="propertyConfigurer"
+
+
+
+	<!-- <bean id="propertyConfigurer"
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="locations">
 			<list>
 				<value>classpath:jdbc.properties</value>
 			</list>
 		</property>
-	</bean>
+	</bean> 
+	 <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		 <property name="driverClassName" value="${jdbc.driverClassName}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+	</bean>-->
+
+	 
 	
 </beans>

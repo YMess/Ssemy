@@ -4,6 +4,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.data.cassandra.mapping.Column;
+import org.springframework.data.cassandra.mapping.PrimaryKey;
+import org.springframework.data.cassandra.mapping.PrimaryKeyColumn;
+import org.springframework.data.cassandra.mapping.Table;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -11,19 +15,41 @@ import org.springframework.web.multipart.MultipartFile;
  * @author balaji i
  *
  */
+@Table(value="ticket_details")
 public class Ticket {
 
+	@Column(value="ticket_id")
 	private Long ticketId;
+	
+	
+	
+	@Column(value="ticket_subject")
 	private String ticketSubject;
+	
+	@Column(value="ticket_body")
 	private String ticketBody;
+	
+	
 	private Map<String,byte[]> ticketAttachments;
+	
+	@Column(value="ticket_posted_on")
 	private Date ticketPostedOn;
+	
+	@Column(value="ticket_posted_by")
 	private String ticketPostedBy;
+	
+	@Column(value="ticket_assigned_to")
 	private String ticketAssignedTo;
+	
+	@Column(value="ticket_assigned_by")
 	private String ticketAssignedBy;
+	
+	@Column(value="ticket_status")
 	private String ticketStatus;
 	
 	private List<MultipartFile> attachments;
+	
+	//@Column(value="ticket_subject")
 	private Boolean isAttachmentAttached;
 	
 	

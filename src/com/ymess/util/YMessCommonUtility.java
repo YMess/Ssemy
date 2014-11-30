@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,6 +40,9 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+
+import com.datastax.driver.core.querybuilder.Insert;
+import com.datastax.driver.core.querybuilder.QueryBuilder;
 
 /**
  * @author balaji i
@@ -365,5 +369,43 @@ public class YMessCommonUtility {
 		public static String removeExtraneousApostrophe(String wordWithApostrophe)
 		{
 			return wordWithApostrophe.replaceAll("'", "");
+		}
+
+		public static Insert getFormattedInsertQuery(String tableName,String insertString, Object[] values) {
+			String[] insertQueryAsArray = getReformedStringArray(insertString);
+			Insert insertQuery = QueryBuilder.insertInto(tableName).values(insertQueryAsArray, values);
+			return insertQuery;
+		}
+		
+		private static String[] getReformedStringArray(String input) {
+			String outputString = "";
+			
+			if(null != input && input.trim().length() > 0 )
+			{
+				if(input.contains(","))
+				{
+					String [] splitString = input.split(",");
+					
+					if(splitString != null && splitString.length > 0)
+					{
+						for(int i = 0 ; i< splitString.length; i++){
+							outputString = outputString.trim() + "\"" + splitString[i].trim() + "\",";
+						}
+						
+						if(outputString.length() > 0 && outputString.contains(","))
+							outputString = outputString.substring(0,outputString.lastIndexOf(","));
+					}
+				}
+			}
+			return outputString.split(",");
+		}
+
+		public static byte[] convertByteBufferToByteArray(ByteBuffer bytes) {
+			
+			byte [] bytesData = new byte[10];
+			if(bytes != null)
+				bytesData = bytes.array();
+			
+			return bytesData == null ? new byte[10] : bytesData;
 		}
 }
