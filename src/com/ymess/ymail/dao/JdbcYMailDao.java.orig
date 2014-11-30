@@ -8,7 +8,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+<<<<<<< HEAD
+=======
 import java.util.Set;
+>>>>>>> development
 
 import org.apache.log4j.Logger;
 import org.springframework.cassandra.core.RowMapper;
@@ -29,12 +32,17 @@ import com.ymess.ymail.util.YMailMailStatus;
 public class JdbcYMailDao  implements YMailDao {
 
 	
+<<<<<<< HEAD
 	Logger logger = Logger.getLogger(getClass());
 	
 	CassandraTemplate cassandraTemplate;
 	
 	
+	private static final String GET_MAIL_IDS = "select mail_id from mail";
+	private static final String GET_INBOX_MAILS = "select mail_id,mail_from,mail_subject,mail_body,_mail_sent_timestamp where mail_id in ";
+=======
 	private static final String GET_MAIL_IDS = "select mail_id from mail_details";
+>>>>>>> development
 	
 	
 	/**
@@ -59,10 +67,28 @@ public class JdbcYMailDao  implements YMailDao {
 		if(mail.getIsAttachmentAttached())
 		{
 			
+<<<<<<< HEAD
 	    /*	String SEND_MAIL_WITH_ATTACHMENTS = "insert into mail(mail_id,mail_from,mail_to,mail_cc,mail_bcc,mail_subject,mail_body,is_mail_attachment_attached,mail_status,mail_sent_timestamp,user_first_name,user_last_name) values(?,?,?,?,?,?,?,?,?,?,?,?)";
-			cassandraTemplate.update(SEND_MAIL_WITH_ATTACHMENTS,
+			getJdbcTemplate().update(SEND_MAIL_WITH_ATTACHMENTS,
 				,
+=======
+	    	String SEND_MAIL_WITH_ATTACHMENTS = "insert into mail_details(mail_id,mail_from,mail_to,mail_cc,mail_bcc,mail_subject,mail_body,is_mail_attachment_attached,mail_status,mail_read,mail_sent_timestamp,user_first_name,user_last_name) values(?,?,?,?,?,?,?,?,?,?,?,?)";
+			getJdbcTemplate().update(SEND_MAIL_WITH_ATTACHMENTS,
+					new Object[]{
+					newMailId,
+					mail.getMailFrom(),
+					mail.getMailTo(),
+					mail.getMailCC(),
+					mail.getMailBCC(),
+					mail.getMailSubject(),
+					mail.getMailBody(),
+					true,
+					YMailMailStatus.MAIL_SENT,
 					false,
+					currentTime,
+					userDetails.getFirstName(),
+					userDetails.getLastName()},
+>>>>>>> development
 					new int[]{
 					Types.BIGINT,
 					Types.VARCHAR,
@@ -110,7 +136,7 @@ public class JdbcYMailDao  implements YMailDao {
 					cassandraTemplate.insert(insertAttachments);
 					
 					/*String SEND_MAIL_ATTACHMENTS = "insert into mail_attachments(mail_id,mail_file_name,mail_attachment) values(?,?,?)";
-					cassandraTemplate.update(SEND_MAIL_ATTACHMENTS,
+					getJdbcTemplate().update(SEND_MAIL_ATTACHMENTS,
 							new Object[]{
 							newMailId,
                             attachmentFile.getOriginalFilename(),
@@ -128,30 +154,34 @@ public class JdbcYMailDao  implements YMailDao {
 		}
 		else	
 		{
-			String SEND_MAIL_WITHOUT_ATTACHMENTS = "insert into mail_details(mail_id,mail_from,mail_to,mail_cc,mail_bcc,mail_subject,mail_body,mail_status,mail_sent_timestamp,user_first_name,user_last_name) values(?,?,?,?,?,?,?,?,?,?,?)";
+<<<<<<< HEAD
+			String SEND_MAIL_WITHOUT_ATTACHMENTS = "insert into mail(mail_id,mail_from,mail_to,mail_cc,mail_bcc,mail_subject,mail_body,mail_status,mail_sent_timestamp,user_first_name,user_last_name) values(?,?,?,?,?,?,?,?,?,?,?)";
 			Insert insertMailWithoutAttachments = YMessCommonUtility.getFormattedInsertQuery("mail", "mail_id,mail_from,mail_to,mail_cc"
 					+ ",mail_bcc,mail_subject,mail_body,mail_status,"
 					+ "mail_sent_timestamp,user_first_name,user_last_name", 
 					new Object[]{newMailId,mail.getMailFrom(),mail.getMailTo(),mail.getMailCC(),mail.getMailBCC(),mail.getMailSubject(),mail.getMailBody(),YMailMailStatus.MAIL_SENT,currentTime,userDetails.getFirstName(),userDetails.getLastName()});
 			
 			
-			/*	cassandraTemplate.update(SEND_MAIL_WITHOUT_ATTACHMENTS,
+			/*	getJdbcTemplate().update(SEND_MAIL_WITHOUT_ATTACHMENTS,
+=======
+			String SEND_MAIL_WITHOUT_ATTACHMENTS = "insert into mail_details(mail_id,mail_from,mail_to,mail_cc,mail_bcc,mail_subject,mail_body,mail_status,mail_sent_timestamp,user_first_name,user_last_name) values(?,?,?,?,?,?,?,?,?,?,?)";
+			getJdbcTemplate().update(SEND_MAIL_WITHOUT_ATTACHMENTS,
+>>>>>>> development
 					new Object[]{newMailId,mail.getMailFrom(),mail.getMailTo(),mail.getMailCC(),mail.getMailBCC(),mail.getMailSubject(),mail.getMailBody(),YMailMailStatus.MAIL_SENT,currentTime,userDetails.getFirstName(),userDetails.getLastName()},
 					new int[]{Types.BIGINT,Types.VARCHAR,Types.ARRAY,Types.ARRAY,Types.ARRAY,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.TIMESTAMP,Types.VARCHAR,Types.VARCHAR}
 					);*/
 		}
 		
+		String CHECK_IF_USER_EXISTS = "select count(1) from mail_user_mapper where user_email_id=?";
 		
 		for (String mailIdTo : mail.getMailTo()) {
-		
-			String CHECK_IF_USER_EXISTS = "select count(1) from mail_user_mapper where user_email_id='"+mailIdTo+"'";
-			long userCountTo = cassandraTemplate.queryForObject(CHECK_IF_USER_EXISTS,Long.class);
+			long userCountTo = getJdbcTemplate().queryForLong(CHECK_IF_USER_EXISTS,mailIdTo);
 			
 			if(userCountTo != 0)
 			{
-				String UPDATE_EXISTING_USER_INBOX = "update mail_user_mapper set mail_inbox=mail_inbox + {"+newMailId+"} where user_email_id='"+mailIdTo+"'";
+				String UPDATE_EXISTING_USER_INBOX = "update mail_user_mapper set mail_inbox=mail_inbox + {"+newMailId+"} where user_email_id=?";
 				try{
-					cassandraTemplate.update(UPDATE_EXISTING_USER_INBOX);
+					getJdbcTemplate().update(UPDATE_EXISTING_USER_INBOX,mailIdTo);
 				}
 				catch(Exception ex)
 				{
@@ -162,7 +192,7 @@ public class JdbcYMailDao  implements YMailDao {
 			{
 				String INSERT_NEW_USER_INBOX = "insert into mail_user_mapper (user_email_id,mail_inbox ,user_first_name,user_last_name) values ('"+mailIdTo+"',"+ "{"+ newMailId +"},'"+userDetails.getFirstName()+"','"+userDetails.getLastName()+"')";
 				try{
-					cassandraTemplate.update(INSERT_NEW_USER_INBOX);
+					getJdbcTemplate().update(INSERT_NEW_USER_INBOX);
 				}
 				catch(Exception ex)
 				{
@@ -173,14 +203,13 @@ public class JdbcYMailDao  implements YMailDao {
 		
 		
 		for (String mailIdCC : mail.getMailCC()) {
-			String CHECK_IF_USER_EXISTS = "select count(1) from mail_user_mapper where user_email_id='"+mailIdCC+"'";
-			long userCountCC = cassandraTemplate.queryForObject(CHECK_IF_USER_EXISTS,Long.class);
+			long userCountCC = getJdbcTemplate().queryForLong(CHECK_IF_USER_EXISTS,mailIdCC);
 			
 			if(userCountCC != 0)
 			{
-				String UPDATE_EXISTING_USER_INBOX = "update mail_user_mapper set mail_inbox=mail_inbox + {"+newMailId+"} where user_email_id='"+mailIdCC+"'";
+				String UPDATE_EXISTING_USER_INBOX = "update mail_user_mapper set mail_inbox=mail_inbox + {"+newMailId+"} where user_email_id=?";
 				try{
-					cassandraTemplate.update(UPDATE_EXISTING_USER_INBOX);
+					getJdbcTemplate().update(UPDATE_EXISTING_USER_INBOX,mailIdCC);
 				}
 				catch(Exception ex)
 				{
@@ -191,7 +220,7 @@ public class JdbcYMailDao  implements YMailDao {
 			{
 				String INSERT_NEW_USER_INBOX = "insert into mail_user_mapper (user_email_id,mail_inbox ,user_first_name,user_last_name) values ('"+mailIdCC+"',"+ "{"+ newMailId +"},'"+userDetails.getFirstName()+"','"+userDetails.getLastName()+"')";
 				try{
-					cassandraTemplate.update(INSERT_NEW_USER_INBOX);
+					getJdbcTemplate().update(INSERT_NEW_USER_INBOX);
 				}
 				catch(Exception ex)
 				{
@@ -201,14 +230,13 @@ public class JdbcYMailDao  implements YMailDao {
 		}
 		
 		for (String mailIdBCC : mail.getMailBCC()) {
-			String CHECK_IF_USER_EXISTS = "select count(1) from mail_user_mapper where user_email_id='"+mailIdBCC+"'";
-			long userCountBCC = cassandraTemplate.queryForObject(CHECK_IF_USER_EXISTS,Long.class);
+			long userCountBCC = getJdbcTemplate().queryForLong(CHECK_IF_USER_EXISTS,mailIdBCC);
 			
 			if(userCountBCC != 0)
 			{
-				String UPDATE_EXISTING_USER_INBOX = "update mail_user_mapper set mail_inbox=mail_inbox + {"+newMailId+"} where user_email_id='"+mailIdBCC+"'";
+				String UPDATE_EXISTING_USER_INBOX = "update mail_user_mapper set mail_inbox=mail_inbox + {"+newMailId+"} where user_email_id=?";
 				try{
-					cassandraTemplate.update(UPDATE_EXISTING_USER_INBOX);
+					getJdbcTemplate().update(UPDATE_EXISTING_USER_INBOX,mailIdBCC);
 				}
 				catch(Exception ex)
 				{
@@ -219,7 +247,7 @@ public class JdbcYMailDao  implements YMailDao {
 			{
 				String INSERT_NEW_USER_INBOX = "insert into mail_user_mapper (user_email_id,mail_inbox ,user_first_name,user_last_name) values ('"+mailIdBCC+"',"+ "{"+ newMailId +"},'"+userDetails.getFirstName()+"','"+userDetails.getLastName()+"')";
 				try{
-					cassandraTemplate.update(INSERT_NEW_USER_INBOX);
+					getJdbcTemplate().update(INSERT_NEW_USER_INBOX);
 				}
 				catch(Exception ex)
 				{
@@ -229,14 +257,14 @@ public class JdbcYMailDao  implements YMailDao {
 		}
 		
 		
-		String CHECK_IF_USER_EXISTS = "select count(1) from mail_user_mapper where user_email_id='"+mail.getMailFrom()+"'";
-		long userCount = cassandraTemplate.queryForObject(CHECK_IF_USER_EXISTS,Long.class);
+
+		long userCount = getJdbcTemplate().queryForLong(CHECK_IF_USER_EXISTS,mail.getMailFrom());
 		
 		if(userCount != 0)
 		{
-			String UPDATE_EXISTING_USER = "update mail_user_mapper set mail_sent=mail_sent + {"+newMailId+"} where user_email_id='"+mail.getMailFrom()+"'";
+			String UPDATE_EXISTING_USER = "update mail_user_mapper set mail_sent=mail_sent + {"+newMailId+"} where user_email_id=?";
 			try{
-				cassandraTemplate.update(UPDATE_EXISTING_USER);
+				getJdbcTemplate().update(UPDATE_EXISTING_USER,mail.getMailFrom());
 			}
 			catch(Exception ex)
 			{
@@ -247,7 +275,7 @@ public class JdbcYMailDao  implements YMailDao {
 		{
 			String INSERT_NEW_USER = "insert into mail_user_mapper (user_email_id,mail_sent ,user_first_name,user_last_name) values ('"+mail.getMailFrom()+"',"+ "{"+ newMailId +"},'"+userDetails.getFirstName()+"','"+userDetails.getLastName()+"')";
 			try{
-				cassandraTemplate.update(INSERT_NEW_USER);
+				getJdbcTemplate().update(INSERT_NEW_USER);
 			}
 			catch(Exception ex)
 			{
@@ -318,7 +346,7 @@ public class JdbcYMailDao  implements YMailDao {
 		
 		try {
 			String GET_INBOX_MAIL_IDS = "select mail_inbox from mail_user_mapper where user_email_id='"+userEmailId+"'";
-			Set<Long> inboxMailIds = cassandraTemplate.queryForObject(GET_INBOX_MAIL_IDS,Set.class);
+			Set<Long> inboxMailIds = getJdbcTemplate().queryForObject(GET_INBOX_MAIL_IDS,Set.class);
 			
 			
 			StringBuilder inboxMailIdsSB = new StringBuilder();
@@ -331,7 +359,7 @@ public class JdbcYMailDao  implements YMailDao {
 				
 			
 			String GET_INBOX_MAILS = "Select * from mail_details where mail_id in ("+inboxMailIdsStr+")";
-			inboxMails = cassandraTemplate.query(GET_INBOX_MAILS,new MailDetailsMapper());
+			inboxMails = getJdbcTemplate().query(GET_INBOX_MAILS,new MailDetailsMapper());
 		} 
 		catch (EmptyResultDataAccessException  emptyEx) {
 			logger.warn(MessageConstants.EMPTY_RESULT_SET);
@@ -343,27 +371,21 @@ public class JdbcYMailDao  implements YMailDao {
 		return inboxMails;
 	}
 
-	public CassandraTemplate getCassandraTemplate() {
-		return cassandraTemplate;
-	}
-
-	public void setCassandraTemplate(CassandraTemplate cassandraTemplate) {
-		this.cassandraTemplate = cassandraTemplate;
-	}
-	
 	/**
 	 * 
 	 * This class is used to Map the ResultSet values(mail) to Domain/Value Objects(Mail)
 	 *
 	 */
-	private class MailDetailsMapper implements RowMapper<Mail> {
+	private static class MailDetailsMapper
+			implements
+				ParameterizedRowMapper<Mail> {
 		@Override
-		public Mail mapRow(Row rs, int arg1) throws DriverException {
+		public Mail mapRow(ResultSet rs, int rowCount) throws SQLException {
 			Mail mail = new Mail();
 			mail.setMailId(rs.getLong("mail_id"));
 			mail.setMailFrom(rs.getString("mail_from"));
-			mail.setMailCC((Set<String>) rs.getSet("mail_cc",String.class));
-			mail.setMailBCC((Set<String>) rs.getSet("mail_bcc",String.class));
+			mail.setMailCC((Set<String>) rs.getObject("mail_cc"));
+			mail.setMailBCC((Set<String>) rs.getObject("mail_bcc"));
 			mail.setMailSubject(rs.getString("mail_subject"));
 			mail.setMailBody(rs.getString("mail_body"));
 			
@@ -376,7 +398,7 @@ public class JdbcYMailDao  implements YMailDao {
 			//mail.setIsAttachmentAttached(rs.getBoolean("is_mail_attachment_attached "));
 			//mail.setIsPictureAttached(rs.getBoolean("is_mail_picture_attached "));
 			mail.setMailStatus(rs.getString("mail_status"));
-			mail.setMailRead(rs.getBool("mail_read"));
+			mail.setMailRead(rs.getBoolean("mail_read"));
 			mail.setUserFirstName(rs.getString("user_first_name"));
 			mail.setUserLastName(rs.getString("user_last_name"));
 			
@@ -384,13 +406,23 @@ public class JdbcYMailDao  implements YMailDao {
 		}
 	}
 
+<<<<<<< HEAD
+	public CassandraTemplate getCassandraTemplate() {
+		return cassandraTemplate;
+	}
+
+	public void setCassandraTemplate(CassandraTemplate cassandraTemplate) {
+		this.cassandraTemplate = cassandraTemplate;
+	}
+
+=======
 	@Override
 	public List<Mail> getSentMails(String userEmailId) {
 		
 		List<Mail> sentMails = new ArrayList<Mail>();
 		try {
 			String GET_SENT_MAIL_IDS = "select mail_sent from mail_user_mapper where user_email_id='"+userEmailId+"'";
-			Set<Long> sentMailIds = cassandraTemplate.queryForObject(GET_SENT_MAIL_IDS,Set.class);
+			Set<Long> sentMailIds = getJdbcTemplate().queryForObject(GET_SENT_MAIL_IDS,Set.class);
 			
 			
 			StringBuilder sentMailIdsSB = new StringBuilder();
@@ -403,7 +435,7 @@ public class JdbcYMailDao  implements YMailDao {
 				
 			
 			String GET_SENT_MAILS = "Select * from mail_details where mail_id in ("+sentMailIdsStr+")";
-			sentMails = cassandraTemplate.query(GET_SENT_MAILS,new MailDetailsMapper());
+			sentMails = getJdbcTemplate().query(GET_SENT_MAILS,new MailDetailsMapper());
 		} 
 		catch (EmptyResultDataAccessException  emptyEx) {
 			logger.warn(MessageConstants.EMPTY_RESULT_SET);
@@ -415,4 +447,5 @@ public class JdbcYMailDao  implements YMailDao {
 		return sentMails;
 	}
 	
+>>>>>>> development
 }

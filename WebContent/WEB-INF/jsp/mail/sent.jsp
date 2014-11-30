@@ -24,7 +24,27 @@
 	<div>
 		<div class="userleft"><%@include file="/WEB-INF/jsp/include/mail_navigation.jsp" %></div>
 		<div class="usercenter">
-
+            <c:choose>
+					<c:when test="${not empty emptyResultSet }">
+									No mails Found! 
+					</c:when>
+					<c:otherwise>
+						
+						<div class="pure-menu pure-menu-open">
+						 	<ul style="padding-left: 10px;">
+								<c:forEach items="${mail}" var="mail">
+								 	<li>
+								 	<div>
+								 	<div><c:out value="${mail.mailFrom }"></c:out></div>
+								 	<div><c:out value="${mail.mailSubject }"></c:out><c:out value="${question.mailBody }"></c:out></div>
+								 	<div><c:out value="${mail.mailSentTimestamp }"></c:out></div>
+								 	</div>
+								 	</li>
+								</c:forEach>
+							</ul>
+							</div>
+					</c:otherwise>
+			</c:choose>
 		</div>
 		<div class="userright"><%@include file="/WEB-INF/jsp/include/right.jsp" %></div>
 	</div>
