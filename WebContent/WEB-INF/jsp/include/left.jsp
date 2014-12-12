@@ -15,6 +15,7 @@
     <li><a href="user_timeline.htm">Timeline</a></li>
     <li><a href="files.htm">Share Files</a></li>
     <li><a href="inbox.htm">Mail</a></li>
+    <li><a href="tickets.htm">Tickets</a></li>
 						       
 	 </ul>
 </div>	
