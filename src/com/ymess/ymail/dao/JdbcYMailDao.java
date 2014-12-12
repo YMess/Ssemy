@@ -51,7 +51,7 @@ public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 		if(mail.getIsAttachmentAttached())
 		{
 			
-	    	String SEND_MAIL_WITH_ATTACHMENTS = "insert into mail_details(mail_id,mail_from,mail_to,mail_cc,mail_bcc,mail_subject,mail_body,is_mail_attachment_attached,mail_status,mail_read,mail_sent_timestamp,user_first_name,user_last_name) values(?,?,?,?,?,?,?,?,?,?,?,?)";
+	    	String SEND_MAIL_WITH_ATTACHMENTS = "insert into mail_details(mail_id,mail_from,mail_to,mail_cc,mail_bcc,mail_subject,mail_body,is_mail_attachment_attached,mail_status,mail_read,mail_sent_timestamp,user_first_name,user_last_name) values(?,?,?,?,?,?,?,?,?,?,?,?,?)";
 			getJdbcTemplate().update(SEND_MAIL_WITH_ATTACHMENTS,
 					new Object[]{
 					newMailId,
@@ -230,14 +230,15 @@ public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 	 */
 	private User getUserDetailsByEmailId(String mailFrom) {
 		
-		String GET_USER_DETAILS = "select first_name,last_name from users_data where email_id=?";
-		User user = new User();
+		String GET_USER_DETAILS = "select first_name,last_name from users_data where email_id='"+mailFrom+"'";
+				User user = new User();
 		try{
-		user = getJdbcTemplate().queryForObject(GET_USER_DETAILS, new UserDetailsMapper(),mailFrom);
+		user = getJdbcTemplate().queryForObject(GET_USER_DETAILS, new UserDetailsMapper());
 		}
 		catch(Exception ex)
 		{
 			logger.error(ex.getLocalizedMessage());
+			logger.error(ex.getStackTrace().toString());
 		}
 		return user;
 	}
@@ -322,18 +323,19 @@ public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 			Mail mail = new Mail();
 			mail.setMailId(rs.getLong("mail_id"));
 			mail.setMailFrom(rs.getString("mail_from"));
+			mail.setMailTo((Set<String>) rs.getObject("mail_to"));
 			mail.setMailCC((Set<String>) rs.getObject("mail_cc"));
 			mail.setMailBCC((Set<String>) rs.getObject("mail_bcc"));
 			mail.setMailSubject(rs.getString("mail_subject"));
 			mail.setMailBody(rs.getString("mail_body"));
 			
 			/*if(rs.getDate("mail_saved_timestamp") != null)
-				mail.setMailSavedTimestamp(rs.getDate("mail_saved_timestamp "));
+				mail.setMailSavedTimestamp(rs.getDate("mail_saved_timestamp"));*/
 			
 			if(rs.getDate("mail_sent_timestamp") != null)	
-				mail.setMailSentTimestamp(rs.getDate("mail_sent_timestamp "));*/
+				mail.setMailSentTimestamp(rs.getDate("mail_sent_timestamp"));
 			
-			//mail.setIsAttachmentAttached(rs.getBoolean("is_mail_attachment_attached "));
+			//mail.setIsAttachmentAttached(rs.getBoolean("is_mail_attachment_attached"));
 			//mail.setIsPictureAttached(rs.getBoolean("is_mail_picture_attached "));
 			mail.setMailStatus(rs.getString("mail_status"));
 			mail.setMailRead(rs.getBoolean("mail_read"));
@@ -364,6 +366,22 @@ public class JdbcYMailDao extends JdbcDaoSupport implements YMailDao {
 			
 			String GET_SENT_MAILS = "Select * from mail_details where mail_id in ("+sentMailIdsStr+")";
 			sentMails = getJdbcTemplate().query(GET_SENT_MAILS,new MailDetailsMapper());
+			
+			StringBuilder sentMailUserSB = new StringBuilder();
+			String sentMailUserStr = "";
+			for (Mail mail : sentMails) {
+				Set<String> mailToUsers = mail.getMailTo();
+				for (String mailTo : mailToUsers) {
+					User userDetails = getUserDetailsByEmailId(mailTo);
+					if(userDetails.getFirstName() != null || userDetails.getFirstName() != "")
+					    sentMailUserSB.append(userDetails.getFirstName()).append(" ").append(userDetails.getLastName()).append(",");
+					else
+						sentMailUserSB.append(mailTo).append(",");
+				}
+				if(sentMailUserSB.length() > 0)
+					sentMailUserStr = sentMailUserSB.substring(0,sentMailUserSB.lastIndexOf(","));
+				mail.setSentUserName(sentMailUserStr);
+			}
 		} 
 		catch (EmptyResultDataAccessException  emptyEx) {
 			logger.warn(MessageConstants.EMPTY_RESULT_SET);

@@ -29,20 +29,18 @@
 									No mails Found! 
 					</c:when>
 					<c:otherwise>
-						
-						<div class="pure-menu pure-menu-open">
-						 	<ul style="padding-left: 10px;">
-								<c:forEach items="${mail}" var="mail">
-								 	<li>
-								 	<div>
-								 	<div><c:out value="${mail.mailFrom }"></c:out></div>
-								 	<div><c:out value="${mail.mailSubject }"></c:out><c:out value="${question.mailBody }"></c:out></div>
-								 	<div><c:out value="${mail.mailSentTimestamp }"></c:out></div>
-								 	</div>
-								 	</li>
-								</c:forEach>
-							</ul>
-							</div>
+		
+					<div class="pure-menu pure-menu-open">
+					<table>
+						 <c:forEach items="${mail}" var="mail">
+                    <tr>
+                  	   <td style="width: 20%">${mail.sentUserName}</td>
+                       <td>${mail.mailSubject}&nbsp;${mail.mailBody}</td>
+                       <td style="width: 20%">${mail.mailSentTimestamp}</td>
+                   </tr>      
+            	 </c:forEach>	
+                 </table>
+						</div>
 					</c:otherwise>
 			</c:choose>
 		</div>

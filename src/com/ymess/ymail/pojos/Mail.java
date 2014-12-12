@@ -31,6 +31,7 @@ public class Mail {
 	  private Boolean mailRead;
 	  private String userFirstName;
 	  private String userLastName;
+	  private String sentUserName;
 	  
 	public long getMailId() {
 		return mailId;
@@ -147,4 +148,11 @@ public class Mail {
 	public void setMailRead(Boolean mailRead) {
 		this.mailRead = mailRead;
 	}
+	public String getSentUserName() {
+		return sentUserName;
+	}
+	public void setSentUserName(String sentUserName) {
+		this.sentUserName = sentUserName;
+	}
+	
 }
