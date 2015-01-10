@@ -147,36 +147,10 @@ public class UserProfileController {
 		    }
 		     //Setting response headers
 		      response.setHeader("Content-Disposition", "inline; filename=\"" + imageName + "\"");
-		     
-		      BufferedInputStream input = null;
-		      BufferedOutputStream output = null;
-
-		      try 
-		      {
-		          input = new BufferedInputStream(new ByteArrayInputStream(image));
-		          output = new BufferedOutputStream(response.getOutputStream());
-		          byte[] buffer = new byte[8192];
-		          int length;
-		         
-		          while ((length = input.read(buffer)) > 0)
-		          {
-		              output.write(buffer, 0, length);
-		          }
-		      } 
-		      catch (IOException e)
-		      {
-		          System.out.println("There are errors in reading/writing image stream " + e.getMessage());
-		      } 
-		      finally 
-		      {
-		       if (output != null)
-		       { 
-		    	   output.flush();
-		           output.close();
-		       }
-		       if (input != null)
-		           input.close();
-		      }
+		      response.getOutputStream().write(image);
+		      response.getOutputStream().flush();
+		      response.getOutputStream().close();
+		   
 		   }
 		   catch(Exception ex)
 		   {
@@ -298,36 +272,9 @@ public class UserProfileController {
 		    }
 		     //Setting response headers
 		      response.setHeader("Content-Disposition", "inline; filename=\"" + imageName + "\"");
-		     
-		      BufferedInputStream input = null;
-		      BufferedOutputStream output = null;
-
-		      try 
-		      {
-		          input = new BufferedInputStream(new ByteArrayInputStream(image));
-		          output = new BufferedOutputStream(response.getOutputStream());
-		          byte[] buffer = new byte[8192];
-		          int length;
-		         
-		          while ((length = input.read(buffer)) > 0)
-		          {
-		              output.write(buffer, 0, length);
-		          }
-		      } 
-		      catch (IOException e)
-		      {
-		          System.out.println("There are errors in reading/writing image stream " + e.getMessage());
-		      } 
-		      finally 
-		      {
-		       if (output != null)
-		       { 
-		    	   output.flush();
-		           output.close();
-		       }
-		       if (input != null)
-		           input.close();
-		      }
+		      response.getOutputStream().write(image);
+		      response.getOutputStream().flush();
+		      response.getOutputStream().close();
 		   }
 		   catch(Exception ex)
 		   {

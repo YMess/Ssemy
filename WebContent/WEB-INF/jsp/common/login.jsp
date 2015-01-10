@@ -96,8 +96,8 @@
    		 <fieldset>
        		 <legend>Login</legend>
 		
-		        <input type="email" placeholder="Email" name="j_username">
-		        <input type="password" placeholder="Password" name="j_password">
+		        <input type="email" placeholder="Email" name="username">
+		        <input type="password" placeholder="Password" name="password">
 		
 		      <!--   <label for="remember">
 		            <input id="remember" type="checkbox"> Remember me

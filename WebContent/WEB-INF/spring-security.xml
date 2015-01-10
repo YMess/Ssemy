@@ -18,19 +18,16 @@
 	
 	<!-- <http pattern="/candidate_login.htm" security="none" /> -->
 	
-	<http auto-config="false" disable-url-rewriting="true">
-		<session-management session-fixation-protection="newSession">
+	
+		<!--<session-management session-fixation-protection="newSession">
 			<concurrency-control max-sessions="1" />
-		</session-management>
+		</session-management>  -->
 	<!-- 	<intercept-url pattern="/employer*.htm" access="ROLE_CORPORATE" />   -->
 		
  
-		<intercept-url pattern="/user*.htm" access="ROLE_REGISTERED" />
-		<!-- <intercept-url pattern="/ticket*.htm" access="ROLE_REGISTERED" /> -->
 		
-		<intercept-url pattern="/admin*.htm" access="ROLE_ADMIN" />
 		
-		<form-login login-page="/home.htm"
+<!-- 		<form-login login-page="/home.htm"
 			default-target-url="/userdashboard.htm" authentication-failure-url="/loginfailed.htm" />
 		<logout logout-success-url="/home.htm" />
 			<logout success-handler-ref="customLogoutHandler" />
@@ -38,10 +35,10 @@
 	    <remember-me />
 
 	</http>
-	<!-- 
+	
 	<beans:bean id="customLogoutHandler" class="caerusapp.web.CustomLogoutHandler">
 	    <beans:property name="loginManagement" ref="loginManagement" ></beans:property>
-    </beans:bean>  -->
+    </beans:bean> 
 	
 	 <authentication-manager alias="authenticationManager">
 		<authentication-provider>
@@ -52,7 +49,7 @@
 		</authentication-provider>
 	</authentication-manager>
 	
-	<!-- <authentication-manager>
+	<authentication-manager>
 	  <authentication-provider>
 	    <user-service>
 		<user name="devitsfangs@wordpress.com" password="123456" authorities="ROLE_REGISTERED" />
@@ -60,4 +57,36 @@
 	  </authentication-provider>
 	</authentication-manager> -->
 	
+	
+	<http auto-config="false" disable-url-rewriting="true">
+		 <form-login login-page="/login.htm" authentication-success-handler-ref="authSuccessHandler" default-target-url="/userdashboard.htm" 
+		     authentication-failure-url="/loginfailed.htm" username-parameter="username" password-parameter="password" />
+		 <logout delete-cookies="JSESSIONID"  invalidate-session="true" success-handler-ref="customLogoutHandler"/>
+	     <remember-me />
+	
+	         <session-management  session-fixation-protection="none"> <!-- session-authentication-strategy-ref="sas" -->        
+	   			 <concurrency-control max-sessions="1" expired-url="/home.htm"/> 
+			</session-management>
+		
+	         	<intercept-url pattern="/user*.htm" access="ROLE_REGISTERED" />
+				<!-- <intercept-url pattern="/ticket*.htm" access="ROLE_REGISTERED" /> -->
+				<intercept-url pattern="/admin*.htm" access="ROLE_ADMIN" />
+	</http>
+	<!--  -->
+	
+		 <beans:bean id="customLogoutHandler" class="com.ymess.util.CustomLogoutHandler">
+   		 </beans:bean>  
+    
+    <beans:bean id="authSuccessHandler" class="com.ymess.util.AuthenticationSuccessHandler" >
+    	<beans:property name="alwaysUseDefaultTargetUrl" value="true"/>
+    </beans:bean>
+    
+	<beans:bean id="sas" class="org.springframework.security.web.authentication.session.SessionFixationProtectionStrategy"/>
+		
+		
+	 <authentication-manager>
+		    <authentication-provider user-service-ref="loginService" >
+		   		 <password-encoder hash="md5" />
+		    </authentication-provider>
+  	</authentication-manager>
 </beans:beans>  

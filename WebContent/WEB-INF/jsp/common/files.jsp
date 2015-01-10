@@ -138,20 +138,20 @@ border: medium;
 						<c:forEach items="${userFiles}" var="userFile">
 						<c:set var="fileId"  value="${userFile.fileId }"/>
 						<c:set var="author"  value="${userFile.authorEmailId }"/>
-							<li class="grid">
+							<li class="grid" style="width: 150px;height: 150px;">
 								<div><c:out value="${userFile.fileDescription }" /></div>
 								<div><a href="download_file.htm?fileId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("fileId")).getBytes()))%>&author=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("author")).getBytes()))%>"><c:out value="${userFile.filename}" /></a>
 								</div><div><c:out value="${userFile.fileSize}" /></div>
-								<div style="padding-left:25%;float: left;">
+								<!-- <div style="padding-left:25%;float: left;"> -->
 									<a href="edit_file.htm?fId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("fileId")).getBytes()))%>&author=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("author")).getBytes()))%>">
 										<img height="40px" width="40px" src="images/Edit_Icon.png">
 									</a>
-								</div>
-								<div style="padding-left:10px;float: left;">
+								<!-- </div> -->
+								<!-- <div style="padding-left:10px;float: left;"> -->
 								<a href="delete_file.htm?fId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("fileId")).getBytes()))%>&author=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("author")).getBytes()))%>">
 									<img height="40px" width="40px" src="images/Delete_Icon.png">
 								</a>
-								</div>
+								<!-- </div> -->
 							</li>
 						</c:forEach>
 						</ul>

@@ -5,6 +5,7 @@ package com.ymess.dao;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -108,13 +109,13 @@ public class JdbcYMessDao implements YMessDao {
 			Insert insertQuery = QueryBuilder.insertInto("users").values(
 					new String[]{"username","password","authority","enabled"}, 
 					new Object[]{user.getUserEmailId(),hashedPassword,YMessCommonUtility.ROLE_REGISTERED,YMessCommonUtility.ENABLE_USER_FLAG});
-			cassandraTemplate.insert(insertQuery);
+			cassandraTemplate.execute(insertQuery);
 			
 			// Users Data
 		Insert insertIntoUserDetails = QueryBuilder.insertInto("users_data").values(
 				new String[]{"email_id","first_name","last_name","password","authority","registered_time"},
 				new Object[]{user.getUserEmailId(),user.getFirstName(),user.getLastName(),hashedPassword,YMessCommonUtility.ROLE_REGISTERED,new Date()});
-		cassandraTemplate.insert(insertIntoUserDetails);
+		cassandraTemplate.execute(insertIntoUserDetails);
 		
 		// User Timeline
 		Insert insertIntoUserTimeline = QueryBuilder.insertInto("user_timeline").values(
@@ -157,8 +158,6 @@ public class JdbcYMessDao implements YMessDao {
 				else
 					compressedImage = originalImage;
 				
-				final String INSERT_QUESTION_WITH_IMAGE = "insert into questions (question_id,author_email_id,question_title,question_desc,created_date,updated_date,keywords,author_first_name,author_last_name,is_image_attached,image_data,image_name,topics) values (?,?,?,?,?,?,?,?,?,?,?,?,?)";
-						
 				Insert insertIntoQuestions = YMessCommonUtility.getFormattedInsertQuery("questions", 
 						"question_id,author_email_id,question_title,question_desc,created_date,"
 						+ "updated_date,keywords,author_first_name,"
@@ -174,12 +173,12 @@ public class JdbcYMessDao implements YMessDao {
 						userDetails.getFirstName(),
 						userDetails.getLastName(),
 						true,
-						compressedImage,
+						ByteBuffer.wrap(compressedImage),
 						question.getQuestionImage().getOriginalFilename(),
 						question.getTopics()
 					});
 				
-				cassandraTemplate.insert(insertIntoQuestions);
+				cassandraTemplate.execute(insertIntoQuestions);
 				
 				
 			Insert insertQueryinTimeline = YMessCommonUtility.getFormattedInsertQuery("user_timeline", 
@@ -195,7 +194,7 @@ public class JdbcYMessDao implements YMessDao {
 						);*/
 			
 			
-			cassandraTemplate.insert(insertQueryinTimeline);
+			cassandraTemplate.execute(insertQueryinTimeline);
 						
 			} catch (IOException e) {
 				logger.error(e.getStackTrace());
@@ -211,7 +210,7 @@ public class JdbcYMessDao implements YMessDao {
 					new Object[]{currentQuestionId,question.getAuthorEmailId(),question.getQuestionTitle(),question.getQuestionDescription(),
 					currentTime,currentTime,question.getKeywords(),userDetails.getFirstName(),userDetails.getLastName(),question.getTopics()});
 			
-			cassandraTemplate.insert(insertQuestionWithoutImage);
+			cassandraTemplate.execute(insertQuestionWithoutImage);
 			
 			
 		/*	cassandraTemplate.update(INSERT_QUESTION,
@@ -228,7 +227,7 @@ public class JdbcYMessDao implements YMessDao {
 					userDetails.getLastName(),currentQuestionId,question.getQuestionTitle(),question.getQuestionDescription(),
 					false,question.getTopics(),currentTime ,YMessCommonUtility.IS_POSTED_QUESTIONS});
 			
-			cassandraTemplate.insert(insertIntoUserTimeline);
+			cassandraTemplate.execute(insertIntoUserTimeline);
 			
 			
 			/*cassandraTemplate.update(ADD_QUESTION_TIMELINE, new Object[]{question.getAuthorEmailId(),new Date(),ActivityConstants.POSTED_QUESTION,userDetails.getFirstName(),userDetails.getLastName(),currentQuestionId,question.getQuestionTitle(),question.getQuestionDescription(),false,question.getTopics(),currentTime ,YMessCommonUtility.IS_POSTED_QUESTIONS},
@@ -257,44 +256,42 @@ public class JdbcYMessDao implements YMessDao {
 			selectTopicCount.where(QueryBuilder.eq("topic", topic));
 				
 			Long topicCount = cassandraTemplate.queryForObject(selectTopicCount,Long.class);
-			
-			//String CHECK_IF_TOPIC_EXISTS = "select count(1) from topics where topic=?";
-			//long topicCount = cassandraTemplate.queryForLong(CHECK_IF_TOPIC_EXISTS,topic);
-			
 			if(topicCount != 0)
 			{
-				
 				Select selectQuestionCount = QueryBuilder.select("question_count").from("topics");
 				selectQuestionCount.where(QueryBuilder.eq("topic", topic));
 					
-				Long questionCount = cassandraTemplate.queryForObject(selectQuestionCount,Long.class);
+				Long questionCount = 0L;
+				try {
+					questionCount = cassandraTemplate.queryForObject(selectQuestionCount,Long.class);
+				}
+				catch(NullPointerException npe){
+					questionCount = 0L;
+				}
 				
-				
-				//long questionCount = cassandraTemplate.queryForLong("select question_count from topics where topic=?",topic);
-				
-				try{
+				try {
 					Update update = QueryBuilder.update("topics");
 					update.with(QueryBuilder.set("question_count", questionCount+1));
-					update.with(QueryBuilder.set("question_ids", "question_ids + {"+questionId+ " }"));
+					update.with(QueryBuilder.append("question_ids", questionId));
 
 					update.where(QueryBuilder.eq("topic", topic));
 					cassandraTemplate.execute(update);
 					
-					
-					//String UPDATE_TOPIC = "update topics set question_count="+(questionCount+1)+",question_ids=question_ids + {"+questionId+"} where topic=?";
-					//cassandraTemplate.update(UPDATE_TOPIC,topic);
 				}
 				catch(Exception ex)
 				{
-					logger.error(ex.getStackTrace());
+					logger.error(ex.getCause());
 				}
 			}
 			else
 			{
-				try{
+				try {
+					Set<Long> questionIds = new HashSet<Long>();
+					questionIds.add(questionId);
+					
 					Insert insert = QueryBuilder.insertInto("topics");
-					insert.value("topic", "'"+topic+"'");
-					insert.value("question_ids", "{"+ questionId +"}");
+					insert.value("topic", topic);
+					insert.value("question_ids", questionIds);
 					insert.value("question_count", 1);
 
 					cassandraTemplate.execute(insert);
@@ -332,15 +329,12 @@ public class JdbcYMessDao implements YMessDao {
 	 * @return User(userDetails)
 	 */
 	private User getUserDetailsByEmailId(String authorEmailId) {
-		String GET_USER_DETAILS = "select first_name,last_name from users_data where email_id=?";
 		User user = new User();
 		try{
 			Select selectUserDetails = QueryBuilder.select("first_name","last_name").from("users_data");
 			selectUserDetails.where(QueryBuilder.eq("email_id", authorEmailId));
 			
-			user = cassandraTemplate.queryForObject(selectUserDetails, User.class);
-			
-		//user = cassandraTemplate.queryForObject(GET_USER_DETAILS, new UserDetailsMapper(),authorEmailId);
+			user = cassandraTemplate.queryForObject(selectUserDetails, new UserDetailsMapper());
 		}
 		catch(Exception ex)
 		{
@@ -537,7 +531,7 @@ public class JdbcYMessDao implements YMessDao {
 			Select selectUserQuestions = QueryBuilder.select().from("questions");
 			selectUserQuestions.where(QueryBuilder.eq("author_email_id", userEmailId));
 			
-			questions = (List<Question>) cassandraTemplate.query(selectUserQuestions,(ResultSetExtractor<Question>) new QuestionDetailsMapper());
+			questions = cassandraTemplate.query(selectUserQuestions, new QuestionDetailsMapper());
 		} 
 		catch (EmptyResultDataAccessException  emptyEx) {
 			logger.warn(MessageConstants.EMPTY_RESULT_SET);
@@ -674,15 +668,13 @@ public class JdbcYMessDao implements YMessDao {
 						compressedImage = originalImage;
 					
 					
-					String ADD_ANSWER_WITH_IMAGE="insert into answers (question_id,answer_id,answered_time,answer_desc,author_email_id,author_first_name,author_last_name,image_data,is_image_attached) values(?,?,?,?,?,?,?,?,?)";
-					
 					Insert insertQuery = YMessCommonUtility.getFormattedInsertQuery("answers", "question_id,answer_id,answered_time,answer_desc,"
 							+ "author_email_id,author_first_name,"
 							+ "author_last_name,image_data,is_image_attached",
 							new Object[]{
 							answer.getQuestionId(),newAnswerId,new Date(),answer.getAnswerDescription(),
 							answer.getAuthorEmailId(),userDetails.getFirstName(),userDetails.getLastName(),
-							compressedImage,answer.getIsImageAttached()});
+							ByteBuffer.wrap(compressedImage),answer.getIsImageAttached()});
 					
 					cassandraTemplate.insert(insertQuery);
 					
@@ -966,7 +958,7 @@ public class JdbcYMessDao implements YMessDao {
 	 */
 	@Override
 	public User getUserDetails(String loggedInUserEmail) throws EmptyResultSetException {
-		final String GET_USER_DETAILS = "select * from users_data where email_id="+loggedInUserEmail;
+		final String GET_USER_DETAILS = "select * from users_data where email_id='"+loggedInUserEmail+"'";
 		
 		User user = new User();
 		try{
@@ -992,10 +984,15 @@ public class JdbcYMessDao implements YMessDao {
 	@Override
 	public void updateUserProfile(User user) {
 
-		final String GET_USER_PREVIOUS_INTERESTS = "select interests from users_data where email_id="+user.getUserEmailId();
+		final String GET_USER_PREVIOUS_INTERESTS = "select interests from users_data where email_id='"+user.getUserEmailId()+"'";
 		/** Fetching User's previous Interests to Compare and check if anything has been updated */
-		Set<String> previousInterests = (Set<String>) cassandraTemplate.queryForObject(GET_USER_PREVIOUS_INTERESTS, Set.class);
-		
+		Set<String> previousInterests = new HashSet<String>();
+		try {
+			previousInterests = cassandraTemplate.queryForObject(GET_USER_PREVIOUS_INTERESTS, Set.class);
+		}
+		catch(NullPointerException npe){
+			previousInterests = new HashSet<String>();
+		}
 		Set<String> previousOrganizations = new HashSet<String>();
 		Set<String> interests = new HashSet<String>();
 		
@@ -1014,9 +1011,7 @@ public class JdbcYMessDao implements YMessDao {
 			interests = YMessCommonUtility.removeNullAndEmptyElements(interests);
 		}
 		
-		final String UPDATE_USER_PROFILE = "insert into users_data(email_id,first_name,last_name,designation,organization,previous_organizations,interests) values(?,?,?,?,?,?,?)  ";
-
-		try{
+		try { 
 			
 			Insert insertUserProfile = YMessCommonUtility.getFormattedInsertQuery("users_data", "email_id,first_name,last_name,designation,"
 					+ "organization,previous_organizations,interests", 
@@ -1029,12 +1024,7 @@ public class JdbcYMessDao implements YMessDao {
 					previousOrganizations ,
 					interests});
 			
-			cassandraTemplate.insert(insertUserProfile);
-			
-			/*cassandraTemplate.insert(UPDATE_USER_PROFILE,
-				new Object[]{user.getUserEmailId(), user.getFirstName(), user.getLastName(), user.getDesignation(), user.getOrganization(), previousOrganizations ,interests},
-		new int[]{Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.ARRAY,Types.ARRAY}
-				);*/
+			cassandraTemplate.execute(insertUserProfile);
 			
 			Insert insertUserProfileTimeline = YMessCommonUtility.getFormattedInsertQuery("user_timeline",
 					"user_email_id, user_timestamp, activity, user_first_name, user_last_name, "
@@ -1046,7 +1036,7 @@ public class JdbcYMessDao implements YMessDao {
 					user.getOrganization(),user.getDesignation(),previousOrganizations, interests,
 					YMessCommonUtility.IS_PROFILE_UPDATED});
 			
-			cassandraTemplate.insert(insertUserProfileTimeline);
+			cassandraTemplate.execute(insertUserProfileTimeline);
 			
 			/*cassandraTemplate.update(UPDATE_USER_PROFILE_TIMELINE, new Object[]{user.getUserEmailId(),new Date(),ActivityConstants.PROFILE_UPDATED,user.getFirstName(),user.getLastName(),user.getFirstName(),user.getLastName(),user.getOrganization(),user.getDesignation(),previousOrganizations, interests,YMessCommonUtility.IS_PROFILE_UPDATED},
 					new int[]{Types.VARCHAR,Types.TIMESTAMP,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.ARRAY,Types.ARRAY,Types.BOOLEAN}
@@ -1074,24 +1064,18 @@ public class JdbcYMessDao implements YMessDao {
 				if(interestCount != 0)
 				{
 					final String UPDATE_INTEREST ="Update user_interests set contributors = contributors + {'"+user.getUserEmailId()+"'} ,contributor_count="+ interestCount+1 +" where interest='"+interest+"'";
-					cassandraTemplate.update(UPDATE_INTEREST);
+					cassandraTemplate.execute(UPDATE_INTEREST);
 				}
 				else
 				{
 					Set<String> emailId = new HashSet<String>();
 					emailId.add(user.getUserEmailId());
 					
-				    final  String INSERT_INTEREST = "Insert into user_interests(interest,contributors,contributor_count,created_date) values(?,?,?,?)";
-				    
-				    
 				    Insert insertIntoUserInterests = YMessCommonUtility.getFormattedInsertQuery("user_interests", 
 				    		"interest,contributors,contributor_count,created_date", 
 				    		new Object[]{interest,emailId,1,new Date() });
 
 				    cassandraTemplate.execute(insertIntoUserInterests);
-				  /*  cassandraTemplate.update(INSERT_INTEREST,
-				    		 new Object[]{interest,emailId,1,new Date() },
-				    		 new int[]{Types.VARCHAR,Types.ARRAY,Types.BIGINT,Types.TIMESTAMP});*/
 				}
 			}
 				
@@ -1213,8 +1197,11 @@ public class JdbcYMessDao implements YMessDao {
 		public User mapRow(Row rs, int arg1) throws DriverException {
 			User user = new User();
 			
-			user.setUserImageData(YMessCommonUtility.convertByteBufferToByteArray(rs.getBytes("user_image")));
-			/*user.setUserImageData(rs.getBytes("user_image"));*/
+			if(rs.getBytes("user_image") != null){
+				byte[] userImage = new byte[rs.getBytes("user_image").remaining()];
+				rs.getBytes("user_image").get(userImage);
+				user.setUserImageData(userImage);
+			}
 			user.setImageName(rs.getString("user_image_name"));
 			
 			return user;
@@ -1256,14 +1243,15 @@ public class JdbcYMessDao implements YMessDao {
 				else
 					compressedImage = originalImage;
 				
-				final String INSERT_IMAGE = "update users_data set user_image_name= '"+imageName+"', user_image = "+compressedImage+" where email_id ='"+user.getUserEmailId()+"'";
-				cassandraTemplate.update(INSERT_IMAGE);
+				//final String INSERT_IMAGE = "update users_data set user_image_name= '"+imageName+"', user_image = "+ByteBuffer.wrap(compressedImage)+" where email_id ='"+user.getUserEmailId()+"'";
 				
+				Update updateUserImage = QueryBuilder.update("users_data");
+				updateUserImage.with(QueryBuilder.set("user_image_name", imageName));
+				updateUserImage.with(QueryBuilder.set("user_image", ByteBuffer.wrap(compressedImage)));
 				
-				/*cassandraTemplate.update(INSERT_IMAGE,
-						new Object[]{imageName,compressedImage,user.getUserEmailId()},
-						new int[]{Types.VARCHAR,Types.BINARY,Types.VARCHAR}
-						);*/
+				updateUserImage.where(QueryBuilder.eq("email_id", user.getUserEmailId()));
+				
+				cassandraTemplate.execute(updateUserImage);
 			} catch (DataAccessException e) {
 				logger.error(e.getLocalizedMessage());
 				e.printStackTrace();
@@ -1579,7 +1567,12 @@ public class JdbcYMessDao implements YMessDao {
 			Question question = new Question();
 			
 			question.setQuestionImageName(rs.getString("image_name"));
-			question.setQuestionImageDB(YMessCommonUtility.convertByteBufferToByteArray(rs.getBytes("image_data")));
+			
+			if(rs.getBytes("image_data") != null){
+				byte[] imageData = new byte[rs.getBytes("image_data").remaining()];
+				rs.getBytes("image_data").get(imageData);
+				question.setQuestionImageDB(imageData);
+			}
 			question.setIsImageAttached(true);
 			
 			return question;
@@ -1715,8 +1708,10 @@ public class JdbcYMessDao implements YMessDao {
 	public List<Question> getQuestionsInTopic(String topicName) throws EmptyResultSetException {
 
 		topicName = YMessCommonUtility.removeExtraneousApostrophe(topicName);
+		topicName = topicName.trim().toLowerCase();
+		
 		String GET_QUESTION_IDS_IN_TOPIC = "select question_ids from topics where topic='"+topicName+"'";
-		Set<Long> questionIds = (Set<Long>) cassandraTemplate.queryForObject(GET_QUESTION_IDS_IN_TOPIC, HashSet.class);
+		Set<Long> questionIds = (Set<Long>) cassandraTemplate.queryForObject(GET_QUESTION_IDS_IN_TOPIC, Set.class);
 		
 		StringBuilder questionIdsSB = new StringBuilder();
 		String questionIdsString = "";
@@ -1743,8 +1738,34 @@ public class JdbcYMessDao implements YMessDao {
 		public Question mapRow(Row rs, int arg1) throws DriverException {
 			Question question = new Question();
 			question.setQuestionId(rs.getLong("question_id"));
-			question.setQuestionDescription(rs.getString("question_desc"));
-			question.setUpdatedDate(rs.getDate("updated_date"));
+			question.setQuestionDescription(rs.getString("question_desc")); 
+			
+			if(rs.getDate("updated_date") != null)
+				question.setUpdatedDate(rs.getDate("updated_date"));
+			
+			question.setLastAnswer(rs.getString("last_answer"));
+			question.setAuthorEmailId(rs.getString("author_email_id"));
+			question.setFirstName(rs.getString("author_first_name"));
+			question.setLastName(rs.getString("author_last_name"));
+			question.setIsImageAttached(rs.getBool("is_image_attached"));
+			
+			question.setTopics(rs.getSet("topics", String.class));
+			
+			return question;
+		}
+}
+	
+	
+	private static class QuestionWithoutTopicsMapper implements RowMapper<Question> {
+		@Override
+		public Question mapRow(Row rs, int arg1) throws DriverException {
+			Question question = new Question();
+			question.setQuestionId(rs.getLong("question_id"));
+			question.setQuestionDescription(rs.getString("question_desc")); 
+			
+			if(rs.getDate("updated_date") != null)
+				question.setUpdatedDate(rs.getDate("updated_date"));
+			
 			question.setLastAnswer(rs.getString("last_answer"));
 			question.setAuthorEmailId(rs.getString("author_email_id"));
 			question.setFirstName(rs.getString("author_first_name"));
@@ -1760,7 +1781,7 @@ public class JdbcYMessDao implements YMessDao {
 		try
 		{
 			final String GET_DASHBOARD_QUESTIONS = "select question_id,question_desc,author_email_id,last_answer,updated_date,author_first_name,author_last_name,is_image_attached from questions where question_id in ("+finalQuestionIds+") allow filtering";
-			questions = cassandraTemplate.query(GET_DASHBOARD_QUESTIONS,new QuestionDetailsMapper());
+			questions = cassandraTemplate.query(GET_DASHBOARD_QUESTIONS,new QuestionWithoutTopicsMapper());
 		}
 		catch(EmptyResultDataAccessException emptyResultSet)
 		{
@@ -1931,8 +1952,6 @@ public class JdbcYMessDao implements YMessDao {
 		
 		User userDetails = getUserDetailsByEmailId(file.getAuthorEmailId());
 		
-		/*final String UPLOAD_FILE = "insert into files("file_id,user_email_id,file_type,filename,share_flag,topics,filedata,upload_time,file_size,file_description,user_first_name,user_last_name") values (?,?,?,?,?,?,?,?,?,?,?,?)";*/
-		
 		Insert insertIntoFiles = YMessCommonUtility.getFormattedInsertQuery("files", 
 				"file_id,user_email_id,file_type,filename,share_flag,topics,"
 				+ "filedata,upload_time,file_size,file_description,"
@@ -1944,14 +1963,14 @@ public class JdbcYMessDao implements YMessDao {
 				file.getFileData().getOriginalFilename(),
 				file.getShared(),
 				newFileTopics,
-				file.getFileData().getBytes(),
+				ByteBuffer.wrap(file.getFileData().getBytes()),
 				new Date(),
 				file.getFileSize(),
 				file.getFileDescription(),
 				userDetails.getFirstName(),
 				userDetails.getLastName()
 				});
-		cassandraTemplate.insert(insertIntoFiles);
+		cassandraTemplate.execute(insertIntoFiles);
 		
 		
 		/*cassandraTemplate.update(UPLOAD_FILE,
@@ -1978,21 +1997,23 @@ public class JdbcYMessDao implements YMessDao {
 					Long previousFileCount = cassandraTemplate.queryForObject(PREVIOUS_FILE_COUNT,Long.class);
 					
 					String UPDATE_TOPIC_WITH_FILE_DETAILS = "update topics set file_ids = file_ids + {"+newFileId+":'"+file.getAuthorEmailId() +"'}, file_count = "+ (previousFileCount+1) +" where topic='"+fileTopic+"'";
-					cassandraTemplate.update(UPDATE_TOPIC_WITH_FILE_DETAILS);
+					cassandraTemplate.execute(UPDATE_TOPIC_WITH_FILE_DETAILS);
 				}
 				else
 				{
 					Map<Long,String> fileIdAndAuthorEmailId = new HashMap<Long, String>();
 					fileIdAndAuthorEmailId.put(newFileId,file.getAuthorEmailId());
 					
-					String INSERT_INTO_TOPICS = "insert into topics(topic,file_ids,file_count) values('"+fileTopic+"',"+fileIdAndAuthorEmailId+","+1+")";
-					cassandraTemplate.insert(INSERT_INTO_TOPICS);
+					Insert INSERT_INTO_TOPICS = QueryBuilder.insertInto("topics").values(new String[]{"topic","file_ids","file_count"}, 
+							new Object[]{
+							fileTopic,
+							fileIdAndAuthorEmailId,
+							1
+					});
 					
 					
-					/*cassandraTemplate.update(INSERT_INTO_TOPICS,
-							new Object[]{fileTopic,fileIdAndAuthorEmailId,1},
-							new int[]{Types.VARCHAR,Types.OTHER,Types.BIGINT}
-							);*/
+					//String INSERT_INTO_TOPICS = "insert into topics(topic,file_ids,file_count) values('"+fileTopic+"',"+fileIdAndAuthorEmailId+","+1+")";
+					cassandraTemplate.execute(INSERT_INTO_TOPICS);
 				}	
 				
 			}
@@ -2013,10 +2034,10 @@ public class JdbcYMessDao implements YMessDao {
 				
 				
 				final String DELETE_FILE_FROM_TOPICS = "DELETE file_ids[" +newFileId +"] FROM topics WHERE topic='"+fileTopic+"'";
-				cassandraTemplate.update(DELETE_FILE_FROM_TOPICS);
+				cassandraTemplate.execute(DELETE_FILE_FROM_TOPICS);
 				
 				final String UPDATE_FILE_COUNT = "update topics set file_count ="+(previousFileCount - 1)+" where topic='"+fileTopic+"'";
-				cassandraTemplate.update(UPDATE_FILE_COUNT);
+				cassandraTemplate.execute(UPDATE_FILE_COUNT);
 				
 			}
 		}
@@ -2093,8 +2114,11 @@ public class JdbcYMessDao implements YMessDao {
 		public File mapRow(Row rs, int arg1) throws DriverException {
 			File file = new File();
 			file.setFilename(rs.getString("filename"));
-			file.setFileDataDb(YMessCommonUtility.convertByteBufferToByteArray(rs.getBytes("filedata")));
-			
+			if(rs.getBytes("filedata") != null){
+				byte[] imageData = new byte[rs.getBytes("filedata").remaining()];
+				rs.getBytes("filedata").get(imageData);
+				file.setFileDataDb(imageData);
+			}
 			return file;
 		}
 	}
@@ -2225,20 +2249,20 @@ public class JdbcYMessDao implements YMessDao {
 		Set<String> fileTopics = getTopics(fileId, decodedAuthorEmailId);
 		
 		final String DELETE_FILE = "delete from files where file_id ="+fileId+" and user_email_id ='"+decodedAuthorEmailId+"'";
-		cassandraTemplate.delete(DELETE_FILE);
+		cassandraTemplate.execute(DELETE_FILE);
 		
-		if(! fileTopics.isEmpty())
+		if(fileTopics != null && !fileTopics.isEmpty())
 		{
 			for (String topic : fileTopics) {
 				topic = YMessCommonUtility.removeExtraneousApostrophe(topic);
 				final String DELETE_REFERENCES_FROM_TOPICS = "delete file_ids["+fileId+"] from topics where topic='"+topic+"'";
-				cassandraTemplate.update(DELETE_REFERENCES_FROM_TOPICS);
+				cassandraTemplate.execute(DELETE_REFERENCES_FROM_TOPICS);
 				
 				final String DECREMENT_FILE_COUNT = "select file_count from topics where topic='"+topic+"'";
 				Long fileCount = cassandraTemplate.queryForObject(DECREMENT_FILE_COUNT,Long.class);
 				
 				final String UPDATE_FILE_COUNT = "update topics set file_count="+(fileCount - 1)+" where topic='"+topic+"'";
-				cassandraTemplate.update(UPDATE_FILE_COUNT);
+				cassandraTemplate.execute(UPDATE_FILE_COUNT);
 				
 			}
 		}
@@ -2396,7 +2420,7 @@ public class JdbcYMessDao implements YMessDao {
 					else
 						compressedImage = originalImage;
 				}
-				final String UPDATE_QUESTION_IMAGE = "update questions set image_name='"+imageName+"' , image_data ="+compressedImage+",is_image_attached=true where question_id ="+question.getQuestionId();
+				final String UPDATE_QUESTION_IMAGE = "update questions set image_name='"+imageName+"' , image_data ="+ByteBuffer.wrap(compressedImage)+",is_image_attached=true where question_id ="+question.getQuestionId();
 				cassandraTemplate.update(UPDATE_QUESTION_IMAGE);
 
 			} catch (DataAccessException e) {
@@ -2415,7 +2439,11 @@ public class JdbcYMessDao implements YMessDao {
 		@Override
 		public Answer mapRow(Row rs, int arg1) throws DriverException {
 			Answer answer = new Answer();
-			answer.setAnswerImageDb(YMessCommonUtility.convertByteBufferToByteArray(rs.getBytes("image_data")));
+			if(rs.getBytes("image_data") != null){
+				byte[] imageData = new byte[rs.getBytes("image_data").remaining()];
+				rs.getBytes("image_data").get(imageData);
+				answer.setAnswerImageDb(imageData);
+			}
 			return answer;
 		}
 		
@@ -2480,7 +2508,7 @@ public class JdbcYMessDao implements YMessDao {
 				}
 				final String UPDATE_QUESTION_WITH_IMAGE = "update questions set question_title='"+question.getQuestionTitle()+"' ,"
 						+ " question_desc='"+question.getQuestionDescription()+"', updated_date="+currentTime+","
-								+ "keywords=["+question.getKeywords()+"],  is_image_attached=true, image_data="+compressedImage+", "
+								+ "keywords=["+question.getKeywords()+"],  is_image_attached=true, image_data="+ByteBuffer.wrap(compressedImage)+", "
 										+ "image_name='"+question.getQuestionImage().getOriginalFilename()+"', topics={"+question.getTopics()+"}"
 												+ "  where question_id ="+question.getQuestionId()+" and author_email_id='"+question.getAuthorEmailId()+"'";	
 				cassandraTemplate.update(UPDATE_QUESTION_WITH_IMAGE);

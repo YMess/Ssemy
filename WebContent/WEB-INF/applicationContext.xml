@@ -84,8 +84,14 @@ http://www.springframework.org/schema/data/cassandra/spring-cassandra-1.0.xsd">
 		<property name="cassandraTemplate" ref="cassandraTemplate" />
 	</bean>
 
-
-
+	
+		<bean id="loginService" class="com.ymess.springsecurity.LoginService">
+			<property name="loginDao" ref="loginDao" />
+		</bean>
+		
+		<bean id="loginDao" class="com.ymess.springsecurity.LoginDao">
+		    <property name="cassandraTemplate" ref="cassandraTemplate" />
+		</bean>
 
 
 	<!-- <bean id="propertyConfigurer"

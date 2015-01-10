@@ -55,10 +55,10 @@ function editQuestionDesc(questionId)
 						  <c:if test="${question.isImageAttached eq true }">
 						  	<img height="60%" width="50%" src="user_question_image.htm?qId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("questionId")).getBytes()))%>">
 						 <br>
-						 <c:out value="${question.questionDescription }"></c:out>
-						 <br/>
 						  </c:if>
 						  
+						 <c:out value="${question.questionDescription }"></c:out>
+						 <br/>
 						  
 						 
 								<!-- <ul style="display: inline;margin-left: 20px;"> -->

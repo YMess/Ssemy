@@ -169,7 +169,6 @@ public class UserActivitiesController {
 		catch (Exception e) {
 			logger.error(e.getLocalizedMessage());
 		}
-		
 		model.addAttribute("questions",questions);
 		return JSPMappings.USER_QUESTIONS;
 	}
@@ -414,7 +413,7 @@ public class UserActivitiesController {
 		String imageName = questionImage.getQuestionImageName();
 		byte[] image =  questionImage.getQuestionImageDB();
 		   
-		logger.info(LoggerConstants.USER_VIEW_PROFILE_IMAGE+" "+ decodedQuestionId);
+		//logger.info(LoggerConstants.USER_VIEW_PROFILE_IMAGE+" "+ decodedQuestionId);
 		   try
 		   {
 		    String imageFormat=null;
@@ -430,36 +429,9 @@ public class UserActivitiesController {
 		    }
 		     //Setting response headers
 		      response.setHeader("Content-Disposition", "inline; filename=\"" + imageName + "\"");
-		     
-		      BufferedInputStream input = null;
-		      BufferedOutputStream output = null;
-
-		      try 
-		      {
-		          input = new BufferedInputStream(new ByteArrayInputStream(image));
-		          output = new BufferedOutputStream(response.getOutputStream());
-		          byte[] buffer = new byte[8192];
-		          int length;
-		         
-		          while ((length = input.read(buffer)) > 0)
-		          {
-		              output.write(buffer, 0, length);
-		          }
-		      } 
-		      catch (IOException e)
-		      {
-		          System.out.println("There are errors in reading/writing image stream " + e.getMessage());
-		      } 
-		      finally 
-		      {
-		       if (output != null)
-		       { 
-		    	   output.flush();
-		           output.close();
-		       }
-		       if (input != null)
-		           input.close();
-		      }
+		      response.getOutputStream().write(image);
+		      response.getOutputStream().flush();
+		      response.getOutputStream().close();
 		   }
 		   catch(Exception ex)
 		   {
@@ -530,49 +502,12 @@ public class UserActivitiesController {
 		   
 		   try
 		   {
-		    String imageFormat=null;
-		    //Code Added By BalajiI to Accommodate All Image Formats(namely PNG,JPEG,BMP)
-		    
-		   /* if(imageName!=null && !imageName.equals(""))
-		    {
-		     //To check for file format and render accordingly
-		     String fileExtension = YMessCommonUtility.getFileExtension(imageName);
-		     imageFormat="image/"+fileExtension;
-		    }*/
 			    response.setContentType("image/jpg");
 			    response.setContentLength(image.length);
-		     //Setting response headers
-		    //  response.setHeader("Content-Disposition", "inline; filename=\"" +  + "\"");
-		     
-		      BufferedInputStream input = null;
-		      BufferedOutputStream output = null;
-
-		      try 
-		      {
-		          input = new BufferedInputStream(new ByteArrayInputStream(image));
-		          output = new BufferedOutputStream(response.getOutputStream());
-		          byte[] buffer = new byte[8192];
-		          int length;
-		         
-		          while ((length = input.read(buffer)) > 0)
-		          {
-		              output.write(buffer, 0, length);
-		          }
-		      } 
-		      catch (IOException e)
-		      {
-		          System.out.println("There are errors in reading/writing image stream " + e.getMessage());
-		      } 
-		      finally 
-		      {
-		       if (output != null)
-		       { 
-		    	   output.flush();
-		           output.close();
-		       }
-		       if (input != null)
-		           input.close();
-		      }
+		        response.setHeader("Content-Disposition", "inline; ");
+		        response.getOutputStream().write(image);
+		        response.getOutputStream().flush();
+		        response.getOutputStream().close();
 		   }
 		   catch(Exception ex)
 		   {
