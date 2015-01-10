@@ -8,7 +8,7 @@ package com.ymess.util;
  * @author balaji i
  *
  */
-public class URLMappings {
+public class YMessURLMappings {
 	
 	public static final String LOGIN_PAGE = "login.htm"; //LoginController
 	public static final String LOGIN_FAILED_PAGE = "/loginfailed.htm"; //LoginController

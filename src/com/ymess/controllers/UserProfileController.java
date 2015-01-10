@@ -30,10 +30,10 @@ import com.ymess.exceptions.EmptyResultSetException;
 import com.ymess.pojos.File;
 import com.ymess.pojos.User;
 import com.ymess.service.interfaces.YMessService;
-import com.ymess.util.JSPMappings;
-import com.ymess.util.LoggerConstants;
-import com.ymess.util.MessageConstants;
-import com.ymess.util.URLMappings;
+import com.ymess.util.YMessJSPMappings;
+import com.ymess.util.YMessLoggerConstants;
+import com.ymess.util.YMessMessageConstants;
+import com.ymess.util.YMessURLMappings;
 import com.ymess.util.YMessCommonUtility;
 
 @Controller
@@ -44,7 +44,7 @@ public class UserProfileController {
 	@Autowired
 	YMessService yMessService;
 	
-	@RequestMapping(value=URLMappings.USER_PROFILE,method=RequestMethod.GET)
+	@RequestMapping(value=YMessURLMappings.USER_PROFILE,method=RequestMethod.GET)
 	String getUserProfilePage( Model model)
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -68,11 +68,11 @@ public class UserProfileController {
 				}
 				if(userInterests.length() > 0 && userInterests.contains(","))
 					userInterests = userInterests.substring(0,userInterests.lastIndexOf(","));
-			logger.info(LoggerConstants.USER_PROFILE_LOADED+ " " + loggedInUserEmail);
+			logger.info(YMessLoggerConstants.USER_PROFILE_LOADED+ " " + loggedInUserEmail);
 		}
 		catch(EmptyResultSetException emptyRS)
 		{
-			model.addAttribute("emptyResultSet",MessageConstants.EMPTY_RESULT_SET);
+			model.addAttribute("emptyResultSet",YMessMessageConstants.EMPTY_RESULT_SET);
 			logger.error(emptyRS.getLocalizedMessage());
 		}
 		catch(Exception ex)
@@ -85,10 +85,10 @@ public class UserProfileController {
 		model.addAttribute("userDetails",userDetails);
 		model.addAttribute("user", new User());
 		
-		return JSPMappings.USER_PROFILE;
+		return YMessJSPMappings.USER_PROFILE;
 	}
 	
-	@RequestMapping(value=URLMappings.USER_PROFILE,method=RequestMethod.POST)
+	@RequestMapping(value=YMessURLMappings.USER_PROFILE,method=RequestMethod.POST)
 	String postUserProfileDetails(@ModelAttribute("user") @Valid User user,BindingResult result)
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -99,17 +99,17 @@ public class UserProfileController {
 		
 		if(result.hasErrors())
 		{
-			return JSPMappings.USER_PROFILE;
+			return YMessJSPMappings.USER_PROFILE;
 		}
 		user.setUserEmailId(loggedInUserEmail);
 		
 		yMessService.updateUserProfile(user);
-		logger.info(LoggerConstants.UPDATED_USER_PROFILE +" " + loggedInUserEmail);
+		logger.info(YMessLoggerConstants.UPDATED_USER_PROFILE +" " + loggedInUserEmail);
 		
-		return URLMappings.USER_PROFILE_SUCCESS_REDIRECTION;
+		return YMessURLMappings.USER_PROFILE_SUCCESS_REDIRECTION;
 	}
 	
-	@RequestMapping(value=URLMappings.USER_PROFILE_IMAGE)
+	@RequestMapping(value=YMessURLMappings.USER_PROFILE_IMAGE)
 	String getUserImage(HttpServletRequest request,HttpServletResponse response)
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -131,7 +131,7 @@ public class UserProfileController {
 			imageName = fileDetails.getFilename();
 		}
 		
-		logger.info(LoggerConstants.USER_PROFILE_IMAGE+" "+ loggedInUserEmail);
+		logger.info(YMessLoggerConstants.USER_PROFILE_IMAGE+" "+ loggedInUserEmail);
 		   try
 		   {
 		    String imageFormat=null;
@@ -159,7 +159,7 @@ public class UserProfileController {
 		return null;
 	}
 	
-	@RequestMapping(value=URLMappings.USER_IMAGE_UPLOAD,method=RequestMethod.POST)
+	@RequestMapping(value=YMessURLMappings.USER_IMAGE_UPLOAD,method=RequestMethod.POST)
 	String uploadUserImage(@ModelAttribute("user") User user,BindingResult result)
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -169,12 +169,12 @@ public class UserProfileController {
 		{
 			user.setUserEmailId(loggedInUserEmail);
 			yMessService.uploadUserImage(user);
-			logger.info(LoggerConstants.USER_UPLOADED_IMAGE +" "+loggedInUserEmail);
+			logger.info(YMessLoggerConstants.USER_UPLOADED_IMAGE +" "+loggedInUserEmail);
 		}
-		return URLMappings.USER_PROFILE_SUCCESS_REDIRECTION;
+		return YMessURLMappings.USER_PROFILE_SUCCESS_REDIRECTION;
 	}
 	
-	@RequestMapping(value=URLMappings.USER_VIEW_PROFILE)
+	@RequestMapping(value=YMessURLMappings.USER_VIEW_PROFILE)
 	String viewUserProfile(@RequestParam(value = "aId") String encodedUserEmailId ,Model model)
 	{
 		String userEmailId = "";
@@ -207,7 +207,7 @@ public class UserProfileController {
 				}
 			}
 			
-			logger.info(LoggerConstants.USER_VIEW_PROFILE +" "+userEmailId);
+			logger.info(YMessLoggerConstants.USER_VIEW_PROFILE +" "+userEmailId);
 				for (String  userPreviousOrganization : userDetails.getPreviousOrganizations()) {
 					userPreviousOrganizations = userPreviousOrganizations.concat(" ").concat(userPreviousOrganization);
 				}
@@ -219,7 +219,7 @@ public class UserProfileController {
 		}
 		catch(EmptyResultSetException emptyRS)
 		{
-			model.addAttribute("emptyResultSet",MessageConstants.EMPTY_RESULT_SET);
+			model.addAttribute("emptyResultSet",YMessMessageConstants.EMPTY_RESULT_SET);
 			logger.error(emptyRS.getLocalizedMessage());
 		}
 		catch(Exception ex)
@@ -232,10 +232,10 @@ public class UserProfileController {
 		model.addAttribute("userDetails",userDetails);
 		model.addAttribute("user", new User());
 		
-		return JSPMappings.USER_VIEW_PROFILE;
+		return YMessJSPMappings.USER_VIEW_PROFILE;
 	}
 	
-	@RequestMapping(value=URLMappings.USER_VIEW_PROFILE_IMAGE)
+	@RequestMapping(value=YMessURLMappings.USER_VIEW_PROFILE_IMAGE)
 	String getUserViewImage(@RequestParam("aId") String encodedUserEmailId , HttpServletRequest request,HttpServletResponse response)
 	{
 		String decodedUserEmailId = YMessCommonUtility.decodeEncodedParameter(encodedUserEmailId);
@@ -256,7 +256,7 @@ public class UserProfileController {
 			imageName = fileDetails.getFilename();
 		}
 		
-		logger.info(LoggerConstants.USER_VIEW_PROFILE_IMAGE+" "+ decodedUserEmailId);
+		logger.info(YMessLoggerConstants.USER_VIEW_PROFILE_IMAGE+" "+ decodedUserEmailId);
 		   try
 		   {
 		    String imageFormat=null;
@@ -289,7 +289,7 @@ public class UserProfileController {
 	 * @return Topics(List<String>)
 	 * @throws EmptyResultSetException 
 	 */
-	@RequestMapping(value = URLMappings.GET_TOPICS)
+	@RequestMapping(value = YMessURLMappings.GET_TOPICS)
 	@ResponseBody
 	List<String> getAllTopics()
 	{
@@ -297,7 +297,7 @@ public class UserProfileController {
 		try {
 			topics = yMessService.getAllTopics();
 		} catch (EmptyResultSetException e) {
-			logger.error(MessageConstants.EMPTY_RESULT_SET);
+			logger.error(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		catch(Exception ex){
 			logger.error(ex.getStackTrace());

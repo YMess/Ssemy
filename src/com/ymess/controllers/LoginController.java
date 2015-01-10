@@ -24,10 +24,10 @@ import com.ymess.pojos.Answer;
 import com.ymess.pojos.Question;
 import com.ymess.pojos.SearchParameters;
 import com.ymess.service.interfaces.YMessService;
-import com.ymess.util.JSPMappings;
-import com.ymess.util.LoggerConstants;
-import com.ymess.util.MessageConstants;
-import com.ymess.util.URLMappings;
+import com.ymess.util.YMessJSPMappings;
+import com.ymess.util.YMessLoggerConstants;
+import com.ymess.util.YMessMessageConstants;
+import com.ymess.util.YMessURLMappings;
 
 /**
  * Contains all the methods related to User Login
@@ -49,11 +49,11 @@ public class LoginController
 	 * @param httpServletResponse
 	 * @return LoginPage
 	 */
-	@RequestMapping(value=URLMappings.LOGIN_PAGE,method=RequestMethod.GET)
+	@RequestMapping(value=YMessURLMappings.LOGIN_PAGE,method=RequestMethod.GET)
 	public String showLoginPage(HttpServletRequest httpServletRequest,HttpServletResponse httpServletResponse)
 	{
-		logger.info(LoggerConstants.LOGIN_PAGE);
-		return JSPMappings.LOGIN_PAGE;
+		logger.info(YMessLoggerConstants.LOGIN_PAGE);
+		return YMessJSPMappings.LOGIN_PAGE;
 	}
 	
 	
@@ -65,11 +65,11 @@ public class LoginController
 	 * @param httpServletResponse
 	 * @return LoginPage
 	 */
-	@RequestMapping(value=URLMappings.LOGIN_FAILED_PAGE,method=RequestMethod.GET)
+	@RequestMapping(value=YMessURLMappings.LOGIN_FAILED_PAGE,method=RequestMethod.GET)
 	public String showLoginFailedPage(HttpServletRequest httpServletRequest,HttpServletResponse httpServletResponse)
 	{
-		logger.info(LoggerConstants.LOGIN_FAILED);
-		return JSPMappings.LOGIN_PAGE;
+		logger.info(YMessLoggerConstants.LOGIN_FAILED);
+		return YMessJSPMappings.LOGIN_PAGE;
 	}
 	
 	
@@ -80,7 +80,7 @@ public class LoginController
 	 * @param httpServletResponse
 	 * @return LoginPage
 	 */
-	@RequestMapping(value=URLMappings.DASHBOARD_PAGE,method=RequestMethod.GET)
+	@RequestMapping(value=YMessURLMappings.DASHBOARD_PAGE,method=RequestMethod.GET)
 	public String showDashboardPage(@ModelAttribute("successfullyPostedQuestion") String successfullyPostedQuestion,HttpServletRequest httpServletRequest,HttpServletResponse httpServletResponse,Model model)
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -95,7 +95,7 @@ public class LoginController
 		try {
 			questions = yMessService.getDashboardQuestions(userEmailId);
 		} catch (EmptyResultSetException e) {
-			model.addAttribute("emptyResultSet",MessageConstants.EMPTY_RESULT_SET);
+			model.addAttribute("emptyResultSet",YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		catch(Exception ex)
 		{
@@ -105,8 +105,8 @@ public class LoginController
 		model.addAttribute("questions",questions);
 		model.addAttribute("answer",new Answer());
 		
-		logger.info(LoggerConstants.DASHBOARD_PAGE);
-		return JSPMappings.DASHBOARD_PAGE;
+		logger.info(YMessLoggerConstants.DASHBOARD_PAGE);
+		return YMessJSPMappings.DASHBOARD_PAGE;
 	}
 	
 	

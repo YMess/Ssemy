@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.ymess.util.MessageConstants;
+import com.ymess.util.YMessMessageConstants;
 import com.ymess.ymail.pojos.Mail;
  
 @Controller
@@ -46,7 +46,7 @@ public class SendEmailController {
              
             // sends the e-mail
             mailSender.send(email);
-            logger.info(MessageConstants.MAIL_SENT_SUCCESSFULLY +" "+toMailId);
+            logger.info(YMessMessageConstants.MAIL_SENT_SUCCESSFULLY +" "+toMailId);
 		}
         return "common/send_email";
     }

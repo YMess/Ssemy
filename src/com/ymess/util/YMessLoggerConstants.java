@@ -8,7 +8,7 @@ package com.ymess.util;
  * @author balaji i
  *
  */
-public class LoggerConstants {
+public class YMessLoggerConstants {
 
 	public static final String LOGIN_PAGE = "Loaded Login Page";
 	

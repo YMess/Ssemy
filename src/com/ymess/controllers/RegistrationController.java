@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.ymess.pojos.User;
 import com.ymess.service.interfaces.YMessService;
-import com.ymess.util.JSPMappings;
-import com.ymess.util.LoggerConstants;
-import com.ymess.util.URLMappings;
+import com.ymess.util.YMessJSPMappings;
+import com.ymess.util.YMessLoggerConstants;
+import com.ymess.util.YMessURLMappings;
 
 /**
  * Contains all the methods of User registration
@@ -38,12 +38,12 @@ public class RegistrationController {
 	 * @param model
 	 * @return (registrationPage)
 	 */
-	@RequestMapping(value=URLMappings.REGISTRATION_PAGE,method=RequestMethod.GET)
+	@RequestMapping(value=YMessURLMappings.REGISTRATION_PAGE,method=RequestMethod.GET)
 	public String showRegistrationPage(Model model)
 	{
 		model.addAttribute("user", new User());
-		logger.info(LoggerConstants.SHOW_REGISTRATION_PAGE);
-		return JSPMappings.REGISTRATION_PAGE;
+		logger.info(YMessLoggerConstants.SHOW_REGISTRATION_PAGE);
+		return YMessJSPMappings.REGISTRATION_PAGE;
 	}
 
 	
@@ -55,7 +55,7 @@ public class RegistrationController {
 	 * @param result
 	 * @return (loginPage)
 	 */
-	@RequestMapping(value=URLMappings.REGISTRATION_PAGE,method=RequestMethod.POST)
+	@RequestMapping(value=YMessURLMappings.REGISTRATION_PAGE,method=RequestMethod.POST)
 	public String registerUser(@ModelAttribute("user") @Valid User user, BindingResult result,Model model)
 	{
 		/** Rejecting the EMail Address if already registered */
@@ -66,13 +66,13 @@ public class RegistrationController {
 		
 		if(result.hasErrors())
 		{
-				return JSPMappings.REGISTRATION_PAGE;
+				return YMessJSPMappings.REGISTRATION_PAGE;
 		}
 		
 		yMessService.addUser(user);
-		logger.info(LoggerConstants.USER_REGISTRATION);
+		logger.info(YMessLoggerConstants.USER_REGISTRATION);
 		
-		return URLMappings.REDIRECT_SUCCESS_USER_REGISTRATION;
+		return YMessURLMappings.REDIRECT_SUCCESS_USER_REGISTRATION;
 	}
 
 }

@@ -4,7 +4,7 @@ package com.ymess.util;
  * @author raj
  *
  */
-public class ActivityConstants {
+public class YMessActivityConstants {
 
 	public static final String USER_JOINED = "Joined YMess";
 	public static final String PROFILE_UPDATED = "Profile Updated";

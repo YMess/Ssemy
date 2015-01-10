@@ -8,7 +8,7 @@ package com.ymess.util;
  * @author balaji i
  *
  */
-public class JSPMappings {
+public class YMessJSPMappings {
 	
 	public static final String LOGIN_PAGE = "common/login"; //LoginController
 	public static final String DASHBOARD_PAGE = "user/dashboard"; //LoginController

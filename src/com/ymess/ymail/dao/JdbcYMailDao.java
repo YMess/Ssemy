@@ -20,7 +20,7 @@ import com.datastax.driver.core.Row;
 import com.datastax.driver.core.exceptions.DriverException;
 import com.datastax.driver.core.querybuilder.Insert;
 import com.ymess.pojos.User;
-import com.ymess.util.MessageConstants;
+import com.ymess.util.YMessMessageConstants;
 import com.ymess.util.YMessCommonUtility;
 import com.ymess.ymail.dao.interfaces.YMailDao;
 import com.ymess.ymail.pojos.Mail;
@@ -334,7 +334,7 @@ public class JdbcYMailDao  implements YMailDao {
 			inboxMails = cassandraTemplate.query(GET_INBOX_MAILS,new MailDetailsMapper());
 		} 
 		catch (EmptyResultDataAccessException  emptyEx) {
-			logger.warn(MessageConstants.EMPTY_RESULT_SET);
+			logger.warn(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -406,7 +406,7 @@ public class JdbcYMailDao  implements YMailDao {
 			sentMails = cassandraTemplate.query(GET_SENT_MAILS,new MailDetailsMapper());
 		} 
 		catch (EmptyResultDataAccessException  emptyEx) {
-			logger.warn(MessageConstants.EMPTY_RESULT_SET);
+			logger.warn(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		catch (Exception e) {
 			e.printStackTrace();

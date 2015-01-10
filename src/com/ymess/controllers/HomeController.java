@@ -11,9 +11,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.ymess.util.JSPMappings;
-import com.ymess.util.LoggerConstants;
-import com.ymess.util.URLMappings;
+import com.ymess.util.YMessJSPMappings;
+import com.ymess.util.YMessLoggerConstants;
+import com.ymess.util.YMessURLMappings;
 
 /**
  * @author balaji i
@@ -31,11 +31,11 @@ private final Logger logger = Logger.getLogger(getClass());
 	 * @param httpServletResponse
 	 * @return LoginPage
 	 */
-	@RequestMapping(value=URLMappings.HOME_PAGE,method=RequestMethod.GET)
+	@RequestMapping(value=YMessURLMappings.HOME_PAGE,method=RequestMethod.GET)
 	public String showHomePage(HttpServletRequest httpServletRequest,HttpServletResponse httpServletResponse)
 	{
-		logger.info(LoggerConstants.HOME_PAGE);
-		return JSPMappings.HOME_PAGE;
+		logger.info(YMessLoggerConstants.HOME_PAGE);
+		return YMessJSPMappings.HOME_PAGE;
 	}
 
 }

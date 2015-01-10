@@ -41,8 +41,8 @@ import com.ymess.pojos.Question;
 import com.ymess.pojos.TimeLine;
 import com.ymess.pojos.Topic;
 import com.ymess.pojos.User;
-import com.ymess.util.ActivityConstants;
-import com.ymess.util.MessageConstants;
+import com.ymess.util.YMessActivityConstants;
+import com.ymess.util.YMessMessageConstants;
 import com.ymess.util.YMessCommonUtility;
 
 /**
@@ -120,7 +120,7 @@ public class JdbcYMessDao implements YMessDao {
 		// User Timeline
 		Insert insertIntoUserTimeline = QueryBuilder.insertInto("user_timeline").values(
 				new String[]{"user_email_id", "user_timestamp", "activity", "user_first_name", "user_last_name", "joined_joining_date", "is_joined"},
-				new Object[]{user.getUserEmailId(),new Date(),ActivityConstants.USER_JOINED,user.getFirstName(),user.getLastName(), new Date(),  YMessCommonUtility.IS_JOINED});
+				new Object[]{user.getUserEmailId(),new Date(),YMessActivityConstants.USER_JOINED,user.getFirstName(),user.getLastName(), new Date(),  YMessCommonUtility.IS_JOINED});
 		
 			added = true;
 		}
@@ -185,7 +185,7 @@ public class JdbcYMessDao implements YMessDao {
 					"user_email_id, user_timestamp, activity, user_first_name, user_last_name,question_posted_id,"
 					+ "question_posted_title ,question_posted_desc,question_is_image_attached,"
 					+ " question_topics, question_updated_date, is_posted_question",  
-					new Object[]{question.getAuthorEmailId(),new Date(),ActivityConstants.POSTED_QUESTION,userDetails.getFirstName(),
+					new Object[]{question.getAuthorEmailId(),new Date(),YMessActivityConstants.POSTED_QUESTION,userDetails.getFirstName(),
 					userDetails.getLastName(),currentQuestionId,question.getQuestionTitle(),question.getQuestionDescription(),true,
 					question.getTopics(),currentTime ,YMessCommonUtility.IS_POSTED_QUESTIONS});	
 				
@@ -223,7 +223,7 @@ public class JdbcYMessDao implements YMessDao {
 					"user_email_id, user_timestamp, activity, user_first_name, user_last_name,question_posted_id,"
 					+ "question_posted_title ,question_posted_desc,question_is_image_attached, "
 					+ "question_topics, question_updated_date, is_posted_question", 
-					new Object[]{question.getAuthorEmailId(),new Date(),ActivityConstants.POSTED_QUESTION,userDetails.getFirstName(),
+					new Object[]{question.getAuthorEmailId(),new Date(),YMessActivityConstants.POSTED_QUESTION,userDetails.getFirstName(),
 					userDetails.getLastName(),currentQuestionId,question.getQuestionTitle(),question.getQuestionDescription(),
 					false,question.getTopics(),currentTime ,YMessCommonUtility.IS_POSTED_QUESTIONS});
 			
@@ -534,8 +534,8 @@ public class JdbcYMessDao implements YMessDao {
 			questions = cassandraTemplate.query(selectUserQuestions, new QuestionDetailsMapper());
 		} 
 		catch (EmptyResultDataAccessException  emptyEx) {
-			logger.warn(MessageConstants.EMPTY_RESULT_SET);
-			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+			logger.warn(YMessMessageConstants.EMPTY_RESULT_SET);
+			throw new EmptyResultSetException(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -611,7 +611,7 @@ public class JdbcYMessDao implements YMessDao {
 		}
 		catch(EmptyResultDataAccessException emptyResultSet)
 		{
-			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+			throw new EmptyResultSetException(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		catch(Exception ex)
 		{
@@ -703,7 +703,7 @@ public class JdbcYMessDao implements YMessDao {
 							new Object[]{
 									answer.getAuthorEmailId(), 
 									new Date(),
-									ActivityConstants.ANSWERED_QUESTION,
+									YMessActivityConstants.ANSWERED_QUESTION,
 									userDetails.getFirstName(),
 									userDetails.getLastName(),
 									answer.getQuestionId(), 
@@ -763,7 +763,7 @@ public class JdbcYMessDao implements YMessDao {
 						new Object[]{
 						answer.getAuthorEmailId(), 
 						new Date(), 
-						ActivityConstants.ANSWERED_QUESTION, 
+						YMessActivityConstants.ANSWERED_QUESTION, 
 						userDetails.getFirstName(),
 						userDetails.getLastName(),
 						answer.getQuestionId(),
@@ -827,7 +827,7 @@ public class JdbcYMessDao implements YMessDao {
 		catch(EmptyResultDataAccessException emptyResultSet)
 		{
 			logger.error(emptyResultSet.getLocalizedMessage());
-			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+			throw new EmptyResultSetException(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		catch (Exception e) {
 			logger.error(e.getLocalizedMessage());
@@ -912,7 +912,7 @@ public class JdbcYMessDao implements YMessDao {
 		}
 		catch(EmptyResultDataAccessException emptyRS)
 		{
-			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+			throw new EmptyResultSetException(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		String emailIds = "";
 		if(upvotedUserEmailIds != null)
@@ -925,7 +925,7 @@ public class JdbcYMessDao implements YMessDao {
 		}
 		catch(EmptyResultDataAccessException emptyRS)
 		{
-			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+			throw new EmptyResultSetException(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		return users;
 	}
@@ -966,7 +966,7 @@ public class JdbcYMessDao implements YMessDao {
 		}
 		catch(EmptyResultDataAccessException emptyRS)
 		{
-			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+			throw new EmptyResultSetException(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		catch(Exception ex)
 		{
@@ -1031,7 +1031,7 @@ public class JdbcYMessDao implements YMessDao {
 					+ "profile_updated_first_name, profile_updated_last_name, "
 					+ "profile_updated_organization, profile_updated_designation, "
 					+ "profile_updated_previous_organizations, profile_updated_interests, is_updated_profile",
-					 new Object[]{user.getUserEmailId(),new Date(),ActivityConstants.PROFILE_UPDATED,
+					 new Object[]{user.getUserEmailId(),new Date(),YMessActivityConstants.PROFILE_UPDATED,
 					user.getFirstName(),user.getLastName(),user.getFirstName(),user.getLastName(),
 					user.getOrganization(),user.getDesignation(),previousOrganizations, interests,
 					YMessCommonUtility.IS_PROFILE_UPDATED});
@@ -1380,8 +1380,8 @@ public class JdbcYMessDao implements YMessDao {
 		}
 		catch(EmptyResultDataAccessException emptyRs)
 		{
-			logger.error(MessageConstants.EMPTY_RESULT_SET);
-			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+			logger.error(YMessMessageConstants.EMPTY_RESULT_SET);
+			throw new EmptyResultSetException(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		catch(Exception ex)
 		{
@@ -1432,8 +1432,8 @@ public class JdbcYMessDao implements YMessDao {
 		}
 		catch(EmptyResultDataAccessException emptyRs)
 		{
-			logger.error(MessageConstants.EMPTY_RESULT_SET);
-			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+			logger.error(YMessMessageConstants.EMPTY_RESULT_SET);
+			throw new EmptyResultSetException(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		catch(Exception ex)
 		{
@@ -1519,7 +1519,7 @@ public class JdbcYMessDao implements YMessDao {
 		}
 		catch(EmptyResultDataAccessException emptyRS)
 		{
-			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+			throw new EmptyResultSetException(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		String emailIds = "";
 		if(downvotedUserEmailIds != null)
@@ -1532,7 +1532,7 @@ public class JdbcYMessDao implements YMessDao {
 		}
 		catch(EmptyResultDataAccessException emptyRS)
 		{
-			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+			throw new EmptyResultSetException(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		return users;
 	}
@@ -1612,7 +1612,7 @@ public class JdbcYMessDao implements YMessDao {
 		}
 		catch(EmptyResultDataAccessException emptyRS)
 		{
-			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+			throw new EmptyResultSetException(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		return timeline;
 	}
@@ -1785,7 +1785,7 @@ public class JdbcYMessDao implements YMessDao {
 		}
 		catch(EmptyResultDataAccessException emptyResultSet)
 		{
-			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+			throw new EmptyResultSetException(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		catch(Exception ex)
 		{
@@ -1808,8 +1808,8 @@ public class JdbcYMessDao implements YMessDao {
 		}
 		catch(EmptyResultDataAccessException emptyRs)
 		{
-			logger.error(MessageConstants.EMPTY_RESULT_SET);
-			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+			logger.error(YMessMessageConstants.EMPTY_RESULT_SET);
+			throw new EmptyResultSetException(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		return topics;
 	}
@@ -2103,7 +2103,7 @@ public class JdbcYMessDao implements YMessDao {
 		}
 		catch(EmptyResultDataAccessException emptyRs)
 		{
-			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+			throw new EmptyResultSetException(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		return files;
 	}
@@ -2152,7 +2152,7 @@ public class JdbcYMessDao implements YMessDao {
 		}
 		catch(EmptyResultDataAccessException emptyRs)
 		{
-			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+			throw new EmptyResultSetException(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		return userFiles;
 	}
@@ -2389,7 +2389,7 @@ public class JdbcYMessDao implements YMessDao {
 		}
 		catch(EmptyResultDataAccessException emptyResultSet)
 		{
-			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+			throw new EmptyResultSetException(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		catch(Exception ex)
 		{
