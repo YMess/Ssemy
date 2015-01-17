@@ -13,9 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public class Answer {
 
-	//private Long answerId;
-	private UUID answerId;
-	
+	private Long answerId;
 	private UUID questionId;
 	private Date answeredTime;
 	private String answerDescription;
@@ -94,10 +92,10 @@ public class Answer {
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
 	}
-	public UUID getAnswerId() {
+	public Long getAnswerId() {
 		return answerId;
 	}
-	public void setAnswerId(UUID answerId) {
+	public void setAnswerId(Long answerId) {
 		this.answerId = answerId;
 	}
 	public String getQuestionDescription() {

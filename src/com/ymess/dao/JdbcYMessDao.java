@@ -138,7 +138,7 @@ public class JdbcYMessDao implements YMessDao {
 	@Override
 	public void addQuestion(Question question) {
 		
-		UUID questionId = UUID.randomUUID();
+		Long questionId = getLastInsertedQuestionId() + 1;
 		
 		Date currentTime = new Date();
 		question.setQuestionId(questionId);
@@ -242,7 +242,7 @@ public class JdbcYMessDao implements YMessDao {
 		
 	}
 
-	private void addQuestionTopics(Set<String> topics,UUID questionId) {
+	private void addQuestionTopics(Set<String> topics,Long questionId) {
 
 		for (String topic : topics) {
 			
@@ -285,7 +285,7 @@ public class JdbcYMessDao implements YMessDao {
 			else
 			{
 				try {
-					Set<UUID> questionIds = new HashSet<UUID>();
+					Set<Long> questionIds = new HashSet<Long>();
 					questionIds.add(questionId);
 					
 					Insert insert = QueryBuilder.insertInto("topics");
@@ -475,7 +475,7 @@ public class JdbcYMessDao implements YMessDao {
 		@Override
 		public Question mapRow(Row rs, int arg1) throws DriverException {
 			Question question = new Question();
-			question.setQuestionId(rs.getUUID("question_id"));
+			question.setQuestionId(rs.getLong("question_id"));
 			question.setQuestionTitle(rs.getString("question_title"));
 			question.setQuestionDescription(rs.getString("question_desc"));
 			question.setUpdatedDate(rs.getDate("updated_date"));
@@ -500,7 +500,7 @@ public class JdbcYMessDao implements YMessDao {
 		@Override
 		public Question mapRow(Row rs, int arg1) throws DriverException {
 			Question question = new Question();
-			question.setQuestionId(rs.getUUID("question_id"));
+			question.setQuestionId(rs.getLong("question_id"));
 			question.setQuestionTitle(rs.getString("question_title"));
 			question.setQuestionDescription(rs.getString("question_desc"));
 			question.setUpdatedDate(rs.getDate("updated_date"));
@@ -663,7 +663,7 @@ public class JdbcYMessDao implements YMessDao {
 	public void addAnswer(Answer answer) {
 		try{
 			
-			UUID answerId = UUID.randomUUID();
+			Long answerId = Long.valueOf(getLastInsertedAnswerId()) + 1;
 			
 			Date currentTime = new Date();
 			answer.setAnswerId(answerId);
@@ -811,7 +811,7 @@ public class JdbcYMessDao implements YMessDao {
 			answer.setAuthorEmailId(rs.getString("author_email_id"));
 			answer.setDownvoteCount(rs.getLong("downvote_count"));
 			answer.setUpvoteCount(rs.getLong("upvote_count"));
-			answer.setAnswerId(rs.getUUID("answer_id"));
+			answer.setAnswerId(rs.getLong("answer_id"));
 			answer.setFirstName(rs.getString("author_first_name"));
 			answer.setLastName(rs.getString("author_last_name"));
 			answer.setUpvotedUsers(rs.getSet("upvoted_users",String.class));
@@ -1769,7 +1769,7 @@ public class JdbcYMessDao implements YMessDao {
 		@Override
 		public Question mapRow(Row rs, int arg1) throws DriverException {
 			Question question = new Question();
-			question.setQuestionId(rs.getUUID("question_id"));
+			question.setQuestionId(rs.getLong("question_id"));
 			question.setQuestionDescription(rs.getString("question_desc")); 
 			
 			if(rs.getDate("updated_date") != null)
@@ -1792,7 +1792,7 @@ public class JdbcYMessDao implements YMessDao {
 		@Override
 		public Question mapRow(Row rs, int arg1) throws DriverException {
 			Question question = new Question();
-			question.setQuestionId(rs.getUUID("question_id"));
+			question.setQuestionId(rs.getLong("question_id"));
 			question.setQuestionDescription(rs.getString("question_desc")); 
 			
 			if(rs.getDate("updated_date") != null)

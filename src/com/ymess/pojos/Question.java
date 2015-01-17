@@ -18,9 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public class Question {
 	
-	//private Long questionId;
-	
-	private UUID questionId;
+	private Long questionId;
 
 	@NotEmpty(message="Please Add Question Details")
 	private String questionDescription;
@@ -89,11 +87,11 @@ public class Question {
 	}
 
 
-	public UUID getQuestionId() {
+	public Long getQuestionId() {
 		return questionId;
 	}
 
-	public void setQuestionId(UUID questionId) {
+	public void setQuestionId(Long questionId) {
 		this.questionId = questionId;
 	}
 

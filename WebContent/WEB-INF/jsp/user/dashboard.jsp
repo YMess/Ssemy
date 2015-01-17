@@ -148,7 +148,6 @@ $().ready(function(){
 								 	<li>
 									 	<c:set var="questionId" value="${question.questionId}"/>
 									 	
-									 	Q ID: <c:out value="${question.questionId}"/>
 									 	<c:set var="emailId" value="${question.authorEmailId }"></c:set>
 									 	
 									 	
