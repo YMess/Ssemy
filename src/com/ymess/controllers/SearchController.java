@@ -28,9 +28,9 @@ import com.ymess.pojos.Question;
 import com.ymess.pojos.SearchParameters;
 import com.ymess.pojos.User;
 import com.ymess.util.AutoSuggest;
-import com.ymess.util.JSPMappings;
+import com.ymess.util.YMessJSPMappings;
 import com.ymess.util.LuceneSearcher;
-import com.ymess.util.URLMappings;
+import com.ymess.util.YMessURLMappings;
 import com.ymess.util.YMessCommonUtility;
 
 @Controller
@@ -41,7 +41,7 @@ public class SearchController {
 	 * @author balaji i
 	 * @param searchParameters
 	 * */
-	@RequestMapping(value = URLMappings.SEARCH)
+	@RequestMapping(value = YMessURLMappings.SEARCH)
 	String getSearchResults(@ModelAttribute("searchParameters") SearchParameters searchParameters,BindingResult result,Model model)
 	{
 		if(searchParameters.getSearchString() != null && searchParameters.getSearchString().length() == 0)
@@ -51,7 +51,7 @@ public class SearchController {
 		
 		if(result.hasErrors())
 		{
-			return JSPMappings.SEARCH_RESULTS;
+			return YMessJSPMappings.SEARCH_RESULTS;
 		}
 		
 		 if(searchParameters.getCriterion().equalsIgnoreCase(YMessCommonUtility.QUESTION_IDENTIFIER_INDEXING))
@@ -115,7 +115,7 @@ public class SearchController {
 			 }
 		 }
 		
-		return JSPMappings.SEARCH_RESULTS;
+		return YMessJSPMappings.SEARCH_RESULTS;
 	}
 	
 	/**
@@ -124,7 +124,7 @@ public class SearchController {
 	 * @param topic
 	 * @throws JsonProcessingException 
 	 */
-	@RequestMapping(value = URLMappings.GET_RELATED_TOPICS, produces = MediaType.APPLICATION_JSON_VALUE,method = RequestMethod.GET,headers="Accept=*/*")
+	@RequestMapping(value = YMessURLMappings.GET_RELATED_TOPICS, produces = MediaType.APPLICATION_JSON_VALUE,method = RequestMethod.GET,headers="Accept=*/*")
 	@ResponseBody
 	public String getRelatedTopics(@RequestParam("topic") String topic,HttpServletRequest request,HttpServletResponse response) 
 	{

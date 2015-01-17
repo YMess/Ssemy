@@ -34,10 +34,10 @@ import com.ymess.pojos.Answer;
 import com.ymess.pojos.Question;
 import com.ymess.pojos.User;
 import com.ymess.service.interfaces.YMessService;
-import com.ymess.util.JSPMappings;
-import com.ymess.util.LoggerConstants;
-import com.ymess.util.MessageConstants;
-import com.ymess.util.URLMappings;
+import com.ymess.util.YMessJSPMappings;
+import com.ymess.util.YMessLoggerConstants;
+import com.ymess.util.YMessMessageConstants;
+import com.ymess.util.YMessURLMappings;
 import com.ymess.util.YMessCommonUtility;
 
 /**
@@ -61,7 +61,7 @@ public class UserActivitiesController {
 	 * @param model
 	 * @return String(post_question.jsp)
 	 */
-	@RequestMapping(value=URLMappings.USER_POST_QUESTION,method=RequestMethod.GET)
+	@RequestMapping(value=YMessURLMappings.USER_POST_QUESTION,method=RequestMethod.GET)
 	public String userPostQuestionPage(@RequestParam(value="qId",required=false) String questionId,Model model)
 	{
 		Question question = new Question();
@@ -77,8 +77,8 @@ public class UserActivitiesController {
 				if(questionTopics.length() > 0 && questionTopics.contains(","))
 					questionTopics = questionTopics.substring(0,questionTopics.lastIndexOf(","));
 			} catch (EmptyResultSetException e) {
-				model.addAttribute("emptyResultSet",MessageConstants.EMPTY_RESULT_SET);
-				logger.error(MessageConstants.EMPTY_RESULT_SET);
+				model.addAttribute("emptyResultSet",YMessMessageConstants.EMPTY_RESULT_SET);
+				logger.error(YMessMessageConstants.EMPTY_RESULT_SET);
 			}catch(Exception ex)
 			{
 				logger.error(ex.getLocalizedMessage());
@@ -86,8 +86,8 @@ public class UserActivitiesController {
 		}
 		model.addAttribute("questionTopics",questionTopics);
 		model.addAttribute("question", question);
-		logger.info(LoggerConstants.USER_POST_QUESTION_PAGE);
-		return JSPMappings.USER_POST_QUESTION;
+		logger.info(YMessLoggerConstants.USER_POST_QUESTION_PAGE);
+		return YMessJSPMappings.USER_POST_QUESTION;
 	}
 	
 	/**
@@ -97,7 +97,7 @@ public class UserActivitiesController {
 	 * @param redirectAttributes
 	 * @return String(redirect:userdashboard.htm)
 	 */
-	@RequestMapping(value=URLMappings.USER_POST_QUESTION,method=RequestMethod.POST)
+	@RequestMapping(value=YMessURLMappings.USER_POST_QUESTION,method=RequestMethod.POST)
 	public String userPostQuestion(@ModelAttribute("question") @Valid Question question,BindingResult result,RedirectAttributes redirectAttributes)
 	{
 		if(question.getIsImageAttached() != null && question.getIsImageAttached())
@@ -114,7 +114,7 @@ public class UserActivitiesController {
 		}
 		if(result.hasErrors())
 		{
-			return JSPMappings.USER_POST_QUESTION;
+			return YMessJSPMappings.USER_POST_QUESTION;
 		}
 		
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -131,7 +131,7 @@ public class UserActivitiesController {
 				yMessService.updateQuestion(question);
 			else
 			    yMessService.addQuestion(question);
-			logger.info(LoggerConstants.USER_POSTED_QUESTION +" "+userEmailId);
+			logger.info(YMessLoggerConstants.USER_POSTED_QUESTION +" "+userEmailId);
 		}
 		catch(Exception ex)
 		{
@@ -140,7 +140,7 @@ public class UserActivitiesController {
 			ex.printStackTrace();
 		}
 		redirectAttributes.addFlashAttribute("successfullyPostedQuestion","You Posted the Question Successfully");
-		return URLMappings.REDIRECT_SUCCESS_POSTING_QUESTION;	
+		return YMessURLMappings.REDIRECT_SUCCESS_POSTING_QUESTION;	
 	}
 	
 	/**
@@ -151,7 +151,7 @@ public class UserActivitiesController {
 	 * @return String (questions.jsp)
 	 * @throws IOException
 	 */
-	@RequestMapping(value=URLMappings.USER_QUESTIONS,method=RequestMethod.GET)
+	@RequestMapping(value=YMessURLMappings.USER_QUESTIONS,method=RequestMethod.GET)
 	public String getUserQuestions(Model model,HttpServletRequest httpServletRequest,HttpServletResponse httpServletResponse) throws IOException
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -161,7 +161,7 @@ public class UserActivitiesController {
 		
 		try {
 			questions = yMessService.getUserQuestions(userEmailId);
-			logger.info(LoggerConstants.USER_QUESTIONS +" "+ userEmailId);
+			logger.info(YMessLoggerConstants.USER_QUESTIONS +" "+ userEmailId);
 		} catch (EmptyResultSetException e) {
 			logger.error(e.getLocalizedMessage());
 			model.addAttribute("emptyResultSet",true);
@@ -170,7 +170,7 @@ public class UserActivitiesController {
 			logger.error(e.getLocalizedMessage());
 		}
 		model.addAttribute("questions",questions);
-		return JSPMappings.USER_QUESTIONS;
+		return YMessJSPMappings.USER_QUESTIONS;
 	}
 	
 	/**
@@ -179,7 +179,7 @@ public class UserActivitiesController {
 	 * @param answer
 	 * @return Boolean (successFlag)
 	 */
-	@RequestMapping(value=URLMappings.USER_POST_ANSWER,method=RequestMethod.POST)
+	@RequestMapping(value=YMessURLMappings.USER_POST_ANSWER,method=RequestMethod.POST)
 	@ResponseBody
 	void addAnswer(@ModelAttribute("answer") Answer answer,BindingResult bindingResult)
 	{
@@ -190,7 +190,7 @@ public class UserActivitiesController {
 		try
 		{
 			yMessService.addAnswer(answer);
-			logger.info(LoggerConstants.USER_POSTED_ANSWER+" "+loggedInUserEmailId);
+			logger.info(YMessLoggerConstants.USER_POSTED_ANSWER+" "+loggedInUserEmailId);
 		}
 		catch(Exception ex)
 		{
@@ -198,7 +198,7 @@ public class UserActivitiesController {
 		}
 	}
 	
-	@RequestMapping(value=URLMappings.USER_QUESTION_RESPONSES)
+	@RequestMapping(value=YMessURLMappings.USER_QUESTION_RESPONSES)
 	String getUserQuestionResponses(@RequestParam("qId")String encodedQuestionId,Model model)
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -209,19 +209,19 @@ public class UserActivitiesController {
 		List<Answer> answers = new ArrayList<Answer>();
 		try {
 			answers = yMessService.getUserQuestionResponses(loggedInUserEmailId,decodedQuestionId);
-			logger.info(LoggerConstants.USER_QUESTION_RESPONSES +" "+loggedInUserEmailId);
+			logger.info(YMessLoggerConstants.USER_QUESTION_RESPONSES +" "+loggedInUserEmailId);
 			
 		} 
 		catch(EmptyResultSetException emptyResultSet)
 		{
-			model.addAttribute("emptyResultSet",MessageConstants.EMPTY_RESULT_SET);
+			model.addAttribute("emptyResultSet",YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		catch (Exception e) {
 			logger.error(e.getLocalizedMessage());
 		}
 		model.addAttribute("loggedInUser",loggedInUserEmailId);
 		model.addAttribute("answers",answers);
-		return JSPMappings.USER_QUESTION_RESPONSES;
+		return YMessJSPMappings.USER_QUESTION_RESPONSES;
 	}
 	
 	/**
@@ -231,7 +231,7 @@ public class UserActivitiesController {
 	 * @param model
 	 * @return List<User> upvoters
 	 */
-	@RequestMapping(value=URLMappings.USER_ANSWER_UPVOTERS)
+	@RequestMapping(value=YMessURLMappings.USER_ANSWER_UPVOTERS)
 	String getUpvoters(@RequestParam("aId") String encodedAnswerId,@RequestParam("qId") String encodedQuestionId,Model model)
 	{
 		String questionId = YMessCommonUtility.decodeEncodedParameter(encodedQuestionId);
@@ -243,9 +243,9 @@ public class UserActivitiesController {
 		List<User> upvoters = new ArrayList<User>();
 		try {
 			upvoters = yMessService.getAnswerUpvoters(questionId,answerId);
-			logger.info(LoggerConstants.ANSWER_UPVOTERS  );
+			logger.info(YMessLoggerConstants.ANSWER_UPVOTERS  );
 		} catch (EmptyResultSetException e) {
-			model.addAttribute("emptyResultSet",MessageConstants.EMPTY_RESULT_SET);
+			model.addAttribute("emptyResultSet",YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		catch(Exception ex)
 		{
@@ -253,7 +253,7 @@ public class UserActivitiesController {
 		}
 		model.addAttribute("upvoters",upvoters);
 		model.addAttribute("loggedInUser",loggedInUserEmailId);
-		return JSPMappings.USER_ANSWER_UPVOTERS;
+		return YMessJSPMappings.USER_ANSWER_UPVOTERS;
 	}
 	
 	
@@ -264,7 +264,7 @@ public class UserActivitiesController {
 	 * @param model
 	 * @return List<User> downvoters
 	 */
-	@RequestMapping(value=URLMappings.USER_ANSWER_DOWNVOTERS)
+	@RequestMapping(value=YMessURLMappings.USER_ANSWER_DOWNVOTERS)
 	String getDownvoters(@RequestParam("aId") String encodedAnswerId,@RequestParam("qId") String encodedQuestionId,Model model)
 	{
 		String questionId = YMessCommonUtility.decodeEncodedParameter(encodedQuestionId);
@@ -276,9 +276,9 @@ public class UserActivitiesController {
 		List<User> downvoters = new ArrayList<User>();
 		try {
 			downvoters = yMessService.getAnswerDownvoters(questionId,answerId);
-			logger.info(LoggerConstants.ANSWER_UPVOTERS  );
+			logger.info(YMessLoggerConstants.ANSWER_UPVOTERS  );
 		} catch (EmptyResultSetException e) {
-			model.addAttribute("emptyResultSet",MessageConstants.EMPTY_RESULT_SET);
+			model.addAttribute("emptyResultSet",YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		catch(Exception ex)
 		{
@@ -286,7 +286,7 @@ public class UserActivitiesController {
 		}
 		model.addAttribute("downvoters",downvoters);
 		model.addAttribute("loggedInUser",loggedInUserEmailId);
-		return JSPMappings.USER_ANSWER_DOWNVOTERS;
+		return YMessJSPMappings.USER_ANSWER_DOWNVOTERS;
 	}
 	
 	/**
@@ -296,7 +296,7 @@ public class UserActivitiesController {
 	 * @param answerId
 	 * @return Boolean(successFlag)
 	 */
-	@RequestMapping(value=URLMappings.USER_UPVOTE_ANSWER,method=RequestMethod.GET)
+	@RequestMapping(value=YMessURLMappings.USER_UPVOTE_ANSWER,method=RequestMethod.GET)
 	@ResponseBody
 	Boolean upvoteAnswer(@RequestParam("qId") String questionId,@RequestParam("aId") String answerId)
 	{
@@ -304,7 +304,7 @@ public class UserActivitiesController {
 		String loggedInUserEmail = authentication.getName();
 		
 		Boolean successFlag = yMessService.upvoteAnswer(questionId,answerId,loggedInUserEmail);
-		logger.info(LoggerConstants.USER_UPVOTE_ANSWER+" "+loggedInUserEmail);
+		logger.info(YMessLoggerConstants.USER_UPVOTE_ANSWER+" "+loggedInUserEmail);
 		
 		return successFlag;
 	}
@@ -316,7 +316,7 @@ public class UserActivitiesController {
 	 * @param answerId
 	 * @return Boolean(successFlag)
 	 */
-	@RequestMapping(value=URLMappings.USER_DOWNVOTE_ANSWER,method=RequestMethod.GET)
+	@RequestMapping(value=YMessURLMappings.USER_DOWNVOTE_ANSWER,method=RequestMethod.GET)
 	@ResponseBody
 	Boolean downvoteAnswer(@RequestParam("qId") String questionId,@RequestParam("aId") String answerId)
 	{
@@ -325,11 +325,11 @@ public class UserActivitiesController {
 		
 		Boolean successFlag = yMessService.downvoteAnswer(questionId,answerId,loggedInUserEmail);
 		
-		logger.info(LoggerConstants.USER_DOWNVOTE_ANSWER+" "+loggedInUserEmail);
+		logger.info(YMessLoggerConstants.USER_DOWNVOTE_ANSWER+" "+loggedInUserEmail);
 		return successFlag;
 	}
 	
-	@RequestMapping(URLMappings.USER_FOLLOW)
+	@RequestMapping(YMessURLMappings.USER_FOLLOW)
 	@ResponseBody
 	Boolean userFollow(@RequestParam("eId") String encodedUserEmailId)
 	{
@@ -339,12 +339,12 @@ public class UserActivitiesController {
 		String loggedInUserEmail = authentication.getName();
 		
 		yMessService.followUser(loggedInUserEmail,decodedUserEmailId);
-		logger.info(loggedInUserEmail+" "+LoggerConstants.USER_FOLLOWING+" "+decodedUserEmailId);
+		logger.info(loggedInUserEmail+" "+YMessLoggerConstants.USER_FOLLOWING+" "+decodedUserEmailId);
 		
 		return true;
 	}
 	
-	@RequestMapping(URLMappings.USER_UNFOLLOW)
+	@RequestMapping(YMessURLMappings.USER_UNFOLLOW)
 	@ResponseBody
 	Boolean userUnfollow(@RequestParam("eId") String encodedUserEmailId)
 	{
@@ -354,13 +354,13 @@ public class UserActivitiesController {
 		String loggedInUserEmail = authentication.getName();
 		
 		yMessService.unfollowUser(loggedInUserEmail,decodedUserEmailId);
-		logger.info(loggedInUserEmail+" "+LoggerConstants.USER_UNFOLLOWING+" "+decodedUserEmailId);
+		logger.info(loggedInUserEmail+" "+YMessLoggerConstants.USER_UNFOLLOWING+" "+decodedUserEmailId);
 		
 		return true;
 	}
 	
 	
-	@RequestMapping(value=URLMappings.FOLLOWING_USERS)
+	@RequestMapping(value=YMessURLMappings.FOLLOWING_USERS)
 	String getFollowingUsers(Model model)
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -372,17 +372,17 @@ public class UserActivitiesController {
 		}
 		catch(EmptyResultSetException emptyRs)
 		{
-			model.addAttribute("emptyResultSet",MessageConstants.EMPTY_RESULT_SET);
+			model.addAttribute("emptyResultSet",YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		catch (Exception ex) {
 			logger.error(ex.getLocalizedMessage());
 		}
 		
 		model.addAttribute("followingUsers",followingUsers);
-		return JSPMappings.FOLLOWING_USERS;
+		return YMessJSPMappings.FOLLOWING_USERS;
 	}
 	
-	@RequestMapping(value=URLMappings.FOLLOWERS)
+	@RequestMapping(value=YMessURLMappings.FOLLOWERS)
 	String getFollowers(Model model)
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -394,17 +394,17 @@ public class UserActivitiesController {
 		}
 		catch(EmptyResultSetException emptyRs)
 		{
-			model.addAttribute("emptyResultSet",MessageConstants.EMPTY_RESULT_SET);
+			model.addAttribute("emptyResultSet",YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		catch (Exception ex) {
 			logger.error(ex.getLocalizedMessage());
 		}
 		
 		model.addAttribute("followers",followers);
-		return JSPMappings.FOLLOWERS;
+		return YMessJSPMappings.FOLLOWERS;
 	}
 	
-	@RequestMapping(value=URLMappings.USER_QUESTION_IMAGE)
+	@RequestMapping(value=YMessURLMappings.USER_QUESTION_IMAGE)
 	String getUserViewImage(@RequestParam("qId") String encodedQuestionId , HttpServletRequest request,HttpServletResponse response)
 	{
 		String decodedQuestionId = YMessCommonUtility.decodeEncodedParameter(encodedQuestionId);
@@ -440,7 +440,7 @@ public class UserActivitiesController {
 		return null;
 	}
 	
-	@RequestMapping(value = URLMappings.USER_VIEW_TOPIC_QUESTIONS)
+	@RequestMapping(value = YMessURLMappings.USER_VIEW_TOPIC_QUESTIONS)
 	String getQuestionsInTopic(@RequestParam("topic") String encodedTopicName,Model model)
 	{
 		String topicName = "";
@@ -463,7 +463,7 @@ public class UserActivitiesController {
 	}
 	
 	
-	@RequestMapping(value=URLMappings.QUESTION_IMAGE_UPLOAD,method=RequestMethod.POST)
+	@RequestMapping(value=YMessURLMappings.QUESTION_IMAGE_UPLOAD,method=RequestMethod.POST)
 	String uploadQuestionImage(@RequestParam(value="qId",required=false) String questionId,@ModelAttribute("question") Question question)
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -477,7 +477,7 @@ public class UserActivitiesController {
 				try
 				{
 					yMessService.uploadQuestionImage(question);
-					logger.info(LoggerConstants.QUESTION_UPLOADED_IMAGE +" "+loggedInUserEmail);
+					logger.info(YMessLoggerConstants.QUESTION_UPLOADED_IMAGE +" "+loggedInUserEmail);
 				}
 				catch(Exception ex)
 				{
@@ -486,11 +486,11 @@ public class UserActivitiesController {
 			}
 		}
 		
-		return URLMappings.QUESTION_IMAGE_UPLOAD_REDIRECTION;
+		return YMessURLMappings.QUESTION_IMAGE_UPLOAD_REDIRECTION;
 	}
 	
 	
-	@RequestMapping(value = URLMappings.FETCH_ANSWER_IMAGE)
+	@RequestMapping(value = YMessURLMappings.FETCH_ANSWER_IMAGE)
 	void fetchAnswerImage(@RequestParam("qId") String encodedQuestionId,@RequestParam("aId") String encodedAnswerId,HttpServletResponse response)
 	{
 		String questionId = YMessCommonUtility.decodeEncodedParameter(encodedQuestionId);

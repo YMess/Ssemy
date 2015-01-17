@@ -1,10 +1,6 @@
 package com.ymess.util;
 
 import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.Date;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -20,6 +16,11 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Row;
+import com.datastax.driver.core.Session;
+
 /**
  * Indexes the Data
  * @author balaji i
@@ -27,6 +28,10 @@ import org.apache.lucene.util.Version;
  */
 public class LuceneIndexer
 {
+	
+		private static Session session;
+		private static Cluster cluster;
+	
 		public static final String INDEX_DIR = YMessCommonUtility.INDEX_LOCATION;
 		private static final String JDBC_DRIVER = "org.apache.cassandra.cql.jdbc.CassandraDriver";
 		private static final String CONNECTION_URL = "jdbc:cassandra://localhost/ymess?version=3.0.0";
@@ -48,9 +53,8 @@ public class LuceneIndexer
 			DeleteDirectory.main(null);
 			try
 			{  
-				   Class.forName(JDBC_DRIVER).newInstance();  
-				   Connection conn = DriverManager.getConnection(CONNECTION_URL, USER_NAME, PASSWORD);  
-				  
+				   session = cluster.builder().addContactPoint("localhost").build().connect("ymess");
+				   
 				   @SuppressWarnings("deprecation")
 				   StandardAnalyzer standardAnalyzer = new StandardAnalyzer(Version.LUCENE_CURRENT,CharArraySet.EMPTY_SET);  
 				   @SuppressWarnings("deprecation")
@@ -59,13 +63,13 @@ public class LuceneIndexer
 				  
 				   /** Creating indexes*/
 				   
-				   int indexedQuestionDocumentCount = createIndexes( indexWriterConfig.clone(), conn, YMessCommonUtility.QUESTION_IDENTIFIER_INDEXING); 
+				   int indexedQuestionDocumentCount = createIndexes( indexWriterConfig.clone(), session, YMessCommonUtility.QUESTION_IDENTIFIER_INDEXING); 
 
-				   int indexedPeopleDocumentCount = createIndexes(indexWriterConfig.clone(),  conn, YMessCommonUtility.PEOPLE_IDENTIFIER_INDEXING); 
+				   int indexedPeopleDocumentCount = createIndexes(indexWriterConfig.clone(),  session, YMessCommonUtility.PEOPLE_IDENTIFIER_INDEXING); 
 				   
-				   int indexedFileDocumentCount = createIndexes(indexWriterConfig.clone() , conn, YMessCommonUtility.FILE_IDENTIFIER_INDEXING); 
+				   int indexedFileDocumentCount = createIndexes(indexWriterConfig.clone() , session, YMessCommonUtility.FILE_IDENTIFIER_INDEXING); 
 				   
-				   int indexedTopicsCount = createIndexes(indexWriterConfig.clone(), conn, YMessCommonUtility.TOPIC_IDENTIFIER_INDEXING);
+				   int indexedTopicsCount = createIndexes(indexWriterConfig.clone(), session, YMessCommonUtility.TOPIC_IDENTIFIER_INDEXING);
 				   
 				   System.out.println(indexedQuestionDocumentCount + " Questions have been indexed successfully");
 				   System.out.println(indexedPeopleDocumentCount + " People have been indexed successfully");
@@ -79,7 +83,7 @@ public class LuceneIndexer
 		}
 		
 		@SuppressWarnings("deprecation")
-		 static int createIndexes(IndexWriterConfig indexWriterConfig , Connection conn,String identifier) throws Exception 
+		 static int createIndexes(IndexWriterConfig indexWriterConfig , Session session,String identifier) throws Exception 
 		 {  
 			  IndexWriter indexWriter = null;
 			  String query = "";  
@@ -111,11 +115,12 @@ public class LuceneIndexer
 				  System.out.println("Indexing to directory '" + YMessCommonUtility.INDEX_LOCATION_TOPICS + "'...");  
 			  }
 			  
-			  Statement stmt = conn.createStatement();  
-			  ResultSet rs = stmt.executeQuery(query);  
+			  ResultSet resultSet = session.execute(query);  
 			  int indexCount = 0;
-			  while (rs.next()) 
+			  while (! resultSet.isExhausted()) 
 			  {  
+				  for (Row rs : resultSet) {
+					
 				  	/** Iterating Result Set to fetch Individual Values and Adding to Document*/
 			         Document document = new Document();  
 			         
@@ -139,7 +144,7 @@ public class LuceneIndexer
 				         {
 				        	 float boost = 5.0f;
 					        	
-				        	 Date profileLastUpdatedDate = rs.getTimestamp("updated_date");
+				        	 Date profileLastUpdatedDate = rs.getDate("updated_date");
 				        	 Date currentDate = new Date();
 				        	 
 				        	 long postedOnTime = profileLastUpdatedDate.getTime();
@@ -183,7 +188,7 @@ public class LuceneIndexer
 				         {
 				        	 float boost = 25.0f;
 					        	
-				        	 Date profileLastUpdatedDate = rs.getTimestamp("profile_last_updated");
+				        	 Date profileLastUpdatedDate = rs.getDate("profile_last_updated");
 				        	 Date currentDate = new Date();
 				        	 
 				        	 long postedOnTime = profileLastUpdatedDate.getTime();
@@ -237,7 +242,7 @@ public class LuceneIndexer
 				         {
 				        	 float boost = 25.0f;
 					        	
-				        	 Date profileLastUpdatedDate = rs.getTimestamp("upload_time");
+				        	 Date profileLastUpdatedDate = rs.getDate("upload_time");
 				        	 Date currentDate = new Date();
 				        	 
 				        	 long postedOnTime = profileLastUpdatedDate.getTime();
@@ -274,9 +279,11 @@ public class LuceneIndexer
 			         indexWriter.addDocument(document);  
 				     indexCount++;
 			 }  
-		  indexWriter.commit();
-		  indexWriter.close();
-		  //indexWriter = null;
-		  return indexCount;
+	    }
+			  indexWriter.commit();
+			  indexWriter.close();
+			  //indexWriter = null;
+			  return indexCount;
+		  
 		}	
 	}

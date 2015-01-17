@@ -2,6 +2,7 @@ package com.ymess.pojos;
 
 import java.util.Date;
 import java.util.Set;
+import java.util.UUID;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -12,8 +13,10 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public class Answer {
 
-	private Long answerId;
-	private Long questionId;
+	//private Long answerId;
+	private UUID answerId;
+	
+	private UUID questionId;
 	private Date answeredTime;
 	private String answerDescription;
 	private String authorEmailId;
@@ -31,10 +34,10 @@ public class Answer {
 	private byte[] answerImageDb;
 	
 	
-	public Long getQuestionId() {
+	public UUID getQuestionId() {
 		return questionId;
 	}
-	public void setQuestionId(Long questionId) {
+	public void setQuestionId(UUID questionId) {
 		this.questionId = questionId;
 	}
 	public Date getAnsweredTime() {
@@ -91,10 +94,10 @@ public class Answer {
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
 	}
-	public Long getAnswerId() {
+	public UUID getAnswerId() {
 		return answerId;
 	}
-	public void setAnswerId(Long answerId) {
+	public void setAnswerId(UUID answerId) {
 		this.answerId = answerId;
 	}
 	public String getQuestionDescription() {

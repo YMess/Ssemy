@@ -6,21 +6,20 @@ package com.ymess.dao;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryparser.classic.ParseException;
-import org.springframework.cassandra.core.ResultSetExtractor;
 import org.springframework.cassandra.core.RowMapper;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -41,9 +40,9 @@ import com.ymess.pojos.Question;
 import com.ymess.pojos.TimeLine;
 import com.ymess.pojos.Topic;
 import com.ymess.pojos.User;
-import com.ymess.util.ActivityConstants;
-import com.ymess.util.MessageConstants;
+import com.ymess.util.YMessActivityConstants;
 import com.ymess.util.YMessCommonUtility;
+import com.ymess.util.YMessMessageConstants;
 
 /**
  * Contains all the methods of DB insertion
@@ -120,7 +119,7 @@ public class JdbcYMessDao implements YMessDao {
 		// User Timeline
 		Insert insertIntoUserTimeline = QueryBuilder.insertInto("user_timeline").values(
 				new String[]{"user_email_id", "user_timestamp", "activity", "user_first_name", "user_last_name", "joined_joining_date", "is_joined"},
-				new Object[]{user.getUserEmailId(),new Date(),ActivityConstants.USER_JOINED,user.getFirstName(),user.getLastName(), new Date(),  YMessCommonUtility.IS_JOINED});
+				new Object[]{user.getUserEmailId(),new Date(),YMessActivityConstants.USER_JOINED,user.getFirstName(),user.getLastName(), new Date(),  YMessCommonUtility.IS_JOINED});
 		
 			added = true;
 		}
@@ -138,11 +137,11 @@ public class JdbcYMessDao implements YMessDao {
 	 */
 	@Override
 	public void addQuestion(Question question) {
-		Long lastQuestionId = getLastInsertedQuestionId();
-		Long currentQuestionId = lastQuestionId + 1;
+		
+		UUID questionId = UUID.randomUUID();
 		
 		Date currentTime = new Date();
-		question.setQuestionId(currentQuestionId);
+		question.setQuestionId(questionId);
 		
 		User userDetails = getUserDetailsByEmailId(question.getAuthorEmailId());
 
@@ -163,7 +162,7 @@ public class JdbcYMessDao implements YMessDao {
 						+ "updated_date,keywords,author_first_name,"
 						+ "author_last_name,is_image_attached,image_data,image_name,topics",
 						new Object[]{
-						currentQuestionId,
+						questionId,
 						question.getAuthorEmailId(),
 						question.getQuestionTitle(),
 						question.getQuestionDescription(),
@@ -185,8 +184,8 @@ public class JdbcYMessDao implements YMessDao {
 					"user_email_id, user_timestamp, activity, user_first_name, user_last_name,question_posted_id,"
 					+ "question_posted_title ,question_posted_desc,question_is_image_attached,"
 					+ " question_topics, question_updated_date, is_posted_question",  
-					new Object[]{question.getAuthorEmailId(),new Date(),ActivityConstants.POSTED_QUESTION,userDetails.getFirstName(),
-					userDetails.getLastName(),currentQuestionId,question.getQuestionTitle(),question.getQuestionDescription(),true,
+					new Object[]{question.getAuthorEmailId(),new Date(),YMessActivityConstants.POSTED_QUESTION,userDetails.getFirstName(),
+					userDetails.getLastName(),questionId,question.getQuestionTitle(),question.getQuestionDescription(),true,
 					question.getTopics(),currentTime ,YMessCommonUtility.IS_POSTED_QUESTIONS});	
 				
 					/*	cassandraTemplate.update(ADD_QUESTION_TIMELINE, new Object[]{question.getAuthorEmailId(),new Date(),ActivityConstants.POSTED_QUESTION,userDetails.getFirstName(),userDetails.getLastName(),currentQuestionId,question.getQuestionTitle(),question.getQuestionDescription(),true,question.getTopics(),currentTime ,YMessCommonUtility.IS_POSTED_QUESTIONS},
@@ -207,7 +206,7 @@ public class JdbcYMessDao implements YMessDao {
 			Insert insertQuestionWithoutImage = YMessCommonUtility.getFormattedInsertQuery("questions", "question_id,author_email_id,"
 					+ "question_title,question_desc,created_date,updated_date,"
 					+ "keywords,author_first_name,author_last_name,topics", 
-					new Object[]{currentQuestionId,question.getAuthorEmailId(),question.getQuestionTitle(),question.getQuestionDescription(),
+					new Object[]{questionId,question.getAuthorEmailId(),question.getQuestionTitle(),question.getQuestionDescription(),
 					currentTime,currentTime,question.getKeywords(),userDetails.getFirstName(),userDetails.getLastName(),question.getTopics()});
 			
 			cassandraTemplate.execute(insertQuestionWithoutImage);
@@ -223,8 +222,8 @@ public class JdbcYMessDao implements YMessDao {
 					"user_email_id, user_timestamp, activity, user_first_name, user_last_name,question_posted_id,"
 					+ "question_posted_title ,question_posted_desc,question_is_image_attached, "
 					+ "question_topics, question_updated_date, is_posted_question", 
-					new Object[]{question.getAuthorEmailId(),new Date(),ActivityConstants.POSTED_QUESTION,userDetails.getFirstName(),
-					userDetails.getLastName(),currentQuestionId,question.getQuestionTitle(),question.getQuestionDescription(),
+					new Object[]{question.getAuthorEmailId(),new Date(),YMessActivityConstants.POSTED_QUESTION,userDetails.getFirstName(),
+					userDetails.getLastName(),questionId,question.getQuestionTitle(),question.getQuestionDescription(),
 					false,question.getTopics(),currentTime ,YMessCommonUtility.IS_POSTED_QUESTIONS});
 			
 			cassandraTemplate.execute(insertIntoUserTimeline);
@@ -237,13 +236,13 @@ public class JdbcYMessDao implements YMessDao {
 		}
 		//addQuestionToKeywords(question);
 		
-		addQuestionTopics(question.getTopics(),currentQuestionId);
+		addQuestionTopics(question.getTopics(),questionId);
 		
 		
 		
 	}
 
-	private void addQuestionTopics(Set<String> topics,Long questionId) {
+	private void addQuestionTopics(Set<String> topics,UUID questionId) {
 
 		for (String topic : topics) {
 			
@@ -286,7 +285,7 @@ public class JdbcYMessDao implements YMessDao {
 			else
 			{
 				try {
-					Set<Long> questionIds = new HashSet<Long>();
+					Set<UUID> questionIds = new HashSet<UUID>();
 					questionIds.add(questionId);
 					
 					Insert insert = QueryBuilder.insertInto("topics");
@@ -342,7 +341,7 @@ public class JdbcYMessDao implements YMessDao {
 		}
 		return user;
 	}
-
+/*
 	private class KeywordMapper implements RowMapper<Keyword>
 	{
 		@Override
@@ -357,6 +356,9 @@ public class JdbcYMessDao implements YMessDao {
 			return keyword;
 		}
 	}
+	*/
+	
+	
 	
 /*	*//**
 	 * Adds Question Details to Keyword table ( One Question is a set of keywords )
@@ -473,7 +475,7 @@ public class JdbcYMessDao implements YMessDao {
 		@Override
 		public Question mapRow(Row rs, int arg1) throws DriverException {
 			Question question = new Question();
-			question.setQuestionId(rs.getLong("question_id"));
+			question.setQuestionId(rs.getUUID("question_id"));
 			question.setQuestionTitle(rs.getString("question_title"));
 			question.setQuestionDescription(rs.getString("question_desc"));
 			question.setUpdatedDate(rs.getDate("updated_date"));
@@ -498,7 +500,7 @@ public class JdbcYMessDao implements YMessDao {
 		@Override
 		public Question mapRow(Row rs, int arg1) throws DriverException {
 			Question question = new Question();
-			question.setQuestionId(rs.getLong("question_id"));
+			question.setQuestionId(rs.getUUID("question_id"));
 			question.setQuestionTitle(rs.getString("question_title"));
 			question.setQuestionDescription(rs.getString("question_desc"));
 			question.setUpdatedDate(rs.getDate("updated_date"));
@@ -534,8 +536,8 @@ public class JdbcYMessDao implements YMessDao {
 			questions = cassandraTemplate.query(selectUserQuestions, new QuestionDetailsMapper());
 		} 
 		catch (EmptyResultDataAccessException  emptyEx) {
-			logger.warn(MessageConstants.EMPTY_RESULT_SET);
-			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+			logger.warn(YMessMessageConstants.EMPTY_RESULT_SET);
+			throw new EmptyResultSetException(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -553,16 +555,18 @@ public class JdbcYMessDao implements YMessDao {
 	 */
 	@Override
 	public List<Question> getDashboardQuestions(String userEmailId) throws EmptyResultSetException {
-		List<Long> allQuestionIds = getAllQuestionIds();
-		List<Long> userQuestionIds = getUserQuestionIds(userEmailId);
+		
+		List<UUID> allQuestionIds = getAllQuestionIds();
+		List<UUID> userQuestionIds = getUserQuestionIds(userEmailId);
 		
 		if(!userQuestionIds.isEmpty())
 		{
 			allQuestionIds.removeAll(userQuestionIds);
 		}
+		
 		List<Question> questions = new ArrayList<Question>();
-		/*StringBuilder finalQuestionIdsSB = new StringBuilder();
-			for (Long finalQuestionId : allQuestionIds){
+		StringBuilder finalQuestionIdsSB = new StringBuilder();
+			for (UUID finalQuestionId : allQuestionIds){
 				finalQuestionIdsSB = finalQuestionIdsSB.append(finalQuestionId).append(",");
 			}
 		
@@ -573,10 +577,12 @@ public class JdbcYMessDao implements YMessDao {
 		
 		if(finalQuestionIds.length() > 0)
 		{
-		}*/
+		}
 		
 		if(null != allQuestionIds && !allQuestionIds.isEmpty())
+		{
 			questions = getQuestionsWithDetails(allQuestionIds);
+		}
 		
 		return questions;
 	}
@@ -586,14 +592,21 @@ public class JdbcYMessDao implements YMessDao {
 	 * @author balaji i
 	 * @return questionIds(List<Long>)
 	 */
-	private List<Long> getAllQuestionIds()
+	private List<UUID> getAllQuestionIds()
 	{
 		Select selectQuestionIds = QueryBuilder.select("question_id").from("questions");
-		List<Long> allQuestionIds = cassandraTemplate.queryForList(selectQuestionIds,Long.class);
-		return allQuestionIds;
+		List<UUID> allQuestionIds = new ArrayList<UUID>();
+		try {
+			allQuestionIds = cassandraTemplate.queryForList(selectQuestionIds,UUID.class);
+		}
+		catch(NullPointerException | IllegalArgumentException ex){
+			allQuestionIds = new ArrayList<UUID>();
+		}
+		
+		return allQuestionIds == null ?  new ArrayList<UUID>() : allQuestionIds;
 	}
 	
-	private List<Question> getQuestionsWithDetails(List<Long> finalQuestionIds) throws EmptyResultSetException
+	private List<Question> getQuestionsWithDetails(List<UUID> allQuestionIds) throws EmptyResultSetException
 	{
 		List<Question> questions = new ArrayList<Question>();
 		try
@@ -602,7 +615,7 @@ public class JdbcYMessDao implements YMessDao {
 			questions = cassandraTemplate.query(GET_DASHBOARD_QUESTIONS,new QuestionMapper());*/
 		
 
-			for (Long questionId : finalQuestionIds) {
+			for (UUID questionId : allQuestionIds) {
 				
 				final String GET_QUESTION_DETAILS = "select * from questions where question_id="+questionId+" allow filtering";
 				questions.add(cassandraTemplate.queryForObject(GET_QUESTION_DETAILS, new QuestionMapper()));
@@ -611,7 +624,7 @@ public class JdbcYMessDao implements YMessDao {
 		}
 		catch(EmptyResultDataAccessException emptyResultSet)
 		{
-			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+			throw new EmptyResultSetException(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		catch(Exception ex)
 		{
@@ -626,13 +639,18 @@ public class JdbcYMessDao implements YMessDao {
 	 * @param userEmailId
 	 * @return userQuestions (List<String>)
 	 */
-	private List<Long> getUserQuestionIds(String userEmailId)
+	private List<UUID> getUserQuestionIds(String userEmailId)
 	{
 		Select selectUserQuestionIds = QueryBuilder.select("question_id").from("questions");
 		selectUserQuestionIds.where(QueryBuilder.eq("author_email_id", userEmailId));
-		
-		List<Long> userQuestionIds = cassandraTemplate.queryForList(selectUserQuestionIds,Long.class);
-		return userQuestionIds;
+		List<UUID> userQuestionIds = new ArrayList<UUID>();
+		try {
+			userQuestionIds = cassandraTemplate.queryForList(selectUserQuestionIds,UUID.class);
+		}
+		catch(NullPointerException | IllegalArgumentException ex){
+			userQuestionIds = new ArrayList<UUID>();
+		}
+		return userQuestionIds == null ? new ArrayList<UUID>(): userQuestionIds;
 	}
 
 	/**
@@ -645,11 +663,10 @@ public class JdbcYMessDao implements YMessDao {
 	public void addAnswer(Answer answer) {
 		try{
 			
-			long lastInsertedAnswerId = Long.parseLong(getLastInsertedAnswerId());
-			long newAnswerId = lastInsertedAnswerId + 1;
+			UUID answerId = UUID.randomUUID();
 			
 			Date currentTime = new Date();
-			answer.setAnswerId(newAnswerId);
+			answer.setAnswerId(answerId);
 			
 			User userDetails = getUserDetailsByEmailId(answer.getAuthorEmailId());
 	        
@@ -672,11 +689,11 @@ public class JdbcYMessDao implements YMessDao {
 							+ "author_email_id,author_first_name,"
 							+ "author_last_name,image_data,is_image_attached",
 							new Object[]{
-							answer.getQuestionId(),newAnswerId,new Date(),answer.getAnswerDescription(),
+							answer.getQuestionId(),answerId,new Date(),answer.getAnswerDescription(),
 							answer.getAuthorEmailId(),userDetails.getFirstName(),userDetails.getLastName(),
 							ByteBuffer.wrap(compressedImage),answer.getIsImageAttached()});
 					
-					cassandraTemplate.insert(insertQuery);
+					cassandraTemplate.execute(insertQuery);
 					
 					/*cassandraTemplate.update(ADD_ANSWER_WITH_IMAGE,
 							new Object[]{answer.getQuestionId(),newAnswerId,new Date(),answer.getAnswerDescription(),answer.getAuthorEmailId(),userDetails.getFirstName(),userDetails.getLastName(),compressedImage,answer.getIsImageAttached()},
@@ -703,16 +720,16 @@ public class JdbcYMessDao implements YMessDao {
 							new Object[]{
 									answer.getAuthorEmailId(), 
 									new Date(),
-									ActivityConstants.ANSWERED_QUESTION,
+									YMessActivityConstants.ANSWERED_QUESTION,
 									userDetails.getFirstName(),
 									userDetails.getLastName(),
 									answer.getQuestionId(), 
 									questionDesc, GET_QUESTION_AUTHOR, 
-									newAnswerId, 
+									answerId, 
 									answer,  
 									YMessCommonUtility.IS_ANSWERED_QUESTIONS,
 									true});
-					cassandraTemplate.insert(insertUserTimeline);
+					cassandraTemplate.execute(insertUserTimeline);
 					
 					/*cassandraTemplate.update(ADD_ANSWER_TIMELINE, new Object[]{answer.getAuthorEmailId(), new Date(), ActivityConstants.ANSWERED_QUESTION, userDetails.getFirstName(),userDetails.getLastName(),answer.getQuestionId(), questionDesc, GET_QUESTION_AUTHOR, newAnswerId, answer,  YMessCommonUtility.IS_ANSWERED_QUESTIONS,true},
 							new int[]{Types.VARCHAR,Types.TIMESTAMP,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR, Types.BIGINT,Types.VARCHAR,Types.VARCHAR,Types.BIGINT,Types.VARCHAR,Types.BOOLEAN,Types.BOOLEAN}
@@ -734,14 +751,14 @@ public class JdbcYMessDao implements YMessDao {
 						+ "answer_desc,author_email_id,author_first_name,author_last_name",
 						new Object[]{
 						answer.getQuestionId(),
-						newAnswerId,
+						answerId,
 						new Date(),
 						answer.getAnswerDescription(),
 						answer.getAuthorEmailId(),
 						userDetails.getFirstName(),
 						userDetails.getLastName()});
 				
-				cassandraTemplate.insert(insertAnswer);
+				cassandraTemplate.execute(insertAnswer);
 				
 				final String GET_QUESTION_AUTHOR = "select author_email_id from questions where question_id="+answer.getQuestionId()+" allow filtering";
 				String questionAuthorEmailId = cassandraTemplate.queryForObject(GET_QUESTION_AUTHOR, String.class);
@@ -763,17 +780,17 @@ public class JdbcYMessDao implements YMessDao {
 						new Object[]{
 						answer.getAuthorEmailId(), 
 						new Date(), 
-						ActivityConstants.ANSWERED_QUESTION, 
+						YMessActivityConstants.ANSWERED_QUESTION, 
 						userDetails.getFirstName(),
 						userDetails.getLastName(),
 						answer.getQuestionId(),
 						questionDesc,
 						GET_QUESTION_AUTHOR,
-						newAnswerId, 
+						answerId, 
 						answer, 
 						YMessCommonUtility.IS_ANSWERED_QUESTIONS});
 				
-				cassandraTemplate.insert(insertAnswerTimeline);
+				cassandraTemplate.execute(insertAnswerTimeline);
 				
 			}
 		}
@@ -788,13 +805,13 @@ public class JdbcYMessDao implements YMessDao {
 		@Override
 		public Answer mapRow(Row rs, int arg1) throws DriverException {
 			Answer answer = new Answer();
-			answer.setQuestionId(rs.getLong("question_id"));
+			answer.setQuestionId(rs.getUUID("question_id"));
 			answer.setAnswerDescription(rs.getString("answer_desc"));
 			answer.setAnsweredTime(rs.getDate("answered_time"));
 			answer.setAuthorEmailId(rs.getString("author_email_id"));
 			answer.setDownvoteCount(rs.getLong("downvote_count"));
 			answer.setUpvoteCount(rs.getLong("upvote_count"));
-			answer.setAnswerId(rs.getLong("answer_id"));
+			answer.setAnswerId(rs.getUUID("answer_id"));
 			answer.setFirstName(rs.getString("author_first_name"));
 			answer.setLastName(rs.getString("author_last_name"));
 			answer.setUpvotedUsers(rs.getSet("upvoted_users",String.class));
@@ -819,15 +836,30 @@ public class JdbcYMessDao implements YMessDao {
 		
 		List<Answer> answers = new ArrayList<Answer>();
 		
-		long questionId = Long.parseLong(decodedQuestionId);
+		UUID questionId = UUID.fromString(decodedQuestionId);
+		
+		//long questionId = Long.parseLong(decodedQuestionId);
 		try {
 			final String FETCH_USER_ANSWERS_FOR_QUESTION ="select question_id,answer_id,answered_time,answer_desc,author_email_id,downvote_count,upvote_count,author_first_name,author_last_name,upvoted_users,downvoted_users,is_image_attached from answers where question_id="+questionId+" order by answer_id desc";
 			answers = cassandraTemplate.query(FETCH_USER_ANSWERS_FOR_QUESTION, new AnswerMapper());
+			
+			Collections.sort(answers,new Comparator<Answer>() {
+				@Override
+				public int compare(Answer o1, Answer o2) {
+					int compare = 0;
+					
+					compare = o2.getAnswerId().compareTo(o1.getAnswerId());
+					
+					// TODO Auto-generated method stub
+					return compare;
+				}
+			});
+			
 		}
 		catch(EmptyResultDataAccessException emptyResultSet)
 		{
 			logger.error(emptyResultSet.getLocalizedMessage());
-			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+			throw new EmptyResultSetException(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		catch (Exception e) {
 			logger.error(e.getLocalizedMessage());
@@ -912,7 +944,7 @@ public class JdbcYMessDao implements YMessDao {
 		}
 		catch(EmptyResultDataAccessException emptyRS)
 		{
-			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+			throw new EmptyResultSetException(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		String emailIds = "";
 		if(upvotedUserEmailIds != null)
@@ -925,7 +957,7 @@ public class JdbcYMessDao implements YMessDao {
 		}
 		catch(EmptyResultDataAccessException emptyRS)
 		{
-			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+			throw new EmptyResultSetException(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		return users;
 	}
@@ -966,7 +998,7 @@ public class JdbcYMessDao implements YMessDao {
 		}
 		catch(EmptyResultDataAccessException emptyRS)
 		{
-			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+			throw new EmptyResultSetException(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		catch(Exception ex)
 		{
@@ -1031,7 +1063,7 @@ public class JdbcYMessDao implements YMessDao {
 					+ "profile_updated_first_name, profile_updated_last_name, "
 					+ "profile_updated_organization, profile_updated_designation, "
 					+ "profile_updated_previous_organizations, profile_updated_interests, is_updated_profile",
-					 new Object[]{user.getUserEmailId(),new Date(),ActivityConstants.PROFILE_UPDATED,
+					 new Object[]{user.getUserEmailId(),new Date(),YMessActivityConstants.PROFILE_UPDATED,
 					user.getFirstName(),user.getLastName(),user.getFirstName(),user.getLastName(),
 					user.getOrganization(),user.getDesignation(),previousOrganizations, interests,
 					YMessCommonUtility.IS_PROFILE_UPDATED});
@@ -1380,8 +1412,8 @@ public class JdbcYMessDao implements YMessDao {
 		}
 		catch(EmptyResultDataAccessException emptyRs)
 		{
-			logger.error(MessageConstants.EMPTY_RESULT_SET);
-			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+			logger.error(YMessMessageConstants.EMPTY_RESULT_SET);
+			throw new EmptyResultSetException(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		catch(Exception ex)
 		{
@@ -1432,8 +1464,8 @@ public class JdbcYMessDao implements YMessDao {
 		}
 		catch(EmptyResultDataAccessException emptyRs)
 		{
-			logger.error(MessageConstants.EMPTY_RESULT_SET);
-			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+			logger.error(YMessMessageConstants.EMPTY_RESULT_SET);
+			throw new EmptyResultSetException(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		catch(Exception ex)
 		{
@@ -1519,7 +1551,7 @@ public class JdbcYMessDao implements YMessDao {
 		}
 		catch(EmptyResultDataAccessException emptyRS)
 		{
-			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+			throw new EmptyResultSetException(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		String emailIds = "";
 		if(downvotedUserEmailIds != null)
@@ -1532,7 +1564,7 @@ public class JdbcYMessDao implements YMessDao {
 		}
 		catch(EmptyResultDataAccessException emptyRS)
 		{
-			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+			throw new EmptyResultSetException(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		return users;
 	}
@@ -1612,7 +1644,7 @@ public class JdbcYMessDao implements YMessDao {
 		}
 		catch(EmptyResultDataAccessException emptyRS)
 		{
-			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+			throw new EmptyResultSetException(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		return timeline;
 	}
@@ -1737,7 +1769,7 @@ public class JdbcYMessDao implements YMessDao {
 		@Override
 		public Question mapRow(Row rs, int arg1) throws DriverException {
 			Question question = new Question();
-			question.setQuestionId(rs.getLong("question_id"));
+			question.setQuestionId(rs.getUUID("question_id"));
 			question.setQuestionDescription(rs.getString("question_desc")); 
 			
 			if(rs.getDate("updated_date") != null)
@@ -1760,7 +1792,7 @@ public class JdbcYMessDao implements YMessDao {
 		@Override
 		public Question mapRow(Row rs, int arg1) throws DriverException {
 			Question question = new Question();
-			question.setQuestionId(rs.getLong("question_id"));
+			question.setQuestionId(rs.getUUID("question_id"));
 			question.setQuestionDescription(rs.getString("question_desc")); 
 			
 			if(rs.getDate("updated_date") != null)
@@ -1785,7 +1817,7 @@ public class JdbcYMessDao implements YMessDao {
 		}
 		catch(EmptyResultDataAccessException emptyResultSet)
 		{
-			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+			throw new EmptyResultSetException(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		catch(Exception ex)
 		{
@@ -1808,8 +1840,8 @@ public class JdbcYMessDao implements YMessDao {
 		}
 		catch(EmptyResultDataAccessException emptyRs)
 		{
-			logger.error(MessageConstants.EMPTY_RESULT_SET);
-			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+			logger.error(YMessMessageConstants.EMPTY_RESULT_SET);
+			throw new EmptyResultSetException(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		return topics;
 	}
@@ -2103,7 +2135,7 @@ public class JdbcYMessDao implements YMessDao {
 		}
 		catch(EmptyResultDataAccessException emptyRs)
 		{
-			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+			throw new EmptyResultSetException(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		return files;
 	}
@@ -2152,7 +2184,7 @@ public class JdbcYMessDao implements YMessDao {
 		}
 		catch(EmptyResultDataAccessException emptyRs)
 		{
-			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+			throw new EmptyResultSetException(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		return userFiles;
 	}
@@ -2389,7 +2421,7 @@ public class JdbcYMessDao implements YMessDao {
 		}
 		catch(EmptyResultDataAccessException emptyResultSet)
 		{
-			throw new EmptyResultSetException(MessageConstants.EMPTY_RESULT_SET);
+			throw new EmptyResultSetException(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
 		catch(Exception ex)
 		{

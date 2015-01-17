@@ -29,9 +29,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.ymess.exceptions.EmptyResultSetException;
 import com.ymess.pojos.File;
 import com.ymess.service.interfaces.YMessService;
-import com.ymess.util.JSPMappings;
-import com.ymess.util.LoggerConstants;
-import com.ymess.util.URLMappings;
+import com.ymess.util.YMessJSPMappings;
+import com.ymess.util.YMessLoggerConstants;
+import com.ymess.util.YMessURLMappings;
 import com.ymess.util.YMessCommonUtility;
 
 /**
@@ -46,7 +46,7 @@ public class FileActivitiesController {
 	@Autowired
 	YMessService yMessService;
 	
-	@RequestMapping(value = URLMappings.FILES)
+	@RequestMapping(value = YMessURLMappings.FILES)
 	String loadFilesPage(@ModelAttribute("fileData") File fileDetails, Model model)
 	{
 		if(fileDetails != null)
@@ -73,7 +73,7 @@ public class FileActivitiesController {
 		model.addAttribute("userFiles",userFiles);
 		model.addAttribute("sharedFiles",sharedFiles);
 		model.addAttribute("popularFiles",popularFiles);
-		return JSPMappings.FILES;
+		return YMessJSPMappings.FILES;
 	}
 	
 	/**
@@ -83,7 +83,7 @@ public class FileActivitiesController {
 	 * @param model
 	 * @return files.htm
 	 */
-	@RequestMapping(value = URLMappings.FILE_UPLOAD,method = RequestMethod.POST)
+	@RequestMapping(value = YMessURLMappings.FILE_UPLOAD,method = RequestMethod.POST)
 	String loadFilesPage(@ModelAttribute("file") File file, BindingResult result,Model model)
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -129,7 +129,7 @@ public class FileActivitiesController {
 		
 		if(result.hasErrors())
 		{
-			return JSPMappings.FILES;
+			return YMessJSPMappings.FILES;
 		}
 		
 		try {
@@ -140,7 +140,7 @@ public class FileActivitiesController {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return URLMappings.REDIRECT_SUCCESS_FILE_UPLOAD;
+		return YMessURLMappings.REDIRECT_SUCCESS_FILE_UPLOAD;
 	}
 	/**
 	 * Downloads the Clicked Zip File
@@ -149,7 +149,7 @@ public class FileActivitiesController {
 	 * @param response
 	 * @return file data in response
 	 */
-	@RequestMapping(value = URLMappings.DOWNLOAD_FILE)
+	@RequestMapping(value = YMessURLMappings.DOWNLOAD_FILE)
 	String downloadFile(@RequestParam("fileId") String fileId,@RequestParam("author")String authorEmailId,HttpServletResponse response)
 	{
 		String encodedFileId = YMessCommonUtility.decodeEncodedParameter(fileId);
@@ -178,16 +178,16 @@ public class FileActivitiesController {
 	 * @param encodedFileId
 	 * @param encodedAuthorEmailId
 	 */
-	@RequestMapping(value = URLMappings.DELETE_FILE)
+	@RequestMapping(value = YMessURLMappings.DELETE_FILE)
 	String deleteFile(@RequestParam("fId") String encodedFileId,@RequestParam("author") String encodedAuthorEmailId)
 	{
 		String fileId = YMessCommonUtility.decodeEncodedParameter(encodedFileId);
 		String authorEmailId = YMessCommonUtility.decodeEncodedParameter(encodedAuthorEmailId);
 		
 		yMessService.deleteFile(fileId,authorEmailId);
-		logger.info(LoggerConstants.FILE_DELETED);
+		logger.info(YMessLoggerConstants.FILE_DELETED);
 		
-		return URLMappings.REDIRECT_SUCCESS_FILE_DELETED;
+		return YMessURLMappings.REDIRECT_SUCCESS_FILE_DELETED;
 	}
 	
 	/**
@@ -195,16 +195,16 @@ public class FileActivitiesController {
 	 * @param encodedFileId
 	 * @param encodedAuthorEmailId
 	 */
-	@RequestMapping(value = URLMappings.SHARE_FILE)
+	@RequestMapping(value = YMessURLMappings.SHARE_FILE)
 	String shareFile(@RequestParam("fId") String encodedFileId,@RequestParam("author") String encodedAuthorEmailId)
 	{
 		String fileId = YMessCommonUtility.decodeEncodedParameter(encodedFileId);
 		String authorEmailId = YMessCommonUtility.decodeEncodedParameter(encodedAuthorEmailId);
 		
 		yMessService.shareFile(fileId,authorEmailId);
-		logger.info(LoggerConstants.FILE_SHARED);
+		logger.info(YMessLoggerConstants.FILE_SHARED);
 		
-		return URLMappings.REDIRECT_SUCCESS_FILE_SHARED;
+		return YMessURLMappings.REDIRECT_SUCCESS_FILE_SHARED;
 	}
 	
 	/**
@@ -215,7 +215,7 @@ public class FileActivitiesController {
 	 * @param redirectAttributes
 	 * @return
 	 */
-	@RequestMapping(value = URLMappings.EDIT_FILE)
+	@RequestMapping(value = YMessURLMappings.EDIT_FILE)
 	String editFile(@RequestParam("fId")String encodedFileId, @RequestParam("author") String encodedAuthorEmailId, RedirectAttributes redirectAttributes)
 	{
 		String fileId = YMessCommonUtility.decodeEncodedParameter(encodedFileId);
@@ -234,12 +234,12 @@ public class FileActivitiesController {
 	 * @param encodedTopic
 	 * @return topic_files(filesInTopic)
 	 */
-	@RequestMapping(value = URLMappings.FILES_IN_TOPIC)
+	@RequestMapping(value = YMessURLMappings.FILES_IN_TOPIC)
 	String getFilesInTopic(@RequestParam("t") String encodedTopic,Model model)
 	{
 		String topic = YMessCommonUtility.decodeEncodedParameter(encodedTopic);
 		List<File> filesInTopic = yMessService.getFilesInTopic(topic);
 		model.addAttribute("filesInTopic",filesInTopic);
-		return JSPMappings.FILES_IN_TOPIC;
+		return YMessJSPMappings.FILES_IN_TOPIC;
 	}
 }

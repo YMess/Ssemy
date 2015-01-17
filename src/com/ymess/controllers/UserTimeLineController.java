@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.ymess.exceptions.EmptyResultSetException;
 import com.ymess.pojos.TimeLine;
 import com.ymess.service.interfaces.YMessService;
-import com.ymess.util.JSPMappings;
-import com.ymess.util.URLMappings;
+import com.ymess.util.YMessJSPMappings;
+import com.ymess.util.YMessURLMappings;
 
 @Controller
 public class UserTimeLineController {
@@ -28,7 +28,7 @@ public class UserTimeLineController {
 	@Autowired
 	YMessService yMessService;
 	
-	@RequestMapping(value=URLMappings.USER_TIMELINE, method=RequestMethod.GET)
+	@RequestMapping(value=YMessURLMappings.USER_TIMELINE, method=RequestMethod.GET)
 	String viewUserTimeLine(Model model)
 	{
 		Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
@@ -43,7 +43,7 @@ public class UserTimeLineController {
 		}
 		
 		model.addAttribute("userTimeline",userTimeline);
-		return JSPMappings.USER_TIMELINE;
+		return YMessJSPMappings.USER_TIMELINE;
 	}
 	
 }

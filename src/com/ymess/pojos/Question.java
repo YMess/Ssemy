@@ -6,6 +6,7 @@ package com.ymess.pojos;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,8 +18,9 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public class Question {
 	
-	private Long questionId;
+	//private Long questionId;
 	
+	private UUID questionId;
 
 	@NotEmpty(message="Please Add Question Details")
 	private String questionDescription;
@@ -87,11 +89,11 @@ public class Question {
 	}
 
 
-	public Long getQuestionId() {
+	public UUID getQuestionId() {
 		return questionId;
 	}
 
-	public void setQuestionId(Long questionId) {
+	public void setQuestionId(UUID questionId) {
 		this.questionId = questionId;
 	}
 
