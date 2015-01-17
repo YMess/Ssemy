@@ -14,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class Answer {
 
 	private Long answerId;
-	private UUID questionId;
+	private Long questionId;
 	private Date answeredTime;
 	private String answerDescription;
 	private String authorEmailId;
@@ -32,10 +32,10 @@ public class Answer {
 	private byte[] answerImageDb;
 	
 	
-	public UUID getQuestionId() {
+	public Long getQuestionId() {
 		return questionId;
 	}
-	public void setQuestionId(UUID questionId) {
+	public void setQuestionId(Long questionId) {
 		this.questionId = questionId;
 	}
 	public Date getAnsweredTime() {

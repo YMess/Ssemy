@@ -555,8 +555,8 @@ public class JdbcYMessDao implements YMessDao {
 	@Override
 	public List<Question> getDashboardQuestions(String userEmailId) throws EmptyResultSetException {
 		
-		List<UUID> allQuestionIds = getAllQuestionIds();
-		List<UUID> userQuestionIds = getUserQuestionIds(userEmailId);
+		List<Long> allQuestionIds = getAllQuestionIds();
+		List<Long> userQuestionIds = getUserQuestionIds(userEmailId);
 		
 		if(!userQuestionIds.isEmpty())
 		{
@@ -565,7 +565,7 @@ public class JdbcYMessDao implements YMessDao {
 		
 		List<Question> questions = new ArrayList<Question>();
 		StringBuilder finalQuestionIdsSB = new StringBuilder();
-			for (UUID finalQuestionId : allQuestionIds){
+			for (Long finalQuestionId : allQuestionIds){
 				finalQuestionIdsSB = finalQuestionIdsSB.append(finalQuestionId).append(",");
 			}
 		
@@ -573,15 +573,14 @@ public class JdbcYMessDao implements YMessDao {
 		if(finalQuestionIdsSB.length() > 0)
 			finalQuestionIds = finalQuestionIdsSB.substring(0,finalQuestionIdsSB.lastIndexOf(","));
 		
-		
 		if(finalQuestionIds.length() > 0)
 		{
+			if(null != allQuestionIds && !allQuestionIds.isEmpty())
+			{
+				questions = getQuestionsWithDetails(allQuestionIds);
+			}
 		}
 		
-		if(null != allQuestionIds && !allQuestionIds.isEmpty())
-		{
-			questions = getQuestionsWithDetails(allQuestionIds);
-		}
 		
 		return questions;
 	}
@@ -591,21 +590,21 @@ public class JdbcYMessDao implements YMessDao {
 	 * @author balaji i
 	 * @return questionIds(List<Long>)
 	 */
-	private List<UUID> getAllQuestionIds()
+	private List<Long> getAllQuestionIds()
 	{
 		Select selectQuestionIds = QueryBuilder.select("question_id").from("questions");
-		List<UUID> allQuestionIds = new ArrayList<UUID>();
+		List<Long> allQuestionIds = new ArrayList<Long>();
 		try {
-			allQuestionIds = cassandraTemplate.queryForList(selectQuestionIds,UUID.class);
+			allQuestionIds = cassandraTemplate.queryForList(selectQuestionIds,Long.class);
 		}
 		catch(NullPointerException | IllegalArgumentException ex){
-			allQuestionIds = new ArrayList<UUID>();
+			allQuestionIds = new ArrayList<Long>();
 		}
 		
-		return allQuestionIds == null ?  new ArrayList<UUID>() : allQuestionIds;
+		return allQuestionIds == null ?  new ArrayList<Long>() : allQuestionIds;
 	}
 	
-	private List<Question> getQuestionsWithDetails(List<UUID> allQuestionIds) throws EmptyResultSetException
+	private List<Question> getQuestionsWithDetails(List<Long> allQuestionIds) throws EmptyResultSetException
 	{
 		List<Question> questions = new ArrayList<Question>();
 		try
@@ -614,7 +613,7 @@ public class JdbcYMessDao implements YMessDao {
 			questions = cassandraTemplate.query(GET_DASHBOARD_QUESTIONS,new QuestionMapper());*/
 		
 
-			for (UUID questionId : allQuestionIds) {
+			for (Long questionId : allQuestionIds) {
 				
 				final String GET_QUESTION_DETAILS = "select * from questions where question_id="+questionId+" allow filtering";
 				questions.add(cassandraTemplate.queryForObject(GET_QUESTION_DETAILS, new QuestionMapper()));
@@ -638,18 +637,18 @@ public class JdbcYMessDao implements YMessDao {
 	 * @param userEmailId
 	 * @return userQuestions (List<String>)
 	 */
-	private List<UUID> getUserQuestionIds(String userEmailId)
+	private List<Long> getUserQuestionIds(String userEmailId)
 	{
 		Select selectUserQuestionIds = QueryBuilder.select("question_id").from("questions");
 		selectUserQuestionIds.where(QueryBuilder.eq("author_email_id", userEmailId));
-		List<UUID> userQuestionIds = new ArrayList<UUID>();
+		List<Long> userQuestionIds = new ArrayList<Long>();
 		try {
-			userQuestionIds = cassandraTemplate.queryForList(selectUserQuestionIds,UUID.class);
+			userQuestionIds = cassandraTemplate.queryForList(selectUserQuestionIds,Long.class);
 		}
 		catch(NullPointerException | IllegalArgumentException ex){
-			userQuestionIds = new ArrayList<UUID>();
+			userQuestionIds = new ArrayList<Long>();
 		}
-		return userQuestionIds == null ? new ArrayList<UUID>(): userQuestionIds;
+		return userQuestionIds == null ? new ArrayList<Long>(): userQuestionIds;
 	}
 
 	/**
@@ -804,7 +803,7 @@ public class JdbcYMessDao implements YMessDao {
 		@Override
 		public Answer mapRow(Row rs, int arg1) throws DriverException {
 			Answer answer = new Answer();
-			answer.setQuestionId(rs.getUUID("question_id"));
+			answer.setQuestionId(rs.getLong("question_id"));
 			answer.setAnswerDescription(rs.getString("answer_desc"));
 			answer.setAnsweredTime(rs.getDate("answered_time"));
 			answer.setAuthorEmailId(rs.getString("author_email_id"));
@@ -835,9 +834,9 @@ public class JdbcYMessDao implements YMessDao {
 		
 		List<Answer> answers = new ArrayList<Answer>();
 		
-		UUID questionId = UUID.fromString(decodedQuestionId);
+		//UUID questionId = UUID.fromString(decodedQuestionId);
 		
-		//long questionId = Long.parseLong(decodedQuestionId);
+		long questionId = Long.parseLong(decodedQuestionId);
 		try {
 			final String FETCH_USER_ANSWERS_FOR_QUESTION ="select question_id,answer_id,answered_time,answer_desc,author_email_id,downvote_count,upvote_count,author_first_name,author_last_name,upvoted_users,downvoted_users,is_image_attached from answers where question_id="+questionId+" order by answer_id desc";
 			answers = cassandraTemplate.query(FETCH_USER_ANSWERS_FOR_QUESTION, new AnswerMapper());
