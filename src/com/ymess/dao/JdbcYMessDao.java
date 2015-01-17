@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -35,7 +34,6 @@ import com.ymess.dao.interfaces.YMessDao;
 import com.ymess.exceptions.EmptyResultSetException;
 import com.ymess.pojos.Answer;
 import com.ymess.pojos.File;
-import com.ymess.pojos.Keyword;
 import com.ymess.pojos.Question;
 import com.ymess.pojos.TimeLine;
 import com.ymess.pojos.Topic;
@@ -185,6 +183,7 @@ public class JdbcYMessDao implements YMessDao {
 					+ "question_posted_title ,question_posted_desc,question_is_image_attached,"
 					+ " question_topics, question_updated_date, is_posted_question",  
 					new Object[]{question.getAuthorEmailId(),new Date(),YMessActivityConstants.POSTED_QUESTION,userDetails.getFirstName(),
+					userDetails.getLastName(),questionId,question.getQuestionTitle(),question.getQuestionDescription(),true,
 					userDetails.getLastName(),questionId,question.getQuestionTitle(),question.getQuestionDescription(),true,
 					question.getTopics(),currentTime ,YMessCommonUtility.IS_POSTED_QUESTIONS});	
 				
