@@ -48,6 +48,7 @@
   <servlet-mapping>
     <servlet-name>ymess</servlet-name>
     <url-pattern>*.htm</url-pattern>
+     <url-pattern>*.json</url-pattern>
     <url-pattern>/service/*</url-pattern>
     <url-pattern>/m/service/*</url-pattern>
     <url-pattern>/t/service/*</url-pattern>

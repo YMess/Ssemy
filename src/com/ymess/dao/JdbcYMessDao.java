@@ -663,7 +663,6 @@ public class JdbcYMessDao implements YMessDao {
 			
 			Long answerId = Long.valueOf(getLastInsertedAnswerId()) + 1;
 			
-			Date currentTime = new Date();
 			answer.setAnswerId(answerId);
 			
 			User userDetails = getUserDetailsByEmailId(answer.getAuthorEmailId());
@@ -893,21 +892,21 @@ public class JdbcYMessDao implements YMessDao {
 	 * @author balaji i
 	 * @return lastInsertedQuestionId(String)
 	 */
-	private String getLastInsertedAnswerId() 
+	private Long getLastInsertedAnswerId() 
 	{
-		long maxAnswerId = 0;
+		Long maxAnswerId = 0L;
 		
-		List<String> answerIds = cassandraTemplate.queryForList(GET_ANSWER_IDS,String.class);
+		List<Long> answerIds = cassandraTemplate.queryForList(GET_ANSWER_IDS,Long.class);
 			try
 			{
 				if(!answerIds.isEmpty())
-					maxAnswerId = Long.parseLong(Collections.max(answerIds));
+					maxAnswerId = Collections.max(answerIds);
 			}
 			catch(EmptyResultDataAccessException emptyRS)
 			{
 				logger.error(emptyRS.getLocalizedMessage());
 			}
-		return String.valueOf(maxAnswerId);
+		return maxAnswerId == null ? 0 : maxAnswerId;
 	}
 
 	private class UserMapper implements RowMapper<User>{
