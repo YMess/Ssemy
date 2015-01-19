@@ -26,5 +26,12 @@ public interface YMailService {
 	 * @return List<Mail>
 	 */
 	List<Mail> getSentMails(String userEmailId);
+    
+	/**
+	 * @author RVishwakarma
+	 * @param userEmailId
+	 * @return List<Mail>
+	 */
+	List<Mail> getImportantMails(String userEmailId);
 
 }

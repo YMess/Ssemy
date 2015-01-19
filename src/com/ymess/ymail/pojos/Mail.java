@@ -80,7 +80,7 @@ public class Mail {
 	public void setMailAttachment(List<MultipartFile> mailAttachment) {
 		this.mailAttachment = mailAttachment;
 	}
-	public boolean getIsAttachmentAttached() {
+	public Boolean getIsAttachmentAttached() {
 		return isAttachmentAttached;
 	}
 	public void setIsAttachmentAttached(boolean isAttachmentAttached) {

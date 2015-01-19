@@ -10,7 +10,7 @@
     
 
 
-<link rel="stylesheet" href="http://yui.yahooapis.com/pure//pure.css">
+<<!-- link rel="stylesheet" href="http://yui.yahooapis.com/pure//pure.css"> -->
 
 <link rel="stylesheet" href="css/pure-min.css">
 

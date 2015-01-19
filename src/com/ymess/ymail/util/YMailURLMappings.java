@@ -2,11 +2,12 @@ package com.ymess.ymail.util;
 
 public class YMailURLMappings {
 
-	public static final String INBOX_PAGE = "inbox.htm"; //MailController
-	public static final String IMPORTANT_PAGE = "important.htm"; //MailController
-	public static final String DRAFTS_PAGE = "drafts.htm"; //MailController
-	public static final String SENT_PAGE = "sent.htm"; //MailController
-	public static final String TRASH_PAGE = "trash.htm"; //MailController
-	public static final String COMPOSE_MAIL_PAGE = "compose_mail.htm"; //MailController
-	public static final String REDIRECT_SUCCESS_MAIL_SEND = "redirect:"+INBOX_PAGE;  //MailController
+	public static final String INBOX_PAGE = "inbox.htm"; //MailActivitiesController.java
+	public static final String IMPORTANT_PAGE = "important.htm"; //MailActivitiesController.java
+	public static final String DRAFTS_PAGE = "drafts.htm"; //MailActivitiesController.java
+	public static final String SENT_PAGE = "sent.htm"; //MailActivitiesController.java
+	public static final String TRASH_PAGE = "trash.htm"; //MailActivitiesController.java
+	public static final String COMPOSE_MAIL_PAGE = "compose_mail.htm"; //MailActivitiesController.java
+	public static final String REDIRECT_SUCCESS_MAIL_SEND = "redirect:"+INBOX_PAGE;  //MailActivitiesController.java
+	
 }

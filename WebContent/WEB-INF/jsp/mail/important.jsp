@@ -24,7 +24,27 @@
 	<div>
 		<div class="userleft"><%@include file="/WEB-INF/jsp/include/mail_navigation.jsp" %></div>
 		<div class="usercenter">
-
+        
+        <ul>
+        <c:forEach items="${importantMails}" var="importantMail">
+        <li>
+        
+								 	<div>
+								 	<div><input type="checkbox" name="checkmark" id="${importantMail.mailId}"></div>
+								 	<div><input type="checkbox" name="impotant"></div>
+								 	<div><c:out value="${importantMail.mailFrom }"></c:out></div>
+								 	<div><c:out value="${importantMail.mailSubject }"></c:out>&nbsp;<c:out value="${importantMail.mailBody }"></c:out></div>
+								 	<div><c:out value="${importantMail.mailSentTimestamp }"></c:out></div>
+								 	<c:if test="${importantMail.isAttachmentAttached eq true }">
+								 	<div>
+							  		<img  src="/images/Attachment_icon.png">		
+							 	    </div>
+							 	    </c:if>
+								 	</div>
+								 	</li>
+        
+        </c:forEach>
+                </ul>
 		</div>
 		<div class="userright"><%@include file="/WEB-INF/jsp/include/right.jsp" %></div>
 	</div>

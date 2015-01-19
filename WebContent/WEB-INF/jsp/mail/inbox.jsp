@@ -14,6 +14,12 @@
   <script src="js/jquery-ui.js" type="text/javascript"></script>
   <LINK REL=Stylesheet TYPE ="text/css" HREF="css/style.css">
 <LINK REL=Stylesheet TYPE ="text/css" HREF="css/pure-min.css">
+<script type="text/javascript">
+function deleteMails()
+{
+  
+}
+</script>
 </head>
 <body>
      <c:if test="${ not empty successfullyMailSend }">
@@ -35,15 +41,24 @@
 									No mails Found! 
 					</c:when>
 					<c:otherwise>
-						
+						<div>
+						<input type="button" value="Delete" onclick="deleteMails()" style="height: 50px;width: 250px;"/>
+						</div>
 						<div class="pure-menu pure-menu-open">
 						 	<ul style="padding-left: 10px;">
-								<c:forEach items="${mail}" var="mail">
+								<c:forEach items="${mails}" var="mail">
 								 	<li>
 								 	<div>
+								 	<div><input type="checkbox" name="checkmark" id="${mail.mailId}"></div>
+								 	<div><input type="checkbox" name="impotant"></div>
 								 	<div><c:out value="${mail.mailFrom }"></c:out></div>
-								 	<div><c:out value="${mail.mailSubject }"></c:out><c:out value="${question.mailBody }"></c:out></div>
+								 	<div><c:out value="${mail.mailSubject }"></c:out>&nbsp;<c:out value="${mail.mailBody }"></c:out></div>
 								 	<div><c:out value="${mail.mailSentTimestamp }"></c:out></div>
+								 	<c:if test="${mail.isAttachmentAttached eq true }">
+								 	<div>
+							  		<img  src="/images/Attachment_icon.png">		
+							 	    </div>
+							 	    </c:if>
 								 	</div>
 								 	</li>
 								</c:forEach>

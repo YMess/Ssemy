@@ -13,8 +13,8 @@
     
 
 
-<link rel="stylesheet" href="http://yui.yahooapis.com/pure//pure.css">
-
+<!-- <link rel="stylesheet" href="http://yui.yahooapis.com/pure//pu	re.css">
+ -->
 <link rel="stylesheet" href="css/pure-min.css">
 
 <!--[if lte IE 8]>
@@ -24,7 +24,7 @@
 <![endif]-->
 <!--[if gt IE 8]><!-->
   
-    <link rel="stylesheet" href="http://yui.yahooapis.com/pure//grids-responsive.css">
+   <!--  <link rel="stylesheet" href="http://yui.yahooapis.com/pure//grids-responsive.css"> -->
   
 <!--<![endif]-->
 

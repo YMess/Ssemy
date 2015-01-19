@@ -51,4 +51,9 @@ public class YMailServiceManager implements YMailService {
 	public List<Mail> getSentMails(String userEmailId) {
 		return yMailDao.getSentMails(userEmailId);
 	}
+
+	@Override
+	public List<Mail> getImportantMails(String userEmailId) {
+	    return yMailDao.getImportantMails(userEmailId);
+	}
 }

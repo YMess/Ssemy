@@ -28,5 +28,8 @@ public interface YMailDao {
 	 */
 	List<Mail> getSentMails(String userEmailId);
 
+
+	List<Mail> getImportantMails(String userEmailId);
+
 	
 }

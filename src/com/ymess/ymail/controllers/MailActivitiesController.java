@@ -45,16 +45,16 @@ public class MailActivitiesController {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		String userEmailId = authentication.getName();
 		
-		List<Mail> mail = new ArrayList<Mail>();
+		List<Mail> mails = new ArrayList<Mail>();
 		
 		try {
-			mail = yMailService.getInboxMails(userEmailId);
+			mails = yMailService.getInboxMails(userEmailId);
 			logger.info(YMailLoggerConstants.INBOX_PAGE +" "+ userEmailId);
 		} catch (Exception e) {
 			logger.error(e.getLocalizedMessage());
 		}
 		
-		model.addAttribute("mail",mail);
+		model.addAttribute("mails",mails);
 		return YMailJSPMappings.INBOX_PAGE;
 	}
 	
@@ -107,7 +107,7 @@ public class MailActivitiesController {
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		String loggedInUserEmailId = authentication.getName();
-		Boolean successFlag = false;
+
 
 		mail.setMailFrom(loggedInUserEmailId);
 
@@ -125,6 +125,21 @@ public class MailActivitiesController {
 		return YMailURLMappings.REDIRECT_SUCCESS_MAIL_SEND;
 	}
 	
+	
+	@RequestMapping(value= YMailURLMappings.IMPORTANT_PAGE)
+	String loadImportantMails(Model model)
+	{
+		List<Mail> importantMails = new ArrayList<Mail>();
+		try {
+			importantMails = yMailService.getImportantMails(SecurityContextHolder.getContext().getAuthentication().getName());
+			logger.info(YMailLoggerConstants.IMPORTANT_PAGE+" "+SecurityContextHolder.getContext().getAuthentication().getName());
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			logger.error(ex.getStackTrace().toString());
+		}
+		model.addAttribute("importantMails",importantMails);
+		return YMailJSPMappings.IMPORTANT_PAGE;
+	}
 	
 	
 }
