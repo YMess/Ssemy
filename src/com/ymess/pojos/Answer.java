@@ -2,6 +2,7 @@ package com.ymess.pojos;
 
 import java.util.Date;
 import java.util.Set;
+import java.util.UUID;
 
 import org.springframework.web.multipart.MultipartFile;
 

@@ -6,21 +6,19 @@ package com.ymess.dao;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryparser.classic.ParseException;
-import org.springframework.cassandra.core.ResultSetExtractor;
 import org.springframework.cassandra.core.RowMapper;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -36,14 +34,13 @@ import com.ymess.dao.interfaces.YMessDao;
 import com.ymess.exceptions.EmptyResultSetException;
 import com.ymess.pojos.Answer;
 import com.ymess.pojos.File;
-import com.ymess.pojos.Keyword;
 import com.ymess.pojos.Question;
 import com.ymess.pojos.TimeLine;
 import com.ymess.pojos.Topic;
 import com.ymess.pojos.User;
 import com.ymess.util.YMessActivityConstants;
-import com.ymess.util.YMessMessageConstants;
 import com.ymess.util.YMessCommonUtility;
+import com.ymess.util.YMessMessageConstants;
 
 /**
  * Contains all the methods of DB insertion
@@ -138,11 +135,11 @@ public class JdbcYMessDao implements YMessDao {
 	 */
 	@Override
 	public void addQuestion(Question question) {
-		Long lastQuestionId = getLastInsertedQuestionId();
-		Long currentQuestionId = lastQuestionId + 1;
+		
+		Long questionId = getLastInsertedQuestionId() + 1;
 		
 		Date currentTime = new Date();
-		question.setQuestionId(currentQuestionId);
+		question.setQuestionId(questionId);
 		
 		User userDetails = getUserDetailsByEmailId(question.getAuthorEmailId());
 
@@ -163,7 +160,7 @@ public class JdbcYMessDao implements YMessDao {
 						+ "updated_date,keywords,author_first_name,"
 						+ "author_last_name,is_image_attached,image_data,image_name,topics",
 						new Object[]{
-						currentQuestionId,
+						questionId,
 						question.getAuthorEmailId(),
 						question.getQuestionTitle(),
 						question.getQuestionDescription(),
@@ -186,7 +183,8 @@ public class JdbcYMessDao implements YMessDao {
 					+ "question_posted_title ,question_posted_desc,question_is_image_attached,"
 					+ " question_topics, question_updated_date, is_posted_question",  
 					new Object[]{question.getAuthorEmailId(),new Date(),YMessActivityConstants.POSTED_QUESTION,userDetails.getFirstName(),
-					userDetails.getLastName(),currentQuestionId,question.getQuestionTitle(),question.getQuestionDescription(),true,
+					userDetails.getLastName(),questionId,question.getQuestionTitle(),question.getQuestionDescription(),true,
+					userDetails.getLastName(),questionId,question.getQuestionTitle(),question.getQuestionDescription(),true,
 					question.getTopics(),currentTime ,YMessCommonUtility.IS_POSTED_QUESTIONS});	
 				
 					/*	cassandraTemplate.update(ADD_QUESTION_TIMELINE, new Object[]{question.getAuthorEmailId(),new Date(),ActivityConstants.POSTED_QUESTION,userDetails.getFirstName(),userDetails.getLastName(),currentQuestionId,question.getQuestionTitle(),question.getQuestionDescription(),true,question.getTopics(),currentTime ,YMessCommonUtility.IS_POSTED_QUESTIONS},
@@ -207,7 +205,7 @@ public class JdbcYMessDao implements YMessDao {
 			Insert insertQuestionWithoutImage = YMessCommonUtility.getFormattedInsertQuery("questions", "question_id,author_email_id,"
 					+ "question_title,question_desc,created_date,updated_date,"
 					+ "keywords,author_first_name,author_last_name,topics", 
-					new Object[]{currentQuestionId,question.getAuthorEmailId(),question.getQuestionTitle(),question.getQuestionDescription(),
+					new Object[]{questionId,question.getAuthorEmailId(),question.getQuestionTitle(),question.getQuestionDescription(),
 					currentTime,currentTime,question.getKeywords(),userDetails.getFirstName(),userDetails.getLastName(),question.getTopics()});
 			
 			cassandraTemplate.execute(insertQuestionWithoutImage);
@@ -224,7 +222,7 @@ public class JdbcYMessDao implements YMessDao {
 					+ "question_posted_title ,question_posted_desc,question_is_image_attached, "
 					+ "question_topics, question_updated_date, is_posted_question", 
 					new Object[]{question.getAuthorEmailId(),new Date(),YMessActivityConstants.POSTED_QUESTION,userDetails.getFirstName(),
-					userDetails.getLastName(),currentQuestionId,question.getQuestionTitle(),question.getQuestionDescription(),
+					userDetails.getLastName(),questionId,question.getQuestionTitle(),question.getQuestionDescription(),
 					false,question.getTopics(),currentTime ,YMessCommonUtility.IS_POSTED_QUESTIONS});
 			
 			cassandraTemplate.execute(insertIntoUserTimeline);
@@ -237,7 +235,7 @@ public class JdbcYMessDao implements YMessDao {
 		}
 		//addQuestionToKeywords(question);
 		
-		addQuestionTopics(question.getTopics(),currentQuestionId);
+		addQuestionTopics(question.getTopics(),questionId);
 		
 		
 		
@@ -342,7 +340,7 @@ public class JdbcYMessDao implements YMessDao {
 		}
 		return user;
 	}
-
+/*
 	private class KeywordMapper implements RowMapper<Keyword>
 	{
 		@Override
@@ -357,6 +355,9 @@ public class JdbcYMessDao implements YMessDao {
 			return keyword;
 		}
 	}
+	*/
+	
+	
 	
 /*	*//**
 	 * Adds Question Details to Keyword table ( One Question is a set of keywords )
@@ -553,6 +554,7 @@ public class JdbcYMessDao implements YMessDao {
 	 */
 	@Override
 	public List<Question> getDashboardQuestions(String userEmailId) throws EmptyResultSetException {
+		
 		List<Long> allQuestionIds = getAllQuestionIds();
 		List<Long> userQuestionIds = getUserQuestionIds(userEmailId);
 		
@@ -560,8 +562,9 @@ public class JdbcYMessDao implements YMessDao {
 		{
 			allQuestionIds.removeAll(userQuestionIds);
 		}
+		
 		List<Question> questions = new ArrayList<Question>();
-		/*StringBuilder finalQuestionIdsSB = new StringBuilder();
+		StringBuilder finalQuestionIdsSB = new StringBuilder();
 			for (Long finalQuestionId : allQuestionIds){
 				finalQuestionIdsSB = finalQuestionIdsSB.append(finalQuestionId).append(",");
 			}
@@ -570,13 +573,14 @@ public class JdbcYMessDao implements YMessDao {
 		if(finalQuestionIdsSB.length() > 0)
 			finalQuestionIds = finalQuestionIdsSB.substring(0,finalQuestionIdsSB.lastIndexOf(","));
 		
-		
 		if(finalQuestionIds.length() > 0)
 		{
-		}*/
+			if(null != allQuestionIds && !allQuestionIds.isEmpty())
+			{
+				questions = getQuestionsWithDetails(allQuestionIds);
+			}
+		}
 		
-		if(null != allQuestionIds && !allQuestionIds.isEmpty())
-			questions = getQuestionsWithDetails(allQuestionIds);
 		
 		return questions;
 	}
@@ -589,11 +593,18 @@ public class JdbcYMessDao implements YMessDao {
 	private List<Long> getAllQuestionIds()
 	{
 		Select selectQuestionIds = QueryBuilder.select("question_id").from("questions");
-		List<Long> allQuestionIds = cassandraTemplate.queryForList(selectQuestionIds,Long.class);
-		return allQuestionIds;
+		List<Long> allQuestionIds = new ArrayList<Long>();
+		try {
+			allQuestionIds = cassandraTemplate.queryForList(selectQuestionIds,Long.class);
+		}
+		catch(NullPointerException | IllegalArgumentException ex){
+			allQuestionIds = new ArrayList<Long>();
+		}
+		
+		return allQuestionIds == null ?  new ArrayList<Long>() : allQuestionIds;
 	}
 	
-	private List<Question> getQuestionsWithDetails(List<Long> finalQuestionIds) throws EmptyResultSetException
+	private List<Question> getQuestionsWithDetails(List<Long> allQuestionIds) throws EmptyResultSetException
 	{
 		List<Question> questions = new ArrayList<Question>();
 		try
@@ -602,7 +613,7 @@ public class JdbcYMessDao implements YMessDao {
 			questions = cassandraTemplate.query(GET_DASHBOARD_QUESTIONS,new QuestionMapper());*/
 		
 
-			for (Long questionId : finalQuestionIds) {
+			for (Long questionId : allQuestionIds) {
 				
 				final String GET_QUESTION_DETAILS = "select * from questions where question_id="+questionId+" allow filtering";
 				questions.add(cassandraTemplate.queryForObject(GET_QUESTION_DETAILS, new QuestionMapper()));
@@ -630,9 +641,14 @@ public class JdbcYMessDao implements YMessDao {
 	{
 		Select selectUserQuestionIds = QueryBuilder.select("question_id").from("questions");
 		selectUserQuestionIds.where(QueryBuilder.eq("author_email_id", userEmailId));
-		
-		List<Long> userQuestionIds = cassandraTemplate.queryForList(selectUserQuestionIds,Long.class);
-		return userQuestionIds;
+		List<Long> userQuestionIds = new ArrayList<Long>();
+		try {
+			userQuestionIds = cassandraTemplate.queryForList(selectUserQuestionIds,Long.class);
+		}
+		catch(NullPointerException | IllegalArgumentException ex){
+			userQuestionIds = new ArrayList<Long>();
+		}
+		return userQuestionIds == null ? new ArrayList<Long>(): userQuestionIds;
 	}
 
 	/**
@@ -645,11 +661,9 @@ public class JdbcYMessDao implements YMessDao {
 	public void addAnswer(Answer answer) {
 		try{
 			
-			long lastInsertedAnswerId = Long.parseLong(getLastInsertedAnswerId());
-			long newAnswerId = lastInsertedAnswerId + 1;
+			Long answerId = Long.valueOf(getLastInsertedAnswerId()) + 1;
 			
-			Date currentTime = new Date();
-			answer.setAnswerId(newAnswerId);
+			answer.setAnswerId(answerId);
 			
 			User userDetails = getUserDetailsByEmailId(answer.getAuthorEmailId());
 	        
@@ -672,11 +686,11 @@ public class JdbcYMessDao implements YMessDao {
 							+ "author_email_id,author_first_name,"
 							+ "author_last_name,image_data,is_image_attached",
 							new Object[]{
-							answer.getQuestionId(),newAnswerId,new Date(),answer.getAnswerDescription(),
+							answer.getQuestionId(),answerId,new Date(),answer.getAnswerDescription(),
 							answer.getAuthorEmailId(),userDetails.getFirstName(),userDetails.getLastName(),
 							ByteBuffer.wrap(compressedImage),answer.getIsImageAttached()});
 					
-					cassandraTemplate.insert(insertQuery);
+					cassandraTemplate.execute(insertQuery);
 					
 					/*cassandraTemplate.update(ADD_ANSWER_WITH_IMAGE,
 							new Object[]{answer.getQuestionId(),newAnswerId,new Date(),answer.getAnswerDescription(),answer.getAuthorEmailId(),userDetails.getFirstName(),userDetails.getLastName(),compressedImage,answer.getIsImageAttached()},
@@ -708,11 +722,11 @@ public class JdbcYMessDao implements YMessDao {
 									userDetails.getLastName(),
 									answer.getQuestionId(), 
 									questionDesc, GET_QUESTION_AUTHOR, 
-									newAnswerId, 
+									answerId, 
 									answer,  
 									YMessCommonUtility.IS_ANSWERED_QUESTIONS,
 									true});
-					cassandraTemplate.insert(insertUserTimeline);
+					cassandraTemplate.execute(insertUserTimeline);
 					
 					/*cassandraTemplate.update(ADD_ANSWER_TIMELINE, new Object[]{answer.getAuthorEmailId(), new Date(), ActivityConstants.ANSWERED_QUESTION, userDetails.getFirstName(),userDetails.getLastName(),answer.getQuestionId(), questionDesc, GET_QUESTION_AUTHOR, newAnswerId, answer,  YMessCommonUtility.IS_ANSWERED_QUESTIONS,true},
 							new int[]{Types.VARCHAR,Types.TIMESTAMP,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR, Types.BIGINT,Types.VARCHAR,Types.VARCHAR,Types.BIGINT,Types.VARCHAR,Types.BOOLEAN,Types.BOOLEAN}
@@ -734,14 +748,14 @@ public class JdbcYMessDao implements YMessDao {
 						+ "answer_desc,author_email_id,author_first_name,author_last_name",
 						new Object[]{
 						answer.getQuestionId(),
-						newAnswerId,
+						answerId,
 						new Date(),
 						answer.getAnswerDescription(),
 						answer.getAuthorEmailId(),
 						userDetails.getFirstName(),
 						userDetails.getLastName()});
 				
-				cassandraTemplate.insert(insertAnswer);
+				cassandraTemplate.execute(insertAnswer);
 				
 				final String GET_QUESTION_AUTHOR = "select author_email_id from questions where question_id="+answer.getQuestionId()+" allow filtering";
 				String questionAuthorEmailId = cassandraTemplate.queryForObject(GET_QUESTION_AUTHOR, String.class);
@@ -769,11 +783,11 @@ public class JdbcYMessDao implements YMessDao {
 						answer.getQuestionId(),
 						questionDesc,
 						GET_QUESTION_AUTHOR,
-						newAnswerId, 
+						answerId, 
 						answer, 
 						YMessCommonUtility.IS_ANSWERED_QUESTIONS});
 				
-				cassandraTemplate.insert(insertAnswerTimeline);
+				cassandraTemplate.execute(insertAnswerTimeline);
 				
 			}
 		}
@@ -819,10 +833,25 @@ public class JdbcYMessDao implements YMessDao {
 		
 		List<Answer> answers = new ArrayList<Answer>();
 		
+		//UUID questionId = UUID.fromString(decodedQuestionId);
+		
 		long questionId = Long.parseLong(decodedQuestionId);
 		try {
 			final String FETCH_USER_ANSWERS_FOR_QUESTION ="select question_id,answer_id,answered_time,answer_desc,author_email_id,downvote_count,upvote_count,author_first_name,author_last_name,upvoted_users,downvoted_users,is_image_attached from answers where question_id="+questionId+" order by answer_id desc";
 			answers = cassandraTemplate.query(FETCH_USER_ANSWERS_FOR_QUESTION, new AnswerMapper());
+			
+			Collections.sort(answers,new Comparator<Answer>() {
+				@Override
+				public int compare(Answer o1, Answer o2) {
+					int compare = 0;
+					
+					compare = o2.getAnswerId().compareTo(o1.getAnswerId());
+					
+					// TODO Auto-generated method stub
+					return compare;
+				}
+			});
+			
 		}
 		catch(EmptyResultDataAccessException emptyResultSet)
 		{
@@ -863,21 +892,21 @@ public class JdbcYMessDao implements YMessDao {
 	 * @author balaji i
 	 * @return lastInsertedQuestionId(String)
 	 */
-	private String getLastInsertedAnswerId() 
+	private Long getLastInsertedAnswerId() 
 	{
-		long maxAnswerId = 0;
+		Long maxAnswerId = 0L;
 		
-		List<String> answerIds = cassandraTemplate.queryForList(GET_ANSWER_IDS,String.class);
+		List<Long> answerIds = cassandraTemplate.queryForList(GET_ANSWER_IDS,Long.class);
 			try
 			{
 				if(!answerIds.isEmpty())
-					maxAnswerId = Long.parseLong(Collections.max(answerIds));
+					maxAnswerId = Collections.max(answerIds);
 			}
 			catch(EmptyResultDataAccessException emptyRS)
 			{
 				logger.error(emptyRS.getLocalizedMessage());
 			}
-		return String.valueOf(maxAnswerId);
+		return maxAnswerId == null ? 0 : maxAnswerId;
 	}
 
 	private class UserMapper implements RowMapper<User>{

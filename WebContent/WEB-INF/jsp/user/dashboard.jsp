@@ -76,7 +76,7 @@ $().ready(function(){
 			  $("#answerImage").val("");
 			  
 		    var xmlhttp = new XMLHttpRequest();
-		    xmlhttp.open("POST", "user_post_answer.htm",false);
+		    xmlhttp.open("POST", "user_post_answer.json",false);
 		    xmlhttp.send(form);
 	    
 		    
@@ -147,6 +147,7 @@ $().ready(function(){
 								 	
 								 	<li>
 									 	<c:set var="questionId" value="${question.questionId}"/>
+									 	
 									 	<c:set var="emailId" value="${question.authorEmailId }"></c:set>
 									 	
 									 	

@@ -21,7 +21,7 @@ public class YMessURLMappings {
 	public static final String USER_POST_QUESTION = "/user_post_question.htm";//UserActivitiesController
 	public static final String REDIRECT_SUCCESS_POSTING_QUESTION = "redirect:"+DASHBOARD_PAGE; //UserActivitiesController
 	public static final String USER_QUESTIONS = "user_questions.htm"; //UserActivitiesController
-	public static final String USER_POST_ANSWER = "user_post_answer.htm"; //UserActivitiesController
+	public static final String USER_POST_ANSWER = "user_post_answer.json"; //UserActivitiesController
 	public static final String USER_QUESTION_RESPONSES = "user_question_responses.htm"; //UserActivitiesController
 	public static final String USER_ANSWER_UPVOTERS = "user_answer_upvoters.htm"; //UserActivitiesController
 	public static final String USER_UPVOTE_ANSWER = "user_upvote_answer.htm"; //UserActivitiesController
