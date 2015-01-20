@@ -34,4 +34,18 @@ public interface YMailService {
 	 */
 	List<Mail> getImportantMails(String userEmailId);
 
+	/**
+	 * @author RVishwakarma
+	 * @param loggedInUserEmail 
+	 * @param inboxMailIds[]
+	 */
+	void deleteMails(Long[] inboxMailIds, String loggedInUserEmail);
+
+	/**
+	 * @author RVishwakarma
+	 * @param userEmailId
+	 * @return List<Mail>
+	 */
+	List<Mail> getTrashMails(String name);
+
 }

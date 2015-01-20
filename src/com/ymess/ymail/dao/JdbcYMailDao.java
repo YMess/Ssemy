@@ -3,6 +3,7 @@ package com.ymess.ymail.dao;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -17,15 +18,18 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.exceptions.DriverException;
+import com.datastax.driver.core.exceptions.NoHostAvailableException;
 import com.datastax.driver.core.querybuilder.Insert;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
+import com.datastax.driver.core.querybuilder.Update;
 import com.ymess.pojos.User;
 import com.ymess.util.YMessCommonUtility;
 import com.ymess.util.YMessMessageConstants;
 import com.ymess.ymail.dao.interfaces.YMailDao;
 import com.ymess.ymail.pojos.Mail;
 import com.ymess.ymail.util.YMailCommonUtility;
+import com.ymess.ymail.util.YMailLoggerConstants;
 import com.ymess.ymail.util.YMailMailStatus;
 
 public class JdbcYMailDao  implements YMailDao {
@@ -429,6 +433,7 @@ public class JdbcYMailDao  implements YMailDao {
 	}
 
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<Mail> getImportantMails(String userEmailId) {
 		
@@ -440,7 +445,7 @@ public class JdbcYMailDao  implements YMailDao {
 		selectImportantMails.where(QueryBuilder.eq("user_email_id", userEmailId));
 		
 		try {
-			importantMailIds = cassandraTemplate.queryForObject(selectImportantMails, Set.class);
+			importantMailIds =  cassandraTemplate.queryForObject(selectImportantMails, Set.class);
 		} catch (NullPointerException | IllegalArgumentException e) {
 			importantMailIds = new HashSet<Long>();
 		}
@@ -453,5 +458,57 @@ public class JdbcYMailDao  implements YMailDao {
 			importantMails = getMailDetailsByMailIds(importantMailIdsStr);
 		}
 		return importantMails;
+	}
+
+
+	@Override
+	public void deleteMails(Long[] deleteMailIds,String userEmailId) {
+		
+			Update deleteMails = QueryBuilder.update("mail_user_mapper");
+			deleteMails.with(QueryBuilder.removeAll("mail_inbox", new HashSet<Long>(Arrays.asList(deleteMailIds))));
+			
+			deleteMails.where(QueryBuilder.eq("user_email_id", userEmailId));
+			
+			Update trashMails = QueryBuilder.update("mail_user_mapper");
+			trashMails.with(QueryBuilder.appendAll("mail_trash",Arrays.asList(deleteMailIds)));
+			
+			trashMails.where(QueryBuilder.eq("user_email_id", userEmailId));
+			try {
+				cassandraTemplate.execute(deleteMails);
+				cassandraTemplate.execute(trashMails);
+			}
+			catch(IllegalArgumentException | NoHostAvailableException ex){
+				logger.error(YMailLoggerConstants.NO_HOST_ERROR + "in deleteMails");
+			}
+	}
+
+    /**
+     * @author RVishwakarma
+     * @param userEmailId
+     * @return List<Mail>
+     */
+	@Override
+	public List<Mail> getTrashMails(String userEmailId) {
+		Set<Long> trashMailIds = new HashSet<Long>();
+		List<Mail> trashMails = new  ArrayList<Mail>();
+		String trashMailIdsStr = "";
+		
+		Select selectTrashMails = QueryBuilder.select("mail_starred").from("mail_user_mapper");
+		selectTrashMails.where(QueryBuilder.eq("user_email_id", userEmailId));
+		
+		try {
+			trashMailIds =  cassandraTemplate.queryForObject(selectTrashMails, Set.class);
+		} catch (NullPointerException | IllegalArgumentException e) {
+			trashMailIds = new HashSet<Long>();
+		}
+		
+		if(null != trashMailIds){
+			trashMailIdsStr = YMailCommonUtility.getCassandraInQuery(trashMailIds);
+		}
+	
+		if(null != trashMailIdsStr && trashMailIdsStr.trim().length() > 0){
+			trashMails = getMailDetailsByMailIds(trashMailIdsStr);
+		}
+		return trashMails;
 	}
 }

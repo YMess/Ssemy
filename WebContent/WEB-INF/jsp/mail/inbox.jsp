@@ -15,10 +15,30 @@
   <LINK REL=Stylesheet TYPE ="text/css" HREF="css/style.css">
 <LINK REL=Stylesheet TYPE ="text/css" HREF="css/pure-min.css">
 <script type="text/javascript">
-function deleteMails()
-{
-  
-}
+$(document).ready(function(){
+    $('#deleteInbox').click(function() {
+        var deleteMailIds = new Array();
+        var k = 0;
+        $('input:checked').each(function(index,value) {
+        	deleteMailIds[k] = value.id;
+        	alert(value.id);
+            k++;
+        });        
+        alert(deleteMailIds[0]);
+
+        $.ajax({
+    		  url:"delete_mails.json",
+    		  data:'mailIds='+deleteMailIds,
+    		  async:false,
+    		  error : function() {
+    	        console.log("error");
+    	      },
+    		  success:function(result){
+    			  alert(mailSize+" Mails Deleted Successfully");
+    			  location.reload();
+      }}); 
+    });
+});
 </script>
 </head>
 <body>
@@ -42,17 +62,17 @@ function deleteMails()
 					</c:when>
 					<c:otherwise>
 						<div>
-						<input type="button" value="Delete" onclick="deleteMails()" style="height: 50px;width: 250px;"/>
+						<input type="button" value="Delete" id="deleteInbox" style="height: 50px;width: 250px;"/>
 						</div>
 						<div class="pure-menu pure-menu-open">
 						 	<ul style="padding-left: 10px;">
 								<c:forEach items="${mails}" var="mail">
 								 	<li>
 								 	<div>
-								 	<div><input type="checkbox" name="checkmark" id="${mail.mailId}"></div>
+								 	<div><input type="checkbox" name="checkmark" id="${mail.mailId}" value="${mail.mailId}"></div>
 								 	<div><input type="checkbox" name="impotant"></div>
 								 	<div><c:out value="${mail.mailFrom }"></c:out></div>
-								 	<div><c:out value="${mail.mailSubject }"></c:out>&nbsp;<c:out value="${mail.mailBody }"></c:out></div>
+								 	<div><b><c:out value="${mail.mailSubject }"></c:out></b>&nbsp;<c:out value="${mail.mailBody }"></c:out></div>
 								 	<div><c:out value="${mail.mailSentTimestamp }"></c:out></div>
 								 	<c:if test="${mail.isAttachmentAttached eq true }">
 								 	<div>

@@ -60,4 +60,6 @@ public class YMessLoggerConstants {
 
 	public static final String FILE_SHARED = "File Successfully Shared";
 	
+	public static final String DELETED_MAILS ="Mails Deleted Successfully";
+	
 }

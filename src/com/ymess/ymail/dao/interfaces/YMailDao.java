@@ -31,5 +31,22 @@ public interface YMailDao {
 
 	List<Mail> getImportantMails(String userEmailId);
 
+
+	/**
+	 * 
+	 * @param deleteMailIds
+	 * @param userEmailId 
+	 * @return boolean
+	 */
+	void deleteMails(Long[] deleteMailIds, String userEmailId);
+
+
+	/**
+	 * @author RVishwakarma
+	 * @param userEmailId
+	 * @return List<Mail>
+	 */
+	List<Mail> getTrashMails(String userEmailId);
+
 	
 }

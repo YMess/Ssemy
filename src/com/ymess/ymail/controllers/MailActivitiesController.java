@@ -13,9 +13,15 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import sun.text.normalizer.ICUBinary.Authenticate;
+
+import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
 import com.ymess.exceptions.EmptyResultSetException;
+import com.ymess.util.YMessLoggerConstants;
 import com.ymess.ymail.pojos.Mail;
 import com.ymess.ymail.service.interfaces.YMailService;
 import com.ymess.ymail.util.YMailJSPMappings;
@@ -127,7 +133,7 @@ public class MailActivitiesController {
 	
 	
 	@RequestMapping(value= YMailURLMappings.IMPORTANT_PAGE)
-	String loadImportantMails(Model model)
+	public String loadImportantMails(Model model)
 	{
 		List<Mail> importantMails = new ArrayList<Mail>();
 		try {
@@ -140,6 +146,39 @@ public class MailActivitiesController {
 		model.addAttribute("importantMails",importantMails);
 		return YMailJSPMappings.IMPORTANT_PAGE;
 	}
+	
+	@RequestMapping(value= YMailURLMappings.TRASH_PAGE)
+	public String showTrashPage(Model model)
+	{
+		List<Mail> trashMails = new ArrayList<Mail>();
+		try {
+			trashMails = yMailService.getTrashMails(SecurityContextHolder.getContext().getAuthentication().getName());
+			logger.info(YMailLoggerConstants.TRASH_PAGE+" "+SecurityContextHolder.getContext().getAuthentication().getName());
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			logger.error(ex.getStackTrace().toString());
+		}
+		model.addAttribute("trashMails",trashMails);
+		return YMailJSPMappings.TRASH_PAGE;
+	}
+	
+	@RequestMapping(value = YMailURLMappings.DELETE_MAIlS)
+	@ResponseBody
+	public Boolean deleteMails(@RequestParam("mailIds") Long[] deleteMailIds)
+	{
+		Boolean successFlag = false;
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String loggedInUserEmail = authentication.getName();
+		try {
+			yMailService.deleteMails(deleteMailIds,loggedInUserEmail);
+			successFlag = true;
+		} catch (Exception ex) {
+			logger.error(ex.getStackTrace().toString());
+		}
+		logger.info(loggedInUserEmail+" "+YMessLoggerConstants.DELETED_MAILS);
+		return successFlag;
+	}
+	
 	
 	
 }

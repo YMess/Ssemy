@@ -2,6 +2,7 @@ package com.ymess.ymail.service;
 
 import java.util.List;
 
+import com.sun.org.apache.bcel.internal.generic.RETURN;
 import com.ymess.ymail.dao.interfaces.YMailDao;
 import com.ymess.ymail.pojos.Mail;
 import com.ymess.ymail.service.interfaces.YMailService;
@@ -52,8 +53,33 @@ public class YMailServiceManager implements YMailService {
 		return yMailDao.getSentMails(userEmailId);
 	}
 
+	/* Load Important Email page
+	 * @author RVishwakarma
+	 * @param userEmailId
+	 * @return List<Mail>
+	 */
 	@Override
 	public List<Mail> getImportantMails(String userEmailId) {
 	    return yMailDao.getImportantMails(userEmailId);
+	}
+
+	/**
+	 * @author RVishwakarma
+	 * @param deleteMailIds[], userEmailId
+	 * @return Boolean
+	 */
+	@Override
+	public void deleteMails(Long[] deleteMailIds,String userEmailId) {
+		 yMailDao.deleteMails(deleteMailIds,userEmailId);
+	}
+
+	/**Load Trash Mail Page
+	 * @author RVishwakarma
+	 * @param userEmailId
+	 * @return List<Mail>
+	 */
+	@Override
+	public List<Mail> getTrashMails(String userEmailId) {
+		return yMailDao.getTrashMails(userEmailId);
 	}
 }

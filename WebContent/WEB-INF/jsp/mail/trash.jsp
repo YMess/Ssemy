@@ -14,6 +14,32 @@
   <script src="js/jquery-ui.js" type="text/javascript"></script>
   <LINK REL=Stylesheet TYPE ="text/css" HREF="css/style.css">
 <LINK REL=Stylesheet TYPE ="text/css" HREF="css/pure-min.css">
+<script type="text/javascript">
+$(document).ready(function(){
+    $('#deleteTrash').click(function() {
+        var deleteMailIds = new Array();
+        var k = 0;
+        $('input:checked').each(function(index,value) {
+        	deleteMailIds[k] = value.id;
+        	alert(value.id);
+            k++;
+        });        
+        alert(deleteMailIds[0]);
+
+        $.ajax({
+    		  url:"delete_mails.json",
+    		  data:'mailIds='+deleteMailIds,
+    		  async:false,
+    		  error : function() {
+    	        console.log("error");
+    	      },
+    		  success:function(result){
+    			  alert(mailSize+" Mails Deleted Successfully");
+    			  location.reload();
+      }}); 
+    });
+});
+</script>
 </head>
 <body>
 <div class="header">
@@ -24,7 +50,37 @@
 	<div>
 		<div class="userleft"><%@include file="/WEB-INF/jsp/include/mail_navigation.jsp" %></div>
 		<div class="usercenter">
-					
+
+				<c:choose>
+					<c:when test="${not empty emptyResultSet }">
+									No mails Found! 
+					</c:when>
+					<c:otherwise>
+						<div>
+						<input type="button" value="Delete" id="deleteTrash"  style="height: 50px;width: 250px;"/>
+						</div>
+						<div class="pure-menu pure-menu-open">
+						 	<ul style="padding-left: 10px;">
+								<c:forEach items="${trashMails}" var="mail">
+								 	<li>
+								 	<div>
+								 	<div><input type="checkbox" name="checkmark" id="${mail.mailId}" value="${mail.mailId}"></div>
+								 	<div><input type="checkbox" name="impotant"></div>
+								 	<div><c:out value="${mail.mailFrom }"></c:out></div>
+								 	<div><b><c:out value="${mail.mailSubject }"></c:out></b>&nbsp;<c:out value="${mail.mailBody }"></c:out></div>
+								 	<div><c:out value="${mail.mailSentTimestamp }"></c:out></div>
+								 	<c:if test="${mail.isAttachmentAttached eq true }">
+								 	<div>
+							  		<img  src="/images/Attachment_icon.png">		
+							 	    </div>
+							 	    </c:if>
+								 	</div>
+								 	</li>
+								</c:forEach>
+							</ul>
+							</div>
+					</c:otherwise>
+			</c:choose>
 		</div>
 		<div class="userright"><%@include file="/WEB-INF/jsp/include/right.jsp" %></div>
 	</div>
