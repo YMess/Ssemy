@@ -48,5 +48,12 @@ public interface YMailDao {
 	 */
 	List<Mail> getTrashMails(String userEmailId);
 
+    /**
+     * 
+     * @param decodedMailId
+     * @return
+     */
+	Mail getMailDetails(String decodedMailId);
+
 	
 }

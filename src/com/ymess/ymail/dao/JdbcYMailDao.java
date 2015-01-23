@@ -99,7 +99,8 @@ public class JdbcYMailDao  implements YMailDao {
 					YMailMailStatus.MAIL_SENT,
 					currentTime,
 					userDetails.getFirstName(),
-					userDetails.getLastName()});
+					userDetails.getLastName()
+			});
 			
 			cassandraTemplate.execute(insertIntoMail);
 			
@@ -113,10 +114,12 @@ public class JdbcYMailDao  implements YMailDao {
 					{
 						byteBuffer = ByteBuffer.wrap(attachmentFile.getBytes());
 					}
-					Insert insertAttachments = YMessCommonUtility.getFormattedInsertQuery("mail_attachments", "mail_id,mail_file_name,mail_attachment", new Object[]{
+					Insert insertAttachments = YMessCommonUtility.getFormattedInsertQuery("mail_attachments", "mail_id,mail_file_name,mail_attachment,attachment_mime_type", new Object[]{
 							newMailId,
                             attachmentFile.getOriginalFilename(),
-                            byteBuffer});
+                            byteBuffer,
+                            attachmentFile.getContentType()
+					});
 					
 					cassandraTemplate.execute(insertAttachments);
 				
@@ -146,7 +149,7 @@ public class JdbcYMailDao  implements YMailDao {
 		for (String mailIdTo : mail.getMailTo()) {
 		
 			String CHECK_IF_USER_EXISTS = "select count(1) from mail_user_mapper where user_email_id='"+mailIdTo+"'";
-			long userCountTo = cassandraTemplate.queryForObject(CHECK_IF_USER_EXISTS,Long.class);
+			Long userCountTo = cassandraTemplate.queryForObject(CHECK_IF_USER_EXISTS,Long.class);
 			
 			if(userCountTo != 0)
 			{
@@ -510,5 +513,24 @@ public class JdbcYMailDao  implements YMailDao {
 			trashMails = getMailDetailsByMailIds(trashMailIdsStr);
 		}
 		return trashMails;
+	}
+
+
+	@Override
+	public Mail getMailDetails(String decodedMailId) {
+		
+		Mail mail = new Mail();
+		Long mailId = Long.valueOf(decodedMailId);
+		
+		Select select = QueryBuilder.select().from("mail_details");
+		select.where(QueryBuilder.eq("mail_id", mailId));
+
+		try {
+			mail = cassandraTemplate.queryForObject( select,new MailDetailsMapper());
+			
+		} catch (IllegalArgumentException | NullPointerException ex ) {
+			 mail = new Mail();
+		}
+		return mail;
 	}
 }

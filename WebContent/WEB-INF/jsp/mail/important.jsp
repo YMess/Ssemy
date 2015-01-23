@@ -24,10 +24,14 @@
 	<div>
 		<div class="userleft"><%@include file="/WEB-INF/jsp/include/mail_navigation.jsp" %></div>
 		<div class="usercenter">
-        
-        <ul>
-        <c:forEach items="${importantMails}" var="importantMail">
-        <li>
+		            <c:choose>
+					<c:when test="${not empty emptyResultSet }">
+									No mails Found! 
+					</c:when>
+					<c:otherwise>
+						
+						<c:forEach items="${importantMails}" var="importantMail">
+                        <li>
         
 								 	<div>
 								 	<div><input type="checkbox" name="checkmark" id="${importantMail.mailId}"></div>
@@ -43,8 +47,11 @@
 								 	</div>
 								 	</li>
         
-        </c:forEach>
-                </ul>
+                        </c:forEach>
+                        </ul>
+					</c:otherwise>
+			</c:choose>
+        
 		</div>
 		<div class="userright"><%@include file="/WEB-INF/jsp/include/right.jsp" %></div>
 	</div>

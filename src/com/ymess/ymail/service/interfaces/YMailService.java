@@ -48,4 +48,11 @@ public interface YMailService {
 	 */
 	List<Mail> getTrashMails(String name);
 
+	/**
+	 * 
+	 * @param decodedMailId
+	 * @return
+	 */
+	Mail getMailDetails(String decodedMailId);
+
 }

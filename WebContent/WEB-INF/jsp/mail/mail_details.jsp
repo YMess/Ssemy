@@ -15,39 +15,8 @@
   <script src="js/jquery-ui.js" type="text/javascript"></script>
   <LINK REL=Stylesheet TYPE ="text/css" HREF="css/style.css">
 <LINK REL=Stylesheet TYPE ="text/css" HREF="css/pure-min.css">
-<script type="text/javascript">
-$(document).ready(function(){
-    $('#deleteInbox').click(function() {
-        var deleteMailIds = new Array();
-        var k = 0;
-        $('input:checked').each(function(index,value) {
-        	deleteMailIds[k] = value.id;
-        	alert(value.id);
-            k++;
-        });        
-        alert(deleteMailIds[0]);
-
-        $.ajax({
-    		  url:"delete_mails.json",
-    		  data:'mailIds='+deleteMailIds,
-    		  async:false,
-    		  error : function() {
-    	        console.log("error");
-    	      },
-    		  success:function(result){
-    			  alert(mailSize+" Mails Deleted Successfully");
-    			  location.reload();
-      }}); 
-    });
-});
-</script>
 </head>
 <body>
-     <c:if test="${ not empty successfullyMailSend }">
-				<script type="text/javascript">
-						alert("Mail Sent Successfully");
-				</script>
-				</c:if>
 <div class="header">
 		<%@ include file="/WEB-INF/jsp/include/header.jsp" %>
 	</div>
@@ -62,25 +31,23 @@ $(document).ready(function(){
 									No mails Found! 
 					</c:when>
 					<c:otherwise>
-						<div>
-						<input type="button" value="Delete" id="deleteInbox" style="height: 50px;width: 250px;"/>
-						</div>
+						
 						<div class="pure-menu pure-menu-open">
 						 	<ul style="padding-left: 10px;">
-								<c:forEach items="${mails}" var="mail">
-									<c:set var="mailId" value="${mail.mailId}" />
-								 	<li onclick="location.href='get_mail_details.htm?mId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("mailId")).getBytes()))%>'">
+						 	<c:set var="mailId" value="${mail.mailId}" />
+								
+									
+								 	
 									 	<div>
 									 		<div style="width: 30%; float: left;">
-												<div style="float: left;"><input type="checkbox" name="checkmark" id="${mail.mailId}" value="${mail.mailId}">&nbsp;</div>
-											 	<div style="float: left;"><c:out value="${mail.mailFrom }" />&nbsp;</div>
+											 	<div style="float: left;"><c:out value="${mailDetails.mailFrom }" />&nbsp;</div>
 									 		</div>
 									 		<div style="width: 45%; float: left;">
-												 <div style="float: left;"><b><i><c:out value="${mail.mailSubject }"></c:out></i></b>&nbsp;<c:out value="${mail.mailBody }" /></div>
+												 <div style="float: left;"><b><i><c:out value="${mailDetails.mailSubject }"></c:out></i></b>&nbsp;<c:out value="${mailDetails.mailBody }" /></div>
 											</div>
 									 		<div style="width: 25%; float: right;">
 										 		<div style="float: left;">
-												 		<c:if test="${mail.isAttachmentAttached eq true }">
+												 		<c:if test="${mailDetails.isAttachmentAttached eq true }">
 												 			<div>
 											  					<img  height="20" width="25" src="images/Attachment_icon.png">		
 											 	    		</div>
@@ -88,14 +55,11 @@ $(document).ready(function(){
 											 		</div>
 											 	<div style="float: left;"><%-- <c:out value="${mail.mailSentTimestamp }"/> --%>
 											 	
-											 	<fmt:formatDate type="date" value="${mail.mailSentTimestamp}" />
+											 	<fmt:formatDate type="date" value="${mailDetails.mailSentTimestamp}" />
 											 	
 											 	</div>
 									 		</div>
 									 	</div>	
-								 	</li>
-								</c:forEach>
-							</ul>
 							</div>
 					</c:otherwise>
 			</c:choose>

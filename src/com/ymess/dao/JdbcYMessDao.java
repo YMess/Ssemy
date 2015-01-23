@@ -2051,7 +2051,7 @@ public class JdbcYMessDao implements YMessDao {
 		else
 		{
 			final String UPDATE_FILE_SHARED_FLAG ="update files set share_flag=false where user_email_id='"+file.getAuthorEmailId()+"' and file_id="+newFileId;
-			cassandraTemplate.update(UPDATE_FILE_SHARED_FLAG);
+			cassandraTemplate.execute(UPDATE_FILE_SHARED_FLAG);
 			
 			for (String fileTopic : newFileTopics) 
 			{
@@ -2061,6 +2061,9 @@ public class JdbcYMessDao implements YMessDao {
 				final String PREVIOUS_FILE_COUNT = "select file_count from topics where topic='"+fileTopic+"'";
 				Long previousFileCount = cassandraTemplate.queryForObject(PREVIOUS_FILE_COUNT,Long.class);
 				
+				if(previousFileCount == null || (previousFileCount !=null && previousFileCount.equals(0))){
+					previousFileCount = 0L;
+				}
 				
 				final String DELETE_FILE_FROM_TOPICS = "DELETE file_ids[" +newFileId +"] FROM topics WHERE topic='"+fileTopic+"'";
 				cassandraTemplate.execute(DELETE_FILE_FROM_TOPICS);

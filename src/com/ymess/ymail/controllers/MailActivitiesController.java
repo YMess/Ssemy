@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.omg.CORBA.MARSHAL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,10 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import sun.text.normalizer.ICUBinary.Authenticate;
-
-import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
 import com.ymess.exceptions.EmptyResultSetException;
+import com.ymess.util.YMessCommonUtility;
 import com.ymess.util.YMessLoggerConstants;
 import com.ymess.ymail.pojos.Mail;
 import com.ymess.ymail.service.interfaces.YMailService;
@@ -100,10 +97,7 @@ public class MailActivitiesController {
 	@RequestMapping(value=YMailURLMappings.COMPOSE_MAIL_PAGE,method=RequestMethod.GET)
 	public String showComposeMailPage(Model model)
 	{
-		Mail mail = new Mail();
-
-
-		model.addAttribute("mail", mail);
+		model.addAttribute("mail",  new Mail());
 		logger.info(YMailLoggerConstants.COMPOSE_MAIL_PAGE);
 		return YMailJSPMappings.COMPOSE_MAIL_PAGE;
 	}
@@ -113,7 +107,6 @@ public class MailActivitiesController {
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		String loggedInUserEmailId = authentication.getName();
-
 
 		mail.setMailFrom(loggedInUserEmailId);
 
@@ -180,5 +173,15 @@ public class MailActivitiesController {
 	}
 	
 	
+	@RequestMapping(value = YMailURLMappings.MAIL_DETAILS)
+	String getMailDetails(@RequestParam("mId") String mailId, Model model)
+	{
+		String decodedMailId = YMessCommonUtility.decodeEncodedParameter(mailId);
+		
+		Mail mailDetails = yMailService.getMailDetails(decodedMailId);
+		model.addAttribute("mailDetails",mailDetails);
+		return YMailJSPMappings.MAIL_DETAILS;
+
+	}
 	
 }

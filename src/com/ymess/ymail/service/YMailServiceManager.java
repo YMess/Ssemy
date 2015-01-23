@@ -82,4 +82,12 @@ public class YMailServiceManager implements YMailService {
 	public List<Mail> getTrashMails(String userEmailId) {
 		return yMailDao.getTrashMails(userEmailId);
 	}
+
+	/**
+	 * 
+	 */
+	@Override
+	public Mail getMailDetails(String decodedMailId) {
+		return yMailDao.getMailDetails(decodedMailId);
+	}
 }
