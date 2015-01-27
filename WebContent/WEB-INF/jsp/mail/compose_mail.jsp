@@ -26,7 +26,7 @@ $(document).ready(function() {
     });  
 });
 </script>
-  <script type="text/javascript">
+ <script type="text/javascript">
   $().ready(function(){
 	  
 	   $('input[type="checkbox"]').click(function(){
@@ -34,6 +34,7 @@ $(document).ready(function() {
       });
 	});
   </script>
+  
 </head>
 <body>
 <div class="header">
@@ -93,7 +94,8 @@ $(document).ready(function() {
 					<br>
 				 
 		
-					<input type="submit" value="Post" style="height: 50px;width: 250px;"/>
+					<input type="submit" value="Send" name="send" style="height: 50px;width: 250px;"/>
+				    <input type="submit" value="Save" name="save" style="height: 50px;width: 250px;"/>
 				</form:form>
 					
 				</div>

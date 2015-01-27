@@ -49,10 +49,23 @@ public interface YMailService {
 	List<Mail> getTrashMails(String name);
 
 	/**
-	 * 
+	 * @author rvishwakarma
 	 * @param decodedMailId
 	 * @return
 	 */
 	Mail getMailDetails(String decodedMailId);
+
+	/**
+	 * @author rvishwakarma
+	 * @param mail
+	 */
+	void saveMail(Mail mail);
+
+	/**
+	 * @author rvishwakarma
+	 * @param userEmailId
+	 * @return List<Mail>
+	 */
+	List<Mail> getDraftMails(String userEmailId);
 
 }

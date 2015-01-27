@@ -533,4 +533,134 @@ public class JdbcYMailDao  implements YMailDao {
 		}
 		return mail;
 	}
+
+
+	@Override
+	public void saveMail(Mail mail) {
+		long lastInsertedMailId = Long.parseLong(getLastInsertedMailId());
+		long newMailId = lastInsertedMailId + 1;
+		
+		Date currentTime = new Date();
+		mail.setMailId(newMailId);
+		
+		User userDetails = getUserDetailsByEmailId(mail.getMailFrom());
+		
+		List<MultipartFile> attachments = mail.getMailAttachment();
+		
+		if(mail.getIsAttachmentAttached() != null && mail.getIsAttachmentAttached())
+		{
+			Insert insertIntoMail = YMessCommonUtility.getFormattedInsertQuery("mail_details", "mail_id,mail_from,mail_to,mail_cc,"
+					+ "mail_bcc,mail_subject,mail_body,is_mail_attachment_attached,"
+					+ "mail_status,mail_sent_timestamp,user_first_name,user_last_name",
+					new Object[]{
+					newMailId,
+					mail.getMailFrom(),
+					mail.getMailTo(),
+					mail.getMailCC(),
+					mail.getMailBCC(),
+					mail.getMailSubject(),
+					mail.getMailBody(),
+					true,
+					YMailMailStatus.MAIL_SENT,
+					currentTime,
+					userDetails.getFirstName(),
+					userDetails.getLastName()
+			});
+			cassandraTemplate.execute(insertIntoMail);
+			
+			for (MultipartFile attachmentFile : attachments) {
+				try {
+					ByteBuffer byteBuffer = null;
+					
+					if(null != attachmentFile.getBytes() )
+					{
+						byteBuffer = ByteBuffer.wrap(attachmentFile.getBytes());
+					}
+					Insert insertAttachments = YMessCommonUtility.getFormattedInsertQuery("mail_attachments", "mail_id,mail_file_name,mail_attachment,attachment_mime_type", new Object[]{
+							newMailId,
+                            attachmentFile.getOriginalFilename(),
+                            byteBuffer,
+                            attachmentFile.getContentType()
+					});
+					cassandraTemplate.execute(insertAttachments);
+				
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		else	
+		{
+			Insert insertMailWithoutAttachments = YMessCommonUtility.getFormattedInsertQuery("mail_details", "mail_id,mail_from,mail_to,mail_cc"
+					+ ",mail_bcc,mail_subject,mail_body,mail_status,"
+					+ "mail_sent_timestamp,user_first_name,user_last_name", 
+					new Object[]{newMailId,mail.getMailFrom(),mail.getMailTo(),mail.getMailCC(),mail.getMailBCC(),mail.getMailSubject(),mail.getMailBody(),YMailMailStatus.MAIL_SENT,currentTime,userDetails.getFirstName(),userDetails.getLastName()});
+			
+			
+			cassandraTemplate.execute(insertMailWithoutAttachments);
+		}
+		
+		
+			String CHECK_IF_USER_EXISTS = "select count(1) from mail_user_mapper where user_email_id='"+newMailId+"'";
+			Long userCountTo = cassandraTemplate.queryForObject(CHECK_IF_USER_EXISTS,Long.class);
+
+			if(userCountTo != 0)
+			{
+				String UPDATE_EXISTING_USER_DRAFT = "update mail_user_mapper set mail_drafts=mail_drafts + {"+newMailId+"} where user_email_id='"+mail.getMailFrom()+"'";
+				try{
+					cassandraTemplate.execute(UPDATE_EXISTING_USER_DRAFT);
+				}
+				catch(Exception ex)
+				{
+					logger.error(ex.getStackTrace());
+				}
+			}
+			else	
+			{
+				String INSERT_NEW_USER_DRAFT = "insert into mail_user_mapper (user_email_id,mail_drafts ,user_first_name,user_last_name) values ('"+mail.getMailFrom()+"',"+ "{"+ newMailId +"},'"+userDetails.getFirstName()+"','"+userDetails.getLastName()+"')";
+				try {
+					cassandraTemplate.execute(INSERT_NEW_USER_DRAFT);
+				}
+				catch(Exception ex)
+				{
+					logger.error(ex.getStackTrace());
+				}
+			}	
+	}
+
+
+	@Override
+	public List<Mail> getDraftMails(String userEmailId) {
+		List<Mail> draftMails = new ArrayList<Mail>();
+	    Set<Long> draftMailIds = new HashSet<Long>();
+		
+		try {
+			String GET_DRAFT_MAIL_IDS = "select mail_drafts from mail_user_mapper where user_email_id='"+userEmailId+"'";
+			draftMailIds = cassandraTemplate.queryForObject(GET_DRAFT_MAIL_IDS,Set.class);
+			
+			
+			StringBuilder draftMailIdsSB = new StringBuilder();
+			
+			if(null != draftMailIds && draftMailIds.size() > 0)
+			{
+				for (Long draftMailId : draftMailIds) {
+					draftMailIdsSB.append(draftMailId).append(",");
+				}
+				String draftMailIdsStr = "";
+				if(draftMailIdsSB.length() > 0)
+					draftMailIdsStr = draftMailIdsSB.substring(0,draftMailIdsSB.lastIndexOf(","));
+					
+				String GET_DRAFT_MAILS = "Select * from mail_details where mail_id in ("+draftMailIdsStr+")";
+				draftMails = cassandraTemplate.query(GET_DRAFT_MAILS,new MailDetailsMapper());
+			}
+		} 
+		catch (EmptyResultDataAccessException  | NullPointerException emptyEx) {
+			logger.warn(YMessMessageConstants.EMPTY_RESULT_SET);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e.getLocalizedMessage());
+		}
+		return draftMails== null ? new ArrayList<Mail>(): draftMails;
+	}
 }

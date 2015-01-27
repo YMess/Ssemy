@@ -15,6 +15,8 @@ public class YMailLoggerConstants {
 	public static final String COMPOSE_MAIL_PAGE = "Loaded Compose Mail Page";
 	
 	public static final String USER_SEND_MAIL = "User Send Mail";
+	
+	public static final String USER_SAVED_MAIL = "User Saved Mail";
 
 	public static final String NO_HOST_ERROR = "No Host Available to Serve the Request";
 }

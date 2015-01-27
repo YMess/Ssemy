@@ -55,5 +55,21 @@ public interface YMailDao {
      */
 	Mail getMailDetails(String decodedMailId);
 
+
+	/**
+	 * @author rvishwakarma
+	 * @param mail
+	 * @return
+	 */
+	void saveMail(Mail mail);
+
+
+	/**
+	 * @author rvishwakarma
+	 * @param userEmailId
+	 * @return List<Mail>
+	 */
+	List<Mail> getDraftMails(String userEmailId);
+
 	
 }

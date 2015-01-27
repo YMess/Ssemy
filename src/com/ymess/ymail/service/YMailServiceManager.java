@@ -84,10 +84,29 @@ public class YMailServiceManager implements YMailService {
 	}
 
 	/**
-	 * 
+	 * @author rvishwakarma
+	 * @param DecodedMailId
 	 */
 	@Override
 	public Mail getMailDetails(String decodedMailId) {
 		return yMailDao.getMailDetails(decodedMailId);
+	}
+
+	/**
+	 * @author rvishwakarma
+	 * @param Mail
+	 */
+	@Override
+	public void saveMail(Mail mail) {
+	    yMailDao.saveMail(mail);
+	}
+
+	/**
+	 * @author rvishwakarma
+	 * @param UserEmailId
+	 */
+	@Override
+	public List<Mail> getDraftMails(String userEmailId) {
+		return yMailDao.getDraftMails(userEmailId);
 	}
 }

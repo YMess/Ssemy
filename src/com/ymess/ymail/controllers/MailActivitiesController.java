@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -17,8 +18,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.ymess.exceptions.EmptyResultSetException;
+import com.ymess.pojos.Answer;
 import com.ymess.util.YMessCommonUtility;
 import com.ymess.util.YMessLoggerConstants;
+import com.ymess.util.YMessURLMappings;
 import com.ymess.ymail.pojos.Mail;
 import com.ymess.ymail.service.interfaces.YMailService;
 import com.ymess.ymail.util.YMailJSPMappings;
@@ -59,6 +62,26 @@ public class MailActivitiesController {
 		
 		model.addAttribute("mails",mails);
 		return YMailJSPMappings.INBOX_PAGE;
+	}
+	
+	@RequestMapping(value = YMailURLMappings.DRAFTS_PAGE,method = RequestMethod.GET)
+	public String showDraftPage(Model model) throws EmptyResultSetException
+	{
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String userEmailId = authentication.getName();
+		
+		List<Mail> mails = new ArrayList<Mail>();
+		
+		//temporary for testing new inbox JSP
+		try {
+			mails = yMailService.getDraftMails(userEmailId);
+			logger.info(YMailLoggerConstants.DRAFTS_PAGE +" "+ userEmailId);
+		} catch (Exception e) {
+			logger.error(e.getLocalizedMessage());
+		}
+		
+		model.addAttribute("mails",mails);
+		return YMailJSPMappings.DRAFTS_PAGE;
 	}
 	
 	/**
@@ -102,7 +125,7 @@ public class MailActivitiesController {
 		return YMailJSPMappings.COMPOSE_MAIL_PAGE;
 	}
 
-	@RequestMapping(value =YMailURLMappings.COMPOSE_MAIL_PAGE,method = RequestMethod.POST)
+	@RequestMapping(value =YMailURLMappings.COMPOSE_MAIL_PAGE,method = RequestMethod.POST,params="send")
 	public String sendMail(@ModelAttribute("mail") Mail mail,RedirectAttributes redirectAttributes)
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -182,6 +205,29 @@ public class MailActivitiesController {
 		model.addAttribute("mailDetails",mailDetails);
 		return YMailJSPMappings.MAIL_DETAILS;
 
+	}
+
+	
+	@RequestMapping(value =YMailURLMappings.COMPOSE_MAIL_PAGE,method = RequestMethod.POST,params="save")
+	public String saveMail(@ModelAttribute("mail") Mail mail,RedirectAttributes redirectAttributes)
+	{
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String loggedInUserEmailId = authentication.getName();
+
+		mail.setMailFrom(loggedInUserEmailId);
+
+		try
+		{
+			yMailService.saveMail(mail);
+			logger.info(YMailLoggerConstants.USER_SAVED_MAIL+" "+loggedInUserEmailId);
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+			logger.error(ex.getStackTrace().toString());
+		}
+		redirectAttributes.addFlashAttribute("successfullyMailSaved","Mail Saved to Drafts Successfully");
+		return YMailURLMappings.REDIRECT_SUCCESS_MAIL_SAVED;
 	}
 	
 }
