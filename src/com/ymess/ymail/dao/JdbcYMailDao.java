@@ -600,15 +600,17 @@ public class JdbcYMailDao  implements YMailDao {
 			cassandraTemplate.execute(insertMailWithoutAttachments);
 		}
 		
-		
-			String CHECK_IF_USER_EXISTS = "select count(1) from mail_user_mapper where user_email_id='"+newMailId+"'";
+			String CHECK_IF_USER_EXISTS = "select count(1) from mail_user_mapper where user_email_id='"+mail.getMailFrom()+"'";
 			Long userCountTo = cassandraTemplate.queryForObject(CHECK_IF_USER_EXISTS,Long.class);
 
 			if(userCountTo != 0)
 			{
-				String UPDATE_EXISTING_USER_DRAFT = "update mail_user_mapper set mail_drafts=mail_drafts + {"+newMailId+"} where user_email_id='"+mail.getMailFrom()+"'";
+				//String UPDATE_EXISTING_USER_DRAFT = "update mail_user_mapper set mail_drafts=mail_drafts + {"+newMailId+"} where user_email_id='"+mail.getMailFrom()+"'";
+				Update draftMail = QueryBuilder.update("mail_user_mapper");
+				draftMail.with(QueryBuilder.add("mail_drafts", newMailId));
+				draftMail.where(QueryBuilder.eq("user_email_id", mail.getMailFrom()));
 				try{
-					cassandraTemplate.execute(UPDATE_EXISTING_USER_DRAFT);
+					cassandraTemplate.execute(draftMail);
 				}
 				catch(Exception ex)
 				{
@@ -618,6 +620,7 @@ public class JdbcYMailDao  implements YMailDao {
 			else	
 			{
 				String INSERT_NEW_USER_DRAFT = "insert into mail_user_mapper (user_email_id,mail_drafts ,user_first_name,user_last_name) values ('"+mail.getMailFrom()+"',"+ "{"+ newMailId +"},'"+userDetails.getFirstName()+"','"+userDetails.getLastName()+"')";
+				
 				try {
 					cassandraTemplate.execute(INSERT_NEW_USER_DRAFT);
 				}
