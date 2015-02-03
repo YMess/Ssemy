@@ -1,9 +1,5 @@
 package com.ymess.controllers;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -30,11 +26,11 @@ import com.ymess.exceptions.EmptyResultSetException;
 import com.ymess.pojos.File;
 import com.ymess.pojos.User;
 import com.ymess.service.interfaces.YMessService;
+import com.ymess.util.YMessCommonUtility;
 import com.ymess.util.YMessJSPMappings;
 import com.ymess.util.YMessLoggerConstants;
 import com.ymess.util.YMessMessageConstants;
 import com.ymess.util.YMessURLMappings;
-import com.ymess.util.YMessCommonUtility;
 
 @Controller
 public class UserProfileController {

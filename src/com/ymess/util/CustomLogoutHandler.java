@@ -17,7 +17,8 @@ public class CustomLogoutHandler extends SimpleUrlLogoutSuccessHandler {
 		@Override
 		public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, 
 				Authentication authentication) throws IOException, ServletException {
-	        // Redirect user to the home page
+	       
+		// Redirect user to the home page
 			response.sendRedirect("home.htm");
 		}
 }
