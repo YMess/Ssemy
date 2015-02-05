@@ -28,27 +28,30 @@ public class User {
 	private String lastName;
 	
 	private String password;
-
 	private String confirmPassword;
-	
-	private Set<String> interests;
-	
+	private String imageName;
 	private String tagline;
-
 	private String designation;
 	private String organization;
-	private Set<String> previousOrganizations;
+	private String website;
+	private String phoneNumber;
+	private String country;
+	
 	private Date profileLastUpdated;
+	
+	private Set<String> interests;
+	private Set<String> previousOrganizations;
+	
+
 	private Map<String,Date> followingUsers;
+	private Map<Long,Date> userTickets;
 	
 	/** For Receiving the Image from JSP to Controller */
 	private MultipartFile userImage;
 	
 	/** Image Data in byte[] in DB */
 	private byte[] userImageData;
-	private String imageName;
 	
-	private Map<Long,Date> userTickets;
 	
 	public String getTagline() {
 		return tagline;
@@ -177,6 +180,30 @@ public class User {
 
 	public void setUserTickets(Map<Long, Date> userTickets) {
 		this.userTickets = userTickets;
+	}
+
+	public String getWebsite() {
+		return website;
+	}
+
+	public void setWebsite(String website) {
+		this.website = website;
+	}
+
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
+
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
+
+	public String getCountry() {
+		return country;
+	}
+
+	public void setCountry(String country) {
+		this.country = country;
 	}
 
 	

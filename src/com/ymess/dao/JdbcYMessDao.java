@@ -1365,10 +1365,10 @@ public class JdbcYMessDao implements YMessDao {
 		long currentTime = new Date().getTime();
 		
 		final String USER_FOLLOW = "update users_data set following_users = following_users + {'"+decodedUserEmailId+"':'"+currentTime+"'} where email_id='"+loggedInUserEmail+"'";
-		cassandraTemplate.update(USER_FOLLOW);
+		cassandraTemplate.execute(USER_FOLLOW);
 		
 		final String FOLLOWED_BY = "update users_data set followed_by_users = followed_by_users + {'"+loggedInUserEmail+"':'"+currentTime+"'} where email_id='"+decodedUserEmailId+"'";
-		cassandraTemplate.update(FOLLOWED_BY);
+		cassandraTemplate.execute(FOLLOWED_BY);
 		
 		User userDetails = null;
 		User decodeUserDetails = null;
