@@ -52,7 +52,7 @@
     <link href="css/custom/theme.css" rel="stylesheet" type="text/css">
     <!--[if IE]> <link href="css/ie.css" rel="stylesheet" > <![endif]-->
     <link href="css/custom/chrome.css" rel="stylesheet" type="text/chrome"> <!-- chrome only css -->    
-
+    
 
         
     <!-- Responsive CSS -->
@@ -68,14 +68,22 @@
     
     <!-- Custom CSS -->
     <link href="css/custom/custom.css" rel="stylesheet" type="text/css">
-
-
-
+    <style type="text/css">
+    .switch-wrapper {
+	  display: inline-block;
+	  position: relative;
+	  top: 3px;
+	}
+    </style>
+    <!-- Switch Element -->
+    
+    
+    <script type="text/javascript" src="js/jquery-2.1.3.min.js"></script>
     <!-- Head SCRIPTS -->
     <script src="js/ga.js" async="" type="text/javascript"></script><script type="text/javascript" src="js/modernizr.js"></script> 
     <script type="text/javascript" src="js/mobile-detect.js"></script> 
     <script type="text/javascript" src="js/mobile-detect-modernizr.js"></script> 
- 
+
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
       <script type="text/javascript" src="js/html5shiv.js"></script>
@@ -89,9 +97,7 @@
 <!-- Header Ends --> 
 <div class="content">
   <div class="container"> 
-    
-    <!-- Middle Content Start -->
-    
+    <!-- Middle Content Start -->  
     <div style="min-height: 8px;" class="vd_content-wrapper">
       <div style="min-height: 8px;" class="vd_container">
         <div class="vd_content clearfix">
@@ -117,6 +123,14 @@
                   <div class="alert alert-success vd_hidden">
                     <button type="button" class="close" data-dismiss="alert" aria-hidden="true"><i class="icon-cross"></i></button>
                     <span class="vd_alert-icon"><i class="fa fa-check-circle vd_green"></i></span>Registration confirmation has been sent to your email. </div>                  
+                    
+                    <div class="form-group">
+                      <div class="col-md-6">
+                        <div class="label-wrapper">
+                          <label class="control-label">Registration Type <span class="vd_red">*</span></label>
+                        </div>
+                      </div>
+                    </div>
                     <div class="form-group">
                       <div class="col-md-6">
                         <div class="label-wrapper">
