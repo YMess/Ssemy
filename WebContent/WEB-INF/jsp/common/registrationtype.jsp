@@ -11,15 +11,6 @@
 <link href="demos/application.css" rel="stylesheet" />
 <link href="http://www.jqueryscript.net/css/jquerysctipttop.css" rel="stylesheet" type="text/css">
 
-<script type="text/javascript">
-<script type="text/javascript">
-$(document).ready(function() {
-    $("#proceed-register").click(function(){
-        alert("button");
-    }); 
-});
-</script>
-</script>
 </head>
 <body>
 <h1 align="center" style="margin-top:150px;">Registraton Type</h1>
@@ -45,7 +36,7 @@ $(document).ready(function() {
 </div>
 <input type="hidden" id="register_type" name="registrationType" value="">
 <div class="proceed">
-<button class ="proceed-button" type="submit" id="proceed-register" name="proceed-register">Proceed</button>
+<button class ="proceed-button" type="submit" id="proceed-register" onclick="return checktype()" name="proceed-register">Proceed</button>
 </div>
 </form:form>
 </div>
@@ -54,6 +45,16 @@ $(document).ready(function() {
 <script type="text/javascript" src="demos/jquery.event.drag.js"></script> 
 <script type="text/javascript" src="demos/switchy.js"></script> 
 <script type="text/javascript" src="demos/application.js"></script> 
-
+<script type="text/javascript">
+function checktype() {
+    var type = $("#register_type").val();
+    //alert(type);
+    if (type == "" || type == null) {
+        var log =  'Please select registration type';
+        $('#console').html(log).hide().fadeIn();
+        return false;
+    }
+}
+</script>
 </body>
 </html>
