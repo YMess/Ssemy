@@ -108,7 +108,9 @@ $().ready(function(){
 	
 	 <div class="clear"></div>
 	<div>
-		<div class="userleft"><%@include file="/WEB-INF/jsp/include/left.jsp" %></div>
+<div class="content">
+  <div class="container">
+		<div class=""> <%@include file="/WEB-INF/jsp/include/left.jsp" %></div>
 		<div class="usercenter">
 					<!-- <div id="dialog-confirm" align="center" style="display: none">
 							<textarea rows="5" cols="40" id="answerTextArea"></textarea>
@@ -180,6 +182,7 @@ $().ready(function(){
 					</c:otherwise>
 			</c:choose>
 		</div>
+		</div></div>
 		<div class="userright"><%@include file="/WEB-INF/jsp/include/right.jsp" %></div>
 	</div>
 </body>
