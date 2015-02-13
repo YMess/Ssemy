@@ -117,11 +117,11 @@ $(document).ready(function(){
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Inbox</title>
-<script src="js/jquery-1.10.2.js" type="text/javascript"></script>
+<script src="js/jquery-2.1.3.min.js" type="text/javascript"></script>
 <script src="js/jquery-ui.js" type="text/javascript"></script>
 <script type="text/javascript">
 $(document).ready(function(){
-    $('#deleteInbox').click(function() {
+    $('#deleteMail').click(function() {
         var deleteMailIds = new Array();
         var k = 0;
         $('input:checked').each(function(index,value) {
@@ -224,7 +224,7 @@ $(document).ready(function(){
                       </th>
                       <th> </th>
                       <th colspan="3"> 
-                      <div class="mgr-20 menu-btn"><a role="button"><i class="icon-trash append-icon vd_green"></i> Delete</a></div> 
+                      <div class="mgr-20 menu-btn"><a role="button" id="deleteMail"><i class="icon-trash append-icon vd_green"></i> Delete</a></div> 
                       <div class="mgr-20 menu-btn"><a role="button"><i class="fa fa-shield append-icon vd_green"></i> Spam</a></div> 
                       <div class="mgr-20 menu-btn"><a role="button"><i class="icon-folder append-icon vd_green"></i>Move</a></div> 
                       <div class="mgr-20 menu-btn"><a data-toggle="dropdown" role="button"><i class="fa fa-ellipsis-h append-icon vd_green"></i>More</a>

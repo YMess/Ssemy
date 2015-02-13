@@ -93,16 +93,16 @@ public class MailActivitiesController {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		String userEmailId = authentication.getName();
 		
-		List<Mail> mail = new ArrayList<Mail>();
+		List<Mail> mails = new ArrayList<Mail>();
 		
 		try {
-			mail = yMailService.getSentMails(userEmailId);
+			mails = yMailService.getSentMails(userEmailId);
 			logger.info(YMailLoggerConstants.SENT_PAGE +" "+ userEmailId);
 		} catch (Exception e) {
 			logger.error(e.getLocalizedMessage());
 		}
 		
-		model.addAttribute("mail",mail);
+		model.addAttribute("mails",mails);
 		return YMailJSPMappings.SENT_PAGE;
 	}
 

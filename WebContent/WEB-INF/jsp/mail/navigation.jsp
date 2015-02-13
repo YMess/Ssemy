@@ -64,7 +64,7 @@
     <li>
     	<a href="important.htm">
         	<span class="menu-icon entypo-icon"><i class="icon-paperplane"></i></span> 
-            <span class="menu-text">Sent</span>  
+            <span class="menu-text">Important</span>  
        	</a>
     </li>     
     <li>
@@ -75,7 +75,7 @@
        	</a>
     </li>          
     <li>
-    	<a href="trash.html">
+    	<a href="trash.htm">
         	<span class="menu-icon entypo-icon"><i class="icon-trash"></i></span> 
             <span class="menu-text">Trash</span>  
        	</a>

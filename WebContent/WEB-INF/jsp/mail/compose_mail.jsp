@@ -117,8 +117,28 @@ $(document).ready(function() {
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Inbox</title>
-<script src="js/jquery-1.10.2.js" type="text/javascript"></script>
+<script src="js/jquery-2.1.3.min.js" type="text/javascript"></script>
  <script src="js/jquery-ui.js" type="text/javascript"></script>
+ <script type="text/javascript">
+$(document).ready(function() {
+    //add more file components if Add is clicked
+    $('#addFile').click(function() {
+        var fileIndex = $('#fileTable tr').children().length ;
+        $('#fileTable').append(
+                '<tr><td>'+
+                '   <input type="file" name="mailAttachment['+ fileIndex +']" />'+
+                '</td></tr>');
+    });  
+});
+</script>
+ <script type="text/javascript">
+  $().ready(function(){
+	   $("#addImage").change(function(){
+		   alert("hi"); 
+              $(".imageDiv").toggle();
+      });
+	});
+  </script>
 </head>
 <body id="email" class="full-layout    nav-top-fixed   nav-right-small   responsive    clearfix breakpoint-975" data-active="email " data-smooth-scrolling="1">
 
@@ -359,6 +379,7 @@ $(document).ready(function() {
           </div>
           <!-- .vd_content-section --> 	
         </div>
+        </div>
 <!-- Compose Content -->
 	<%@include file="/WEB-INF/jsp/include/footer.jsp" %>
 
@@ -443,27 +464,7 @@ $(function () {
         var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
     })();
 </script>
-<script type="text/javascript">
-$(document).ready(function() {
-    //add more file components if Add is clicked
-    $('#addFile').click(function() {
-        var fileIndex = $('#fileTable tr').children().length ;
-        $('#fileTable').append(
-                '<tr><td>'+
-                '   <input type="file" name="mailAttachment['+ fileIndex +']" />'+
-                '</td></tr>');
-    });  
-});
-</script>
- <script type="text/javascript">
-  $().ready(function(){
-	 
-	   $('input[type="checkbox"]').click(function(){
-		   alert("hi"); 
-              $(".imageDiv").toggle();
-      });
-	});
-  </script>
+
 
 </body>
 </html>		
