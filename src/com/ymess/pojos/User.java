@@ -20,6 +20,7 @@ public class User {
 	@NotEmpty(message="Please Enter an Email Id")
 	@Email(message="Please Enter a Valid Email Address")
 	private String userEmailId;
+    private String registrationType;
 
 	@NotEmpty(message="Please Enter First Name")
 	private String firstName;
@@ -52,6 +53,35 @@ public class User {
 	/** Image Data in byte[] in DB */
 	private byte[] userImageData;
 	
+	private long userId;
+	private String roleType;
+	private Date registrationTimestamp;
+	private String department;
+	private String speciality;
+	private String phoneCode; 
+	private String faxPhone;
+	private String homePhone;
+	private String officePhone;
+	private String mobilePhone;
+	private String address1;
+	private String address2;
+	private String city;
+	private String pinCode;
+	private Boolean isRegisterNewsLetter;
+	private Boolean isAgreedService;
+	private String createdBy;
+	private String ceatedTimestamp;
+	private String updatedBy;
+	private String updatedTimestamp;
+	
+	public String getFaxPhone() {
+		return faxPhone;
+	}
+
+	public void setFaxPhone(String faxPhone) {
+		this.faxPhone = faxPhone;
+	}
+
 	
 	public String getTagline() {
 		return tagline;
@@ -108,6 +138,158 @@ public class User {
 
 	public void setInterests(Set<String> interests) {
 		this.interests = interests;
+	}
+
+	public long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(long userId) {
+		this.userId = userId;
+	}
+
+	public String getRoleType() {
+		return roleType;
+	}
+
+	public void setRoleType(String roleType) {
+		this.roleType = roleType;
+	}
+
+	public Date getRegistrationTimestamp() {
+		return registrationTimestamp;
+	}
+
+	public void setRegistrationTimestamp(Date registrationTimestamp) {
+		this.registrationTimestamp = registrationTimestamp;
+	}
+
+	public String getDepartment() {
+		return department;
+	}
+
+	public void setDepartment(String department) {
+		this.department = department;
+	}
+
+	public String getSpeciality() {
+		return speciality;
+	}
+
+	public void setSpeciality(String speciality) {
+		this.speciality = speciality;
+	}
+
+	public String getPhoneCode() {
+		return phoneCode;
+	}
+
+	public void setPhoneCode(String phoneCode) {
+		this.phoneCode = phoneCode;
+	}
+
+	public String getHomePhone() {
+		return homePhone;
+	}
+
+	public void setHomePhone(String homePhone) {
+		this.homePhone = homePhone;
+	}
+
+	public String getOfficePhone() {
+		return officePhone;
+	}
+
+	public void setOfficePhone(String officePhone) {
+		this.officePhone = officePhone;
+	}
+
+	public String getMobilePhone() {
+		return mobilePhone;
+	}
+
+	public void setMobilePhone(String mobilePhone) {
+		this.mobilePhone = mobilePhone;
+	}
+
+	public String getAddress1() {
+		return address1;
+	}
+
+	public void setAddress1(String address1) {
+		this.address1 = address1;
+	}
+
+	public String getAddress2() {
+		return address2;
+	}
+
+	public void setAddress2(String address2) {
+		this.address2 = address2;
+	}
+
+	public String getCity() {
+		return city;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
+	}
+
+	public String getPinCode() {
+		return pinCode;
+	}
+
+	public void setPinCode(String pinCode) {
+		this.pinCode = pinCode;
+	}
+
+	public Boolean getIsRegisterNewsLetter() {
+		return isRegisterNewsLetter;
+	}
+
+	public void setIsRegisterNewsLetter(Boolean isRegisterNewsLetter) {
+		this.isRegisterNewsLetter = isRegisterNewsLetter;
+	}
+
+	public Boolean getIsAgreedService() {
+		return isAgreedService;
+	}
+
+	public void setIsAgreedService(Boolean isAgreedService) {
+		this.isAgreedService = isAgreedService;
+	}
+
+	public String getCreatedBy() {
+		return createdBy;
+	}
+
+	public void setCreatedBy(String createdBy) {
+		this.createdBy = createdBy;
+	}
+
+	public String getCeatedTimestamp() {
+		return ceatedTimestamp;
+	}
+
+	public void setCeatedTimestamp(String ceatedTimestamp) {
+		this.ceatedTimestamp = ceatedTimestamp;
+	}
+
+	public String getUpdatedBy() {
+		return updatedBy;
+	}
+
+	public void setUpdatedBy(String updatedBy) {
+		this.updatedBy = updatedBy;
+	}
+
+	public String getUpdatedTimestamp() {
+		return updatedTimestamp;
+	}
+
+	public void setUpdatedTimestamp(String updatedTimestamp) {
+		this.updatedTimestamp = updatedTimestamp;
 	}
 
 	public String getUserEmailId() {
@@ -206,7 +388,13 @@ public class User {
 		this.country = country;
 	}
 
-	
+	public String getRegistrationType() {
+		return registrationType;
+	}
+
+	public void setRegistrationType(String registrationType) {
+		this.registrationType = registrationType;
+	}
 	
 	
 

@@ -42,11 +42,9 @@ public class RegistrationController {
 	public String showRegistrationPage(Model model)
 	{
 		model.addAttribute("user", new User());
-		logger.info(YMessLoggerConstants.SHOW_REGISTRATION_PAGE);
+		logger.info(YMessLoggerConstants.SHOW_REGISTRATION_STEP2_PAGE);
 		return YMessJSPMappings.REGISTRATION_PAGE;
 	}
-
-	
 	
 	/**
 	 * Submits the User Data and checks for Validity of Data,else returns.
@@ -75,4 +73,19 @@ public class RegistrationController {
 		return YMessURLMappings.REDIRECT_SUCCESS_USER_REGISTRATION;
 	}
 
+	@RequestMapping(value=YMessURLMappings.REGISTRATIONTYPE_PAGE,method=RequestMethod.GET)
+	public String showRegisterTypeForm(Model model)
+	{
+		model.addAttribute("user",new User());
+		logger.info(YMessLoggerConstants.SHOW_REGISTRATION_STEP1_PAGE);
+		return YMessJSPMappings.REGISTRATIONTYPE_PAGE;
+	}
+	
+	@RequestMapping(value=YMessURLMappings.REGISTRATIONTYPE_PAGE,method=RequestMethod.POST)
+	public String registerRegisterType(@ModelAttribute("user")@Valid User user, BindingResult result, Model model)
+	{
+		model.addAttribute("user", user);
+		logger.info(YMessLoggerConstants.SHOW_REGISTRATION_STEP2_PAGE);
+		return YMessJSPMappings.REGISTRATION_PAGE;
+	}
 }

@@ -12,7 +12,9 @@ public class YMessLoggerConstants {
 
 	public static final String LOGIN_PAGE = "Loaded Login Page";
 	
-	public static final String SHOW_REGISTRATION_PAGE = "Displayed Registration Page";
+	public static final String SHOW_REGISTRATION_STEP1_PAGE = "Displayed Registration Step1 Page";
+	
+	public static final String SHOW_REGISTRATION_STEP2_PAGE = "Displayed Registration Step2 Page";
 
 	public static final String USER_REGISTRATION = "User Registered Successfully";
 

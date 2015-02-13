@@ -162,7 +162,7 @@
                 </div>
               </div>
               <!-- Panel Widget -->
-              <div class="register-panel text-center font-semibold"> <a href="registration.htm">CREATE AN ACCOUNT<span class="menu-icon"><i class="fa fa-angle-double-right fa-fw"></i></span></a> </div>
+              <div class="register-panel text-center font-semibold"> <a href="registrationtype.htm">CREATE AN ACCOUNT<span class="menu-icon"><i class="fa fa-angle-double-right fa-fw"></i></span></a> </div>
             </div>
             <!-- vd_login-page --> 
             

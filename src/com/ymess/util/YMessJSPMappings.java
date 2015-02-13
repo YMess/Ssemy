@@ -14,6 +14,7 @@ public class YMessJSPMappings {
 	public static final String DASHBOARD_PAGE = "user/dashboard"; //LoginController
 
 	public static final String REGISTRATION_PAGE = "common/registration"; //RegistrationController
+	public static final String REGISTRATIONTYPE_PAGE = "common/registrationtype"; //RegistrationController
 	
 	public static final String HOME_PAGE = "common/home"; //HomeController
 	

@@ -1,6 +1,11 @@
-<%@ page language="java" import="org.springframework.security.core.Authentication, org.springframework.security.core.context.SecurityContextHolder" contentType="text/html; charset=ISO-8859-1"
-    pageEncoding="ISO-8859-1"%>
-<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+<%@ page language="java"
+	import="org.springframework.security.core.Authentication, org.springframework.security.core.context.SecurityContextHolder"
+	contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1"%>
+
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 
 <!doctype html>
 <html lang="en">
@@ -96,7 +101,12 @@
 
 <!-- Header Ends --> 
 <div class="content">
-  <div class="container"> 
+  <div class="container">
+  <c:choose>
+	<c:when test="${not empty emptyResultSet }">
+			No Details Found! 
+		</c:when>
+	<c:otherwise> 
     <!-- Middle Content Start -->  
     <div style="min-height: 8px;" class="vd_content-wrapper">
       <div style="min-height: 8px;" class="vd_container">
@@ -111,6 +121,7 @@
               </div>
               <div class="panel widget">
                 <div class="panel-body">
+                
 <!--                  <div id="register-success" class="alert alert-success" style="display:none;"><i class="fa fa-exclamation-circle fa-fw"></i> Registration confirmation has been sent to your email </div>
                   <div id="register-passerror" class="alert alert-danger" style="display:none;"><i class="fa fa-exclamation-circle fa-fw"></i> Your password and Confirm password are not same </div>-->
                   <form:form modelAttribute="user" action="registration.htm" method="POST" novalidate="novalidate" class="form-horizontal" role="form" id="register-form">
@@ -123,14 +134,7 @@
                   <div class="alert alert-success vd_hidden">
                     <button type="button" class="close" data-dismiss="alert" aria-hidden="true"><i class="icon-cross"></i></button>
                     <span class="vd_alert-icon"><i class="fa fa-check-circle vd_green"></i></span>Registration confirmation has been sent to your email. </div>                  
-                    
-                    <div class="form-group">
-                      <div class="col-md-6">
-                        <div class="label-wrapper">
-                          <label class="control-label">Registration Type <span class="vd_red">*</span></label>
-                        </div>
-                      </div>
-                    </div>
+                   
                     <div class="form-group">
                       <div class="col-md-6">
                         <div class="label-wrapper">
@@ -227,6 +231,7 @@
                           <label for="checkbox-2"> I agree with <a href="#">terms of service</a></label>
                         </div>
                       </div>
+                      <input type="hidden" value="${user.registrationType}" name="registrationType" id="registrationType">
                       <div class="col-md-12 text-center mgbt-xs-5">
                         <button class="btn vd_bg-green vd_white width-100" type="submit" id="submit-register" name="submit-register">Register</button>
                       </div>
@@ -251,8 +256,10 @@
     <!-- .vd_content-wrapper --> 
     
     <!-- Middle Content End --> 
-    
+    </c:otherwise>
+	</c:choose>
   </div>
+  
   <!-- .container --> 
 </div>
 <!-- .content -->

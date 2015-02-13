@@ -86,6 +86,8 @@ public class JdbcYMessDao implements YMessDao {
 	
 	private static final String ADD_FOLLOWING_TIMELINE = "insert into user_timeline(user_email_id, user_timestamp, activity, user_first_name, user_last_name, following_first_name, following_last_name, following_email_id, is_following) values(?,?,?,?,?,?,?,?,?)";	
 	
+	private static final String GET_USER_IDS = "select user_id from users_data";
+	
 	/** Query Section Ends*/
 	
 	
@@ -98,20 +100,35 @@ public class JdbcYMessDao implements YMessDao {
 	@Override
 	public boolean addUser(User user) {
 		boolean added = false;
+		
+		Long newUserId = getLastInsertedUserId() + 1;
 		String hashedPassword = YMessCommonUtility.getMD5HashedPassword(user.getPassword());
 		try{
 			
 			// Users
 			Insert insertQuery = QueryBuilder.insertInto("users").values(
-					new String[]{"username","password","authority","enabled"}, 
-					new Object[]{user.getUserEmailId(),hashedPassword,YMessCommonUtility.ROLE_REGISTERED,YMessCommonUtility.ENABLE_USER_FLAG});
+					new String[]{"username","password","authority","enabled","role"}, 
+					new Object[]{user.getUserEmailId(),hashedPassword,YMessCommonUtility.ROLE_REGISTERED,YMessCommonUtility.ENABLE_USER_FLAG,user.getRegistrationType()});
 			cassandraTemplate.execute(insertQuery);
 			
 			// Users Data
-		Insert insertIntoUserDetails = QueryBuilder.insertInto("users_data").values(
-				new String[]{"email_id","first_name","last_name","password","authority","registered_time"},
-				new Object[]{user.getUserEmailId(),user.getFirstName(),user.getLastName(),hashedPassword,YMessCommonUtility.ROLE_REGISTERED,new Date()});
-		cassandraTemplate.execute(insertIntoUserDetails);
+			Insert insertIntoUserDetails;
+			if(user.getRegistrationType() == YMessCommonUtility.ROLE_COMPANY)
+			{
+				insertIntoUserDetails = QueryBuilder.insertInto("users_data").values(
+						new String[]{"user_id","email_id","first_name","last_name","password","authority","registered_time","phone_code","mobile_phone","role_type","website","is_registered_newsletter","is_agreed_service"},
+						new Object[]{newUserId,user.getUserEmailId(),user.getFirstName(),user.getLastName(),hashedPassword,YMessCommonUtility.ROLE_REGISTERED,new Date(),
+								user.getPhoneCode(),user.getMobilePhone(),YMessCommonUtility.ROLE_COMPANY_ADMINISTRATOR,user.getWebsite(),user.getIsRegisterNewsLetter(),user.getIsAgreedService()});
+				
+			}
+			else
+			{
+				insertIntoUserDetails = QueryBuilder.insertInto("users_data").values(
+						new String[]{"user_id","email_id","first_name","last_name","password","authority","registered_time","phone_code","mobile_phone",},
+						new Object[]{newUserId,user.getUserEmailId(),user.getFirstName(),user.getLastName(),hashedPassword,YMessCommonUtility.ROLE_REGISTERED,new Date(),user.getPhoneCode(),user.getMobilePhone(),});
+				
+			}
+			cassandraTemplate.execute(insertIntoUserDetails);
 		
 		// User Timeline
 		Insert insertIntoUserTimeline = QueryBuilder.insertInto("user_timeline").values(
@@ -884,6 +901,28 @@ public class JdbcYMessDao implements YMessDao {
 				logger.error(emptyRS.getLocalizedMessage());
 			}
 		return maxQuestionId;
+	}
+	
+	/**
+	 * Retrieves the last inserted user Id.
+	 * @author rvishwakarma
+	 * @return lastInsertedUserId(String)
+	 */
+	private Long getLastInsertedUserId() 
+	{
+		long maxUserId = 0;
+		
+		List<Long> userIds = cassandraTemplate.queryForList(GET_USER_IDS,Long.class);
+			try
+			{
+				if(!userIds.isEmpty())
+					maxUserId = Collections.max(userIds);
+			}
+			catch(EmptyResultDataAccessException emptyRS)
+			{
+				logger.error(emptyRS.getLocalizedMessage());
+			}
+		return maxUserId;
 	}
 	
 	/**

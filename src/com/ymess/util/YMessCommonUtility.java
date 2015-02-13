@@ -51,6 +51,13 @@ import com.datastax.driver.core.querybuilder.QueryBuilder;
 public class YMessCommonUtility {
 	
 	public static final String ROLE_REGISTERED = "ROLE_REGISTERED";
+	public static final String ROLE_INDIVIDUAL = "INDIVIDUAL";
+	public static final String ROLE_COMPANY = "COMPANY";
+	public static final String ROLE_COMPANY_STANDARDUSER = "STANDARD USER";
+	public static final String ROLE_COMPANY_ADMINISTRATOR = "ADMINISTRATOR";
+	public static final Boolean IS_REGISTERED_FOR_NEWSLETTER = true;
+	public static final Boolean IS_AGREED_SERVICE = true;
+	public static final String ROLE_COMPANY_TYPE = "ROLE_REGISTERED";
 	public static final Boolean ENABLE_USER_FLAG = true;
 	public static final Boolean DISABLE_USER_FLAG = false;
 	public static final Boolean IS_JOINED = true;

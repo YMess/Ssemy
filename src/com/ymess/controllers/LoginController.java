@@ -57,7 +57,6 @@ public class LoginController
 	}
 	
 	
-	
 	/**
 	 * Displays the Login Failed Page on Invalid Credentials
 	 * @author balaji i

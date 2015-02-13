@@ -15,6 +15,7 @@ public class YMessURLMappings {
 	public static final String DASHBOARD_PAGE = "/userdashboard.htm"; //LoginController
 	
 	public static final String REGISTRATION_PAGE = "/registration.htm"; //RegistrationController
+	public static final String REGISTRATIONTYPE_PAGE = "/registrationtype.htm";////RegistrationController
 	
 	public static final String HOME_PAGE = "home.htm"; //HomeController
 	
