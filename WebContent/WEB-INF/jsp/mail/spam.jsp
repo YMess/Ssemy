@@ -1,109 +1,3 @@
-<%-- <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %> 
-<%@ page language="java" import="org.springframework.security.core.Authentication, org.springframework.security.core.context.SecurityContextHolder" contentType="text/html; charset=ISO-8859-1"
-    pageEncoding="ISO-8859-1"%>
-    
-<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
-<%@ page import="org.apache.commons.codec.binary.Base64" %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Inbox</title>
-  <script src="js/jquery-1.10.2.js" type="text/javascript"></script>
-  <script src="js/jquery-ui.js" type="text/javascript"></script>
-  <LINK REL=Stylesheet TYPE ="text/css" HREF="css/style.css">
-<LINK REL=Stylesheet TYPE ="text/css" HREF="css/pure-min.css">
-<script type="text/javascript">
-$(document).ready(function(){
-    $('#deleteInbox').click(function() {
-        var deleteMailIds = new Array();
-        var k = 0;
-        $('input:checked').each(function(index,value) {
-        	deleteMailIds[k] = value.id;
-        	alert(value.id);
-            k++;
-        });        
-        alert(deleteMailIds[0]);
-
-        $.ajax({
-    		  url:"delete_mails.json",
-    		  data:'mailIds='+deleteMailIds,
-    		  async:false,
-    		  error : function() {
-    	        console.log("error");
-    	      },
-    		  success:function(result){
-    			  alert(mailSize+" Mails Deleted Successfully");
-    			  location.reload();
-      }}); 
-    });
-});
-</script>
-</head>
-<body>
-     <c:if test="${ not empty successfullyMailSend }">
-				<script type="text/javascript">
-						alert("Mail Sent Successfully");
-				</script>
-				</c:if>
-<div class="header">
-		<%@ include file="/WEB-INF/jsp/include/header.jsp" %>
-	</div>
-	
-	 <div class="clear"></div>
-	<div>
-		<div class="userleft"><%@include file="/WEB-INF/jsp/include/mail_navigation.jsp" %></div>
-		<div class="usercenter">
-
-				<c:choose>
-					<c:when test="${not empty emptyResultSet }">
-									No mails Found! 
-					</c:when>
-					<c:otherwise>
-						<div>
-						<input type="button" value="Delete" id="deleteInbox" style="height: 50px;width: 250px;"/>
-						</div>
-						<div class="pure-menu pure-menu-open">
-						 	<ul style="padding-left: 10px;">
-								<c:forEach items="${mails}" var="mail">
-									<c:set var="mailId" value="${mail.mailId}" />
-								 	<li onclick="location.href='get_mail_details.htm?mId=<%=new String(Base64.encodeBase64(String.valueOf(pageContext.getAttribute("mailId")).getBytes()))%>'">
-									 	<div>
-									 		<div style="width: 30%; float: left;">
-												<div style="float: left;"><input type="checkbox" name="checkmark" id="${mail.mailId}" value="${mail.mailId}">&nbsp;</div>
-											 	<div style="float: left;"><c:out value="${mail.mailFrom }" />&nbsp;</div>
-									 		</div>
-									 		<div style="width: 45%; float: left;">
-												 <div style="float: left;"><b><i><c:out value="${mail.mailSubject }"></c:out></i></b>&nbsp;<c:out value="${mail.mailBody }" /></div>
-											</div>
-									 		<div style="width: 25%; float: right;">
-										 		<div style="float: left;">
-												 		<c:if test="${mail.isAttachmentAttached eq true }">
-												 			<div>
-											  					<img  height="20" width="25" src="images/Attachment_icon.png">		
-											 	    		</div>
-											 	    	</c:if>
-											 		</div>
-											 	<div style="float: left;"><c:out value="${mail.mailSentTimestamp }"/>
-											 	
-											 	<fmt:formatDate type="date" value="${mail.mailSentTimestamp}" />
-											 	
-											 	</div>
-									 		</div>
-									 	</div>	
-								 	</li>
-								</c:forEach>
-							</ul>
-							</div>
-					</c:otherwise>
-			</c:choose>
-		</div>
-		<div class="userright"><%@include file="/WEB-INF/jsp/include/right.jsp" %></div>
-	</div>
-</body>
-</html> --%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %> 
@@ -116,12 +10,12 @@ $(document).ready(function(){
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Drafts</title>
+<title>Spam</title>
 <script src="js/jquery-2.1.3.min.js" type="text/javascript"></script>
 <script src="js/jquery-ui.js" type="text/javascript"></script>
 <script type="text/javascript">
 $(document).ready(function(){
-    $('#deleteInbox').click(function() {
+    $('#deleteMail').click(function() {
         var deleteMailIds = new Array();
         var k = 0;
         $('input:checked').each(function(index,value) {
@@ -147,6 +41,11 @@ $(document).ready(function(){
 </script>
 </head>
 <body id="email" class="full-layout    nav-top-fixed   nav-right-small   responsive    clearfix breakpoint-975" data-active="email " data-smooth-scrolling="1">     
+<c:if test="${ not empty successfullyMailSend }">
+				<script type="text/javascript">
+						alert("Mail Sent Successfully");
+				</script>
+				</c:if>
 <div class="vd_body">
 <header>
    <%@ include file="/WEB-INF/jsp/include/header.jsp" %>
@@ -162,7 +61,7 @@ $(document).ready(function(){
           <div class="vd_head-section clearfix">
             <div class="vd_panel-header">
               <ul class="breadcrumb">
-                <li><a href="dashboard.htm">Home</a> </li>
+                <li><a href="index.php">Home</a> </li>
                 <li class="active">Email</li>
               </ul>
               <div class="vd_panel-menu hidden-sm hidden-xs" data-intro="<strong>Expand Control</strong><br/>To expand content page horizontally, vertically, or Both. If you just need one button just simply remove the other button code." data-step="5" data-position="left">
@@ -211,7 +110,7 @@ $(document).ready(function(){
               </div>
               <!-- vd_panel-heading -->
               <div class="panel-body">
-                <h2 class="mgtp--10">Drafts</h2>
+                <h2 class="mgtp--10"> Spam</h2>
                 <table class="table table-striped table-hover">
                   <thead>
                     <tr>
@@ -222,7 +121,7 @@ $(document).ready(function(){
                       </th>
                       <th> </th>
                       <th colspan="3"> 
-                      <div class="mgr-20 menu-btn"><a role="button"><i class="icon-trash append-icon vd_green"></i> Delete</a></div> 
+                      <div class="mgr-20 menu-btn"><a role="button" id="deleteMail"><i class="icon-trash append-icon vd_green"></i> Delete</a></div> 
                       <div class="mgr-20 menu-btn"><a role="button"><i class="fa fa-shield append-icon vd_green"></i> Spam</a></div> 
                       <div class="mgr-20 menu-btn"><a role="button"><i class="icon-folder append-icon vd_green"></i>Move</a></div> 
                       <div class="mgr-20 menu-btn"><a data-toggle="dropdown" role="button"><i class="fa fa-ellipsis-h append-icon vd_green"></i>More</a>
@@ -288,14 +187,13 @@ $(document).ready(function(){
         <!-- .vd_content-section --> 
         
       </div>
+     </div>
+    </div>  
    </div>
 </div>
-      </div>
-   </div>
 
 <%@include file="/WEB-INF/jsp/include/footer.jsp" %>
 <a id="back-top" href="#" data-action="backtop" class="vd_back-top"> <i class="fa  fa-angle-up"> </i> </a>
 </div>
 </body>
 </html>
-

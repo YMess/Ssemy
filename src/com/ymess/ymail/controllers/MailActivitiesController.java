@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -107,6 +108,30 @@ public class MailActivitiesController {
 	}
 
 
+	/**
+	 * Displays Spam Page
+	 * @author RAJ@param httpServletRequest
+	 * @param httpServletResponse* @param model
+	 * @return Spam Page
+	 */
+	@RequestMapping(value=YMailURLMappings.SPAM_PAGE,method=RequestMethod.GET)
+	public String showSpamPage(Model model)
+	{
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String userEmailId = authentication.getName(); 
+		
+		List<Mail> mails = new ArrayList<Mail>();
+		
+		try {
+			mails = yMailService.getSpamMails(userEmailId);	
+			logger.info(YMailLoggerConstants.SPAM_PAGE+" "+userEmailId);
+		} catch (Exception e) {
+			logger.error(e.getLocalizedMessage());
+		}
+		model.addAttribute("mails", mails);
+		return YMailJSPMappings.SPAM_PAGE;
+	}
+	
 	/**
 	 * Displays the Compose Mail Page
 	 * @author rvishwakarma

@@ -71,5 +71,13 @@ public interface YMailDao {
 	 */
 	List<Mail> getDraftMails(String userEmailId);
 
+
+	/**
+	 * @author RAJ
+	 * @param userEmailId
+	 * @return List<Mail>
+	 */
+	List<Mail> getSpamMails(String userEmailId);
+
 	
 }

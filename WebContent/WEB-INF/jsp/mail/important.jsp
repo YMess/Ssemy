@@ -107,7 +107,10 @@ $(document).ready(function(){
 <div class="content">
   <div class="container">
 		<%@include file="/WEB-INF/jsp/mail/navigation.jsp" %>
-		<div class="vd_content clearfix" style="padding-left: 198px;">
+		<%@ include file="/WEB-INF/jsp/include/right.jsp" %>
+	<div style="min-height: 1048px;" class="vd_content-wrapper">
+      <div style="min-height: 1048px;margin-left: 180px;" class="vd_container">
+		<div class="vd_content clearfix">
         
           <div class="vd_head-section clearfix">
             <div class="vd_panel-header">
@@ -136,7 +139,7 @@ $(document).ready(function(){
           </div>
           <!-- vd_title-section -->
           
-          <div class="vd_content-section clearfix" style="width: 1143px; padding-left: initial;">
+          <div class="vd_content-section clearfix">
             <div class="panel widget light-widget">
             
               <div class="panel-heading no-title">
@@ -160,7 +163,7 @@ $(document).ready(function(){
  
               </div>
               <!-- vd_panel-heading -->
-              <div class="panel-body" style="width: 1121px; padding-left: 13px;">
+              <div class="panel-body">
                 <h2 class="mgtp--10">Important</h2>
                 <table class="table table-striped table-hover">
                   <thead>
@@ -240,8 +243,11 @@ $(document).ready(function(){
       </div>
    </div>
 </div>
+</div>
+</div>
 <%@include file="/WEB-INF/jsp/include/footer.jsp" %>
 <a id="back-top" href="#" data-action="backtop" class="vd_back-top"> <i class="fa  fa-angle-up"> </i> </a>
+</div>
 </body>
 </html>
 

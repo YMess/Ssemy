@@ -1,5 +1,5 @@
 
-<div class="vd_navbar vd_nav-width vd_navbar-email vd_bg-black-80 vd_navbar-left vd_navbar-style-2 " style="width: 15%;">
+<div class="vd_navbar vd_nav-width vd_navbar-email vd_bg-black-80 vd_navbar-left vd_navbar-style-2 " style="width: 17%;">
 	<div class="navbar-tabs-menu clearfix">
 			<span class="expand-menu" data-action="expand-navbar-tabs-menu">
             	<span class="menu-icon menu-icon-left">
@@ -68,7 +68,7 @@
        	</a>
     </li>     
     <li>
-    	<a href="spam.html">
+    	<a href="spam.htm">
         	<span class="menu-icon"><i class="fa fa-shield"></i></span> 
             <span class="menu-text">Spam</span>
             <span class="menu-badge"><span class="badge vd_bg-red">99+</span></span>               

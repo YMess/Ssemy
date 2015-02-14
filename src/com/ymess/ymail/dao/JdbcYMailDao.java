@@ -666,4 +666,39 @@ public class JdbcYMailDao  implements YMailDao {
 		}
 		return draftMails== null ? new ArrayList<Mail>(): draftMails;
 	}
+
+
+	@Override
+	public List<Mail> getSpamMails(String userEmailId) {
+		List<Mail> spamMails = new ArrayList<Mail>();
+		Set<Long> spamMailIds = new HashSet<Long>();
+		
+		try {
+			
+			String GET_SPAM_MAIL_IDS = "select mail_spam from mail_user_mapper where user_email_id="+userEmailId;
+			spamMailIds = cassandraTemplate.queryForObject(GET_SPAM_MAIL_IDS, Set.class);
+			
+			StringBuilder spamMailIdsSB = new StringBuilder();
+			
+			if(null != spamMailIds && spamMailIds.size() > 0)
+			{
+				for (Long draftMailId : spamMailIds) {
+					spamMailIdsSB.append(draftMailId).append(",");
+				}
+				String draftMailIdsStr = "";
+				if(spamMailIdsSB.length() > 0)
+					draftMailIdsStr = spamMailIdsSB.substring(0,spamMailIdsSB.lastIndexOf(","));
+				
+				String GET_DRAFT_MAILS = "Select * from mail_details where mail_id in ("+draftMailIdsStr+")";
+				spamMails = cassandraTemplate.query(GET_DRAFT_MAILS,new MailDetailsMapper());
+			}
+		} catch (EmptyResultDataAccessException  | NullPointerException emptyEx) {
+			logger.warn(YMessMessageConstants.EMPTY_RESULT_SET);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e.getLocalizedMessage());
+		}
+		return spamMails== null ? new ArrayList<Mail>(): spamMails;
+	}
 }

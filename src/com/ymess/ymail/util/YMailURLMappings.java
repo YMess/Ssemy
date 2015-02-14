@@ -7,6 +7,7 @@ public class YMailURLMappings {
 	public static final String DRAFTS_PAGE = "drafts.htm"; //MailActivitiesController.java
 	public static final String SENT_PAGE = "sent.htm"; //MailActivitiesController.java
 	public static final String TRASH_PAGE = "trash.htm"; //MailActivitiesController.java
+	public static final String SPAM_PAGE = "spam.htm"; //MailActivitiesController.java
 	public static final String COMPOSE_MAIL_PAGE = "compose_mail.htm"; //MailActivitiesController.java
 	public static final String REDIRECT_SUCCESS_MAIL_SEND = "redirect:"+INBOX_PAGE;  //MailActivitiesController.java
 	public static final String REDIRECT_SUCCESS_MAIL_SAVED = "redirect:"+INBOX_PAGE;  //MailActivitiesController.java

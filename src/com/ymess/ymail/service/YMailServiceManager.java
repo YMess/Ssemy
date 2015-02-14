@@ -109,4 +109,9 @@ public class YMailServiceManager implements YMailService {
 	public List<Mail> getDraftMails(String userEmailId) {
 		return yMailDao.getDraftMails(userEmailId);
 	}
+
+	@Override
+	public List<Mail> getSpamMails(String userEmailId) {
+		return yMailDao.getSpamMails(userEmailId);
+	}
 }

@@ -150,8 +150,10 @@ $(document).ready(function() {
   <div class="container">
 		<%@include file="/WEB-INF/jsp/mail/navigation.jsp" %>
 
+	<div style="min-height: 1048px;" class="vd_content-wrapper">
+      <div style="min-height: 1048px;margin-left: 180px;" class="vd_container">
 <!-- Compose Content -->
- <div class="vd_content clearfix" style="padding-left: 198px;">
+ <div class="vd_content clearfix">
           <div class="vd_head-section clearfix">
             <div class="vd_panel-header">
               <ul class="breadcrumb">
@@ -178,7 +180,7 @@ $(document).ready(function() {
           </div>
           <!-- vd_title-section -->
           
-          <div class="vd_content-section clearfix" style="width: 1143px; padding-left: initial;">
+          <div class="vd_content-section clearfix" >
             <div class="row">
               <div class="col-md-9">
                 <div class="panel widget light-widget">
@@ -380,12 +382,14 @@ $(document).ready(function() {
           <!-- .vd_content-section --> 	
         </div>
         </div>
+       </div>
+      </div>
+     </div>
 <!-- Compose Content -->
 	<%@include file="/WEB-INF/jsp/include/footer.jsp" %>
-
 <!-- .vd_body END  -->
 <a id="back-top" href="#" data-action="backtop" class="vd_back-top"> <i class="fa  fa-angle-up"> </i> </a>
-
+</div>
 <script type="text/javascript">
 
 $(function () {
