@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -20,6 +21,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.ymess.exceptions.EmptyResultSetException;
 import com.ymess.util.YMessCommonUtility;
 import com.ymess.util.YMessLoggerConstants;
+import com.ymess.ymail.pojos.Folder;
 import com.ymess.ymail.pojos.Mail;
 import com.ymess.ymail.service.interfaces.YMailService;
 import com.ymess.ymail.util.YMailJSPMappings;
@@ -57,6 +59,7 @@ public class MailActivitiesController {
 			logger.error(e.getLocalizedMessage());
 		}
 		
+		model.addAttribute("folder", new Folder());
 		model.addAttribute("mails",mails);
 		return YMailJSPMappings.INBOX_PAGE;
 	}
@@ -249,6 +252,27 @@ public class MailActivitiesController {
 		}
 		redirectAttributes.addFlashAttribute("successfullyMailSaved","Mail Saved to Drafts Successfully");
 		return YMailURLMappings.REDIRECT_SUCCESS_MAIL_SAVED;
+	}
+	
+	@RequestMapping(value=YMailURLMappings.CREATE_FOLDER,method=RequestMethod.POST)
+	@ResponseBody
+	public Boolean createFolder(@ModelAttribute("folder") Folder folder, BindingResult bindingResult)
+	{
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String userEmailId= authentication.getName();
+		
+		folder.setUserEmailId(userEmailId);
+		Boolean successFlag = false;
+		
+		try {
+			successFlag = yMailService.createFolder(folder);
+			logger.info(YMailLoggerConstants.USER_CREATE_FOLDER);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			logger.error(ex.getStackTrace().toString());
+		}
+		
+		return successFlag;
 	}
 	
 }

@@ -145,6 +145,38 @@ $(document).ready(function(){
     });
 });
 </script>
+<script type="text/javascript">
+$().ready(function(){
+	
+	$( '#createFolder').submit( function( e ) {
+	    	  alert("hi");
+			var successFlag = false;
+		    var form = new FormData(this);
+
+			  $("#basic-modal-content").modal("close");
+			  $("#folderName").val("");
+			  $("#ruleFrom").val("");
+			  $("#ruleTo").val("");
+			  $("#ruleCC").val("");
+			  $("#ruleBCC").val("");
+			  $("#isExcludeInbox").val("");
+			  
+		    var xmlhttp = new XMLHttpRequest();
+		    xmlhttp.open("POST", "create_folder.json",false);
+		    xmlhttp.send(form);
+	   
+		   xmlhttp.onreadystatechange=function()
+		   {
+			    if (xmlhttp.readyState==4 && xmlhttp.status==200)
+		        {
+				      alert("Success");
+			    }
+		   }
+
+		window.location.reload();
+	  });
+});
+</script>
 </head>
 <body id="email" class="full-layout    nav-top-fixed   nav-right-small   responsive    clearfix breakpoint-975" data-active="email " data-smooth-scrolling="1">     
 <c:if test="${ not empty successfullyMailSend }">
@@ -161,7 +193,7 @@ $(document).ready(function(){
 		<%@include file="/WEB-INF/jsp/mail/navigation.jsp" %>
 		<%@ include file="/WEB-INF/jsp/include/right.jsp" %>
 	<div style="min-height: 1048px;" class="vd_content-wrapper">
-      <div style="min-height: 1048px;margin-left: 180px;" class="vd_container">
+      <div style="min-height: 1048px;margin-left: 14%;" class="vd_container">
 		<div class="vd_content clearfix">
         
           <div class="vd_head-section clearfix">

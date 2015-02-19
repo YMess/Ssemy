@@ -156,7 +156,7 @@ $(document).ready(function(){
 		<%@include file="/WEB-INF/jsp/mail/navigation.jsp" %>
 		<%@ include file="/WEB-INF/jsp/include/right.jsp" %>
 	<div style="min-height: 1048px;" class="vd_content-wrapper">
-      <div style="min-height: 1048px;margin-left: 180px;" class="vd_container">
+      <div style="min-height: 1048px;margin-left: 14%;" class="vd_container">
 		<div class="vd_content clearfix">
         
           <div class="vd_head-section clearfix">

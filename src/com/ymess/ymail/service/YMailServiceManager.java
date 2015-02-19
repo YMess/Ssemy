@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.sun.org.apache.bcel.internal.generic.RETURN;
 import com.ymess.ymail.dao.interfaces.YMailDao;
+import com.ymess.ymail.pojos.Folder;
 import com.ymess.ymail.pojos.Mail;
 import com.ymess.ymail.service.interfaces.YMailService;
 
@@ -113,5 +114,10 @@ public class YMailServiceManager implements YMailService {
 	@Override
 	public List<Mail> getSpamMails(String userEmailId) {
 		return yMailDao.getSpamMails(userEmailId);
+	}
+
+	@Override
+	public Boolean createFolder(Folder folder) {
+		return yMailDao.createFolder(folder);
 	}
 }

@@ -21,4 +21,6 @@ public class YMailLoggerConstants {
 	public static final String USER_SAVED_MAIL = "User Saved Mail";
 
 	public static final String NO_HOST_ERROR = "No Host Available to Serve the Request";
+	
+	public static final String USER_CREATE_FOLDER = "User Creates Folder";
 }

@@ -2,6 +2,7 @@ package com.ymess.ymail.dao.interfaces;
 
 import java.util.List;
 
+import com.ymess.ymail.pojos.Folder;
 import com.ymess.ymail.pojos.Mail;
 
 public interface YMailDao {
@@ -78,6 +79,14 @@ public interface YMailDao {
 	 * @return List<Mail>
 	 */
 	List<Mail> getSpamMails(String userEmailId);
+
+
+	/**
+	 * @author RVishwakarma
+	 * @param folder
+	 * @return Success
+	 */
+	Boolean createFolder(Folder folder);
 
 	
 }

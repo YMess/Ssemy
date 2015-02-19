@@ -1,5 +1,19 @@
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+  <link href="css/custom/modal.css" rel="stylesheet" type="text/css"/>
+  <script type='text/javascript' src='js/jquery.simplemodal.js'></script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+    	// Load dialog on click
+    	$('#basic-modal .basic').click(function (e) {
+        	
+    		$('#basic-modal-content').modal();
 
-<div class="vd_navbar vd_nav-width vd_navbar-email vd_bg-black-80 vd_navbar-left vd_navbar-style-2 " style="width: 17%;">
+    		return false;
+    	});
+    });
+    </script>
+    
+<div class="vd_navbar vd_nav-width vd_navbar-email vd_bg-black-80 vd_navbar-left vd_navbar-style-2 " style="width: 15%;">
 	<div class="navbar-tabs-menu clearfix">
 			<span class="expand-menu" data-action="expand-navbar-tabs-menu">
             	<span class="menu-icon menu-icon-left">
@@ -81,10 +95,24 @@
        	</a>
     </li>          
     <li>
-    	<a href="javascript:void(0);">
+    	<a href="javascript:void(0);" data-action="click-trigger">
         	<span class="menu-icon entypo-icon"><i class="icon-folder"></i></span> 
-            <span class="menu-text">Folders</span>  
-       	</a>
+            <span class="menu-text">Folders</span>
+       	</a> 
+     	<div class="child-menu" data-action="click-target">
+            <ul>
+                <li id="basic-modal">
+                    <a href="" class="basic">
+                        <span class="menu-text">New Folder</span>  
+                    </a>
+                </li>              
+                <li>
+                    <a href="http://vendroid.venmond.com/index-ecommerce.php">
+                        <span class="menu-text">Edit</span>  
+                    </a>
+                </li>                                                                                                  
+            </ul>   
+      	</div>
     </li>             
 	<li class="line vd_bd-grey">
     </li>
@@ -127,4 +155,93 @@
     </div>
     <div class="navbar-spacing clearfix">
     </div>
+<!--     <div id="basic-modal-content">
+			<h3>Basic Modal Dialog</h3>
+			<div class='contact-content'>
+		<div class='contact-loading' style='display:none'></div>
+		<div class='contact-message' style='display:none'></div>
+		<form action='#'>
+			<label for='folder-name'>*Folder:</label>
+			<input type='text' id='folder-name' class='folder-input' name='folder' tabindex='1001' /><br/>
+			<label for='folder-name'>*From:</label>
+			<select>
+			<option value="xyx@gmail.com">XYZ@gmail.com</option>
+			<option value="abc@gmail.com">abc@gmail.com</option>
+			</select>
+			<br/>
+			<label for='folder-name'>*To:</label>
+			<select>
+			<option value="xyx@gmail.com">XYZ@gmail.com</option>
+			<option value="abc@gmail.com">abc@gmail.com</option>
+			</select>
+			<br/>
+			
+			
+			<br/>
+			<label>&nbsp;</label>
+			<button type='submit' class='contact-send contact-button' tabindex='1006'>Send</button>
+			<button type='submit' class='contact-cancel contact-button simplemodal-close' tabindex='1007'>Cancel</button>
+			<br/>
+			<input type='hidden' name='token' value='" . smcf_token($to) . "'/>
+		</form>
+	  </div>
+	</div> -->
+	                <div id="basic-modal-content">
+                    <h2 class="mgtp--10"><i class="icon-feather mgr-10 vd_green"></i> Create Folder</h2>
+                    <br>
+                    <form:form action="create_folder.json" modelAttribute="folder" enctype="multipart/form-data" id="createFolder" method="post">
+                      <div class="form-group clearfix">
+                        <label class="col-sm-2 control-label">Folder</label>
+                        <div class="col-sm-10 controls">
+                          <input id="email-input" type="text" class="input-border-btm" name="folderName" placeholder="Folder name">
+                        </div>
+                      </div>
+                      <div class="form-group clearfix">
+                        <label class="col-sm-2 control-label">From</label>
+                        <div class="col-sm-10 controls">
+                          <input id="email-input" type="text" class="input-border-btm" name="ruleFrom" placeholder="someone@example.com">
+                        </div>
+                        </div>
+                        <div class="form-group clearfix">
+                        <label class="col-sm-2 control-label">To</label>
+                        <div class="col-sm-10 controls">
+                          <input id="email-input" type="text" class="input-border-btm" name="ruleTo" placeholder="someone@example.com">
+                        </div>
+                        </div>
+                       <div class="form-group clearfix">
+                        <label class="col-sm-2 control-label">Cc</label>
+                        <div class="col-sm-10 controls">
+                          <input id="email-input" type="text" class="input-border-btm" name="ruleCC" placeholder="someone@example.com">
+                        </div>
+                      </div>
+                       <div class="form-group clearfix">
+                        <label class="col-sm-2 control-label">Bcc</label>
+                        <div class="col-sm-10 controls">
+                          <input id="email-input" type="text" class="input-border-btm" name="ruleBCC" placeholder="someone@example.com">
+                        </div>
+                      </div>
+                      <div class="form-group clearfix">
+                        <label class="col-sm-2 control-label">Subject</label>
+                        <div class="col-sm-10 controls">
+                          <input id="email-input" type="text" class="input-border-btm" name="ruleSubject" placeholder="subject">
+                        </div>
+                      </div>
+                      <div class="form-group  clearfix">
+                        <label class="col-sm-2 control-label">Exclude Inbox</label>
+                        <div class="col-sm-10 controls">
+                          <input id="excludeInbox" type="checkbox" name="isExcludeInbox">
+                        </div>
+                      </div>
+                      <div class="form-group form-actions">
+                        <div class="col-sm-12">
+                          <button type="submit" class="btn vd_btn vd_bg-green vd_white" name="save" ><i class="fa fa-envelope append-icon"></i> SAVE</button>
+                          <button type="submit" class="btn vd_btn vd_bg-yellow vd_white"  name="cancel"><i class="fa fa-archive append-icon"></i> CANCEl</button>
+                        </div>
+                      </div>
+                    </form:form>
+                  </div>
+                  <!-- preload the images -->
+		         <div style='display:none'>
+			         <img src='images/x.png' alt='' />
+		         </div>
 </div>
