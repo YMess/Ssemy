@@ -8,7 +8,8 @@ public class Folder {
 
 	private long folderId;
 	private String folderName;
-	private Date folderTimestamp;
+	private Date createdTime;
+	private Date modifiedTime;
     private String userEmailId;
     private Set<String> ruleTo;
     private Set<String> ruleFrom;
@@ -16,7 +17,7 @@ public class Folder {
     private Set<String> ruleBCC;
     private String ruleSubject;
 	private int mailCount;
-	private boolean isExcludeInbox;
+	private boolean excludeInbox;
 	
 	
 	
@@ -34,12 +35,7 @@ public class Folder {
 	public void setFolderName(String folderName) {
 		this.folderName = folderName;
 	}
-	public Date getFolderTimestamp() {
-		return folderTimestamp;
-	}
-	public void setFolderTimestamp(Date folderTimestamp) {
-		this.folderTimestamp = folderTimestamp;
-	}
+	
 	public String getUserEmailId() {
 		return userEmailId;
 	}
@@ -53,11 +49,11 @@ public class Folder {
 	public void setMailCount(int mailCount) {
 		this.mailCount = mailCount;
 	}
-	public boolean getIsExcludeInbox() {
-		return isExcludeInbox;
+	public boolean getExcludeInbox() {
+		return excludeInbox;
 	}
-	public void setIsExcludeInbox(boolean isExcludeInbox) {
-		this.isExcludeInbox = isExcludeInbox;
+	public void setExcludeInbox(boolean excludeInbox) {
+		this.excludeInbox = excludeInbox;
 	}
 	public String getRuleSubject() {
 		return ruleSubject;
@@ -88,5 +84,17 @@ public class Folder {
 	}
 	public void setRuleBCC(Set<String> ruleBCC) {
 		this.ruleBCC = ruleBCC;
+	}
+	public Date getCreatedTime() {
+		return createdTime;
+	}
+	public void setCreatedTime(Date createdTime) {
+		this.createdTime = createdTime;
+	}
+	public Date getModifiedTime() {
+		return modifiedTime;
+	}
+	public void setModifiedTime(Date modifiedTime) {
+		this.modifiedTime = modifiedTime;
 	}
 }

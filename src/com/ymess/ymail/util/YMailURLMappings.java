@@ -15,5 +15,6 @@ public class YMailURLMappings {
 	public static final String DELETE_MAIlS = "delete_mails.json"; //MailActivitiesController.java
 	public static final String MAIL_DETAILS = "get_mail_details.htm"; //MailActivitiesController.java
 	public static final String CREATE_FOLDER = "create_folder.json"; //MailActivitiesController.java
+	public static final String REDIRECT_SUCCESS_FOLDER_CREATED = "redirect:"+INBOX_PAGE;  //MailActivitiesController.java
 	
 }

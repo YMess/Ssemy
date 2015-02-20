@@ -1,4 +1,11 @@
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %> 
+<%@ page language="java" import="org.springframework.security.core.Authentication, org.springframework.security.core.context.SecurityContextHolder" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+    
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@ page import="org.apache.commons.codec.binary.Base64" %>
   <link href="css/custom/modal.css" rel="stylesheet" type="text/css"/>
   <script type='text/javascript' src='js/jquery.simplemodal.js'></script>
   <script type="text/javascript">
@@ -105,12 +112,14 @@
                     <a href="" class="basic">
                         <span class="menu-text">New Folder</span>  
                     </a>
-                </li>              
+                </li> 
+               <c:forEach items="${folders}" var="folder">      
                 <li>
-                    <a href="http://vendroid.venmond.com/index-ecommerce.php">
-                        <span class="menu-text">Edit</span>  
+                    <a href="#" id="<c:out value="${folder.folderName}"/>">
+                        <span class="menu-text"><c:out value="${folder.folderName}"/></span>  
                     </a>
-                </li>                                                                                                  
+                </li>  
+                </c:forEach>                                                                                                
             </ul>   
       	</div>
     </li>             

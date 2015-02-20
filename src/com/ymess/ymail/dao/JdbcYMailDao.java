@@ -12,15 +12,16 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.springframework.cassandra.core.RowMapper;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.cassandra.core.CassandraTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.exceptions.DriverException;
 import com.datastax.driver.core.exceptions.NoHostAvailableException;
 import com.datastax.driver.core.querybuilder.Delete;
-import com.datastax.driver.core.querybuilder.Delete.Where;
 import com.datastax.driver.core.querybuilder.Insert;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
@@ -709,39 +710,54 @@ public class JdbcYMailDao  implements YMailDao {
 
 	@Override
 	public Boolean createFolder(Folder folder) {
-	try {		
-		String CHECK_IF_USER_EXISTS = "select count(1) from folder_details where user_email_id='"+folder.getUserEmailId()+"'";
-		Long userCountTo = cassandraTemplate.queryForObject(CHECK_IF_USER_EXISTS,Long.class);
+	try {
+		
+		Select selectFolderCount = QueryBuilder.select().countAll().from("folder_details");
+		 selectFolderCount.where(QueryBuilder.eq("user_email_id", folder.getUserEmailId()));
+		 selectFolderCount.where(QueryBuilder.eq("folder_name", folder.getFolderName()));
+		
+		Long folderCount = cassandraTemplate.queryForObject(selectFolderCount,Long.class);
 		
 		Date currentTime = new Date();
 		
-		ArrayList<Long> ruleIds = new ArrayList<Long>();
-		
-		if(userCountTo != 0)
+		if(null != folderCount && folderCount != 0)
 		{
-		    String deleteRules = "delete from rule_details where user_email_id='"+folder.getUserEmailId()+"'";
-			cassandraTemplate.equals(deleteRules);
-			
-			ruleIds = createNewRules(folder,currentTime);
+            Select selectFolder = QueryBuilder.select("created_time").from("folder_details");
+            	   selectFolder.where(QueryBuilder.eq("user_email_id", folder.getUserEmailId()));
+            	   selectFolder.where(QueryBuilder.eq("folder_name", folder.getFolderName()));
+            	   
+           	Date createdTime =  cassandraTemplate.queryForObject(selectFolder, Date.class);
 			
 			//Insert in Folder
 			Update updateFolder = QueryBuilder.update("folder_details");
-					updateFolder.with(QueryBuilder.add("folder_name", folder.getFolderName()));
-					updateFolder.with(QueryBuilder.add("folder_saved_timestamp", currentTime));
-					updateFolder.with(QueryBuilder.add("rule", ruleIds));
-					updateFolder.with(QueryBuilder.add("is_exclude_inbox", folder.getIsExcludeInbox()));
-					updateFolder.where(QueryBuilder.eq("user_email_id", folder.getUserEmailId()));
+				   updateFolder.with(QueryBuilder.set("folder_name", folder.getFolderName()));
+				   updateFolder.with(QueryBuilder.set("modified_time", currentTime));
+				   updateFolder.with(QueryBuilder.set("exclude_inbox", folder.getExcludeInbox()));
+				   updateFolder.with(QueryBuilder.set("rule_to", folder.getRuleTo()));
+				   updateFolder.with(QueryBuilder.set("rule_from", folder.getRuleFrom()));
+				   updateFolder.with(QueryBuilder.set("rule_cc", folder.getRuleCC()));
+				   updateFolder.with(QueryBuilder.set("rule_bcc", folder.getRuleBCC()));
+				   updateFolder.with(QueryBuilder.set("rule_subject", folder.getRuleSubject()));
+				   updateFolder.where(QueryBuilder.eq("user_email_id", folder.getUserEmailId()));
+				   updateFolder.where(QueryBuilder.eq("created_time",createdTime));
+			
+				   cassandraTemplate.execute(updateFolder);
 		}
 		else
 		{
-			ruleIds = createNewRules(folder,currentTime);
 			//Insert in Folder
 			Insert insertFolder = QueryBuilder.insertInto("folder_details")
 					.value("user_email_id", folder.getUserEmailId())
-					.value("folder_saved_timestamp", currentTime)
+					.value("created_time", currentTime)
 					.value("folder_name", folder.getFolderName())
-					.value("rule", ruleIds)
-					.value("is_exclude_inbox", folder.getIsExcludeInbox());
+					.value("exclude_inbox", folder.getExcludeInbox())
+					.value("rule_to", folder.getRuleTo())
+					.value("rule_from", folder.getRuleFrom())
+					.value("rule_cc", folder.getRuleCC())
+					.value("rule_bcc", folder.getRuleBCC())
+					.value("rule_subject", folder.getRuleSubject());
+			
+			cassandraTemplate.execute(insertFolder);
 		 }	
 		
 		}catch (EmptyResultDataAccessException  | NullPointerException emptyEx) {
@@ -757,123 +773,53 @@ public class JdbcYMailDao  implements YMailDao {
 
 	/**
 	 * @author RVishwakarma
-	 * @param folder
-	 * @return ArrayList<Long> RuleIds
+	 * @param userEmailId
+	 * @return ArrayList<Folder>
 	 */
-	private ArrayList<Long> createNewRules(Folder folder,Date currentTime) {
-		long newRuleId = 0;
+	@Override
+	public List<Folder> getFolders(String userEmailId) {
 		
-		ArrayList<Long> ruleIds = new ArrayList<Long>();
-		
-		newRuleId = Long.parseLong(getLastInsertedRuleId()) + 1; 
-		//Check RuleTo
-		for (String mailIdTo : folder.getRuleTo()) {
+		List<Folder> folders = new ArrayList<Folder>();
+		try {
+			Select selectFolders = QueryBuilder.select().from("folder_details");
+			selectFolders.where(QueryBuilder.eq("user_email_id", userEmailId));
 			
-			Insert insertRuleTo = QueryBuilder.insertInto("rule_details")
-					.value("rule_id", newRuleId)
-					.value("user_email_id", folder.getUserEmailId())
-					.value("rule_saved_timestamp", currentTime)
-					.value("flag", "to")
-					.value("value", mailIdTo);
-		
-				try {
-					 cassandraTemplate.execute(insertRuleTo);
-				}
-				catch(Exception ex)
-				{
-					logger.error(ex.getStackTrace());
-				}
+			folders = cassandraTemplate.query(selectFolders,new FolderMapper());
+			//folders = cassandraTemplate.queryForList(selectFolders, String.class);
+		}catch (EmptyResultDataAccessException  | NullPointerException emptyEx) {
+			logger.error(YMessMessageConstants.EMPTY_RESULT_SET);
 		}
-		ruleIds.add(newRuleId);
-		
-		newRuleId = Long.parseLong(getLastInsertedRuleId()) + 1;
-		
-		//Check RuleFrom
-		for (String mailIdFrom : folder.getRuleFrom()) {
-			
-			Insert insertRuleFrom = QueryBuilder.insertInto("rule_details")
-					.value("rule_id", newRuleId)
-					.value("user_email_id", folder.getUserEmailId())
-					.value("rule_saved_timestamp", currentTime)
-					.value("flag", "from")
-					.value("value", mailIdFrom);
-		
-				try {
-					 cassandraTemplate.execute(insertRuleFrom);
-				}
-				catch(Exception ex)
-				{
-					logger.error(ex.getStackTrace());
-				}
+		catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e.getLocalizedMessage());
 		}
-		ruleIds.add(newRuleId);
-		
-		newRuleId = Long.parseLong(getLastInsertedRuleId()) + 1;
-		//Check RuleCC
-		for (String mailIdCC : folder.getRuleTo()) {
-			
-			Insert insertRuleCC = QueryBuilder.insertInto("rule_details")
-					.value("rule_id", newRuleId)
-					.value("user_email_id", folder.getUserEmailId())
-					.value("rule_saved_timestamp", currentTime)
-					.value("flag", "cc")
-					.value("value", mailIdCC);
-		
-				try {
-					 cassandraTemplate.execute(insertRuleCC);
-				}
-				catch(Exception ex)
-				{
-					logger.error(ex.getStackTrace());
-				}
-		}
-		ruleIds.add(newRuleId);
-		
-		newRuleId = Long.parseLong(getLastInsertedRuleId()) + 1;
-		//Check RuleBCC
-		for (String mailIdBCC : folder.getRuleTo()) {
-			
-			Insert insertRuleBCC = QueryBuilder.insertInto("rule_details")
-					.value("rule_id", newRuleId)
-					.value("user_email_id", folder.getUserEmailId())
-					.value("rule_saved_timestamp", currentTime)
-					.value("flag", "to")
-					.value("value", mailIdBCC);
-		
-				try {
-					 cassandraTemplate.execute(insertRuleBCC);
-				}
-				catch(Exception ex)
-				{
-					logger.error(ex.getStackTrace());
-				}
-		}
-		ruleIds.add(newRuleId);
-		return ruleIds;
+		return folders;
 	}
-
-
+	
 	/**
-	 * @author RVishwakarma
-	 * @return Last Inserted RuleId
+	 * 
+	 * This class is used to Map the ResultSet values(folder) to Domain/Value Objects(Folder)
+	 *
 	 */
-	private String getLastInsertedRuleId() {
-		long maxRuleId = 0;
-		
-		Select selectRuleId = QueryBuilder.select("rule_id").from("rule_details");
-		    
-		List<Long> ruleIds = cassandraTemplate.queryForObject(selectRuleId, List.class);
-		try
-		{	
-			if(!ruleIds.isEmpty())
-			{
-				maxRuleId = (Collections.max(ruleIds));
-			}
+	private class FolderMapper implements RowMapper<Folder> {
+		@Override
+		public Folder mapRow(Row rs, int arg1) throws DriverException {
+			Folder folder = new Folder();
+			folder.setFolderName(rs.getString("folder_name"));
+			if(rs.getDate("created_time") != null)
+				folder.setCreatedTime(rs.getDate("created_time"));
+			
+			if(rs.getDate("modified_time") != null)	
+				folder.setModifiedTime(rs.getDate("modified_time"));
+			folder.setUserEmailId(rs.getString("user_email_id"));
+			folder.setRuleTo((Set<String>) rs.getSet("rule_to",String.class));
+			folder.setRuleFrom((Set<String>) rs.getSet("rule_from",String.class));
+			folder.setRuleCC((Set<String>) rs.getSet("rule_cc",String.class));
+			folder.setRuleBCC((Set<String>) rs.getSet("rule_bcc",String.class));
+			folder.setRuleSubject(rs.getString("rule_subject"));
+			folder.setExcludeInbox(rs.getBool("exclude_inbox"));
+			
+			return folder;
 		}
-		catch(EmptyResultDataAccessException emptyRS)
-		{
-			logger.error(emptyRS.getLocalizedMessage());
-		}
-		return String.valueOf(maxRuleId);
 	}
 }

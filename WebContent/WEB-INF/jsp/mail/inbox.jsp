@@ -149,7 +149,7 @@ $(document).ready(function(){
 $().ready(function(){
 	
 	$( '#createFolder').submit( function( e ) {
-	    	  alert("hi");
+
 			var successFlag = false;
 		    var form = new FormData(this);
 
@@ -159,6 +159,7 @@ $().ready(function(){
 			  $("#ruleTo").val("");
 			  $("#ruleCC").val("");
 			  $("#ruleBCC").val("");
+			  $("#ruleSubject").val("");
 			  $("#isExcludeInbox").val("");
 			  
 		    var xmlhttp = new XMLHttpRequest();

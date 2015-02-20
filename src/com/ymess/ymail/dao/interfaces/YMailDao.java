@@ -88,5 +88,13 @@ public interface YMailDao {
 	 */
 	Boolean createFolder(Folder folder);
 
-	
+
+	/**
+	 * @author RVishwakarma
+	 * @param userEmailId
+	 * @return ArrayList<Folder>
+	 * @return
+	 */
+	List<Folder> getFolders(String userEmailId);
+
 }

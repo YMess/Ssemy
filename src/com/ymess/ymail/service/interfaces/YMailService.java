@@ -83,6 +83,11 @@ public interface YMailService {
 	 */
 	Boolean createFolder(Folder folder);
 
-	
+	/**
+	 * @author RVishwakarma
+	 * @param userEmailId
+	 * @return ArrayList<Folder>
+	 */
+	List<Folder> getFolders(String userEmailId);
 
 }

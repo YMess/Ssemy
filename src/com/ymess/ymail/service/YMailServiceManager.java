@@ -120,4 +120,14 @@ public class YMailServiceManager implements YMailService {
 	public Boolean createFolder(Folder folder) {
 		return yMailDao.createFolder(folder);
 	}
+
+	/**
+	 * @author RVishwakarma
+	 * @param userEmailId
+	 * @return ArrayList<Folder>
+	 */
+	@Override
+	public List<Folder> getFolders(String userEmailId) {
+		return yMailDao.getFolders(userEmailId);
+	}
 }

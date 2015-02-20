@@ -51,15 +51,18 @@ public class MailActivitiesController {
 		String userEmailId = authentication.getName();
 		
 		List<Mail> mails = new ArrayList<Mail>();
+		List<Folder> folders = new ArrayList<Folder>();
 		
 		try {
 			mails = yMailService.getInboxMails(userEmailId);
+			folders = yMailService.getFolders(userEmailId);
 			logger.info(YMailLoggerConstants.INBOX_PAGE +" "+ userEmailId);
 		} catch (Exception e) {
 			logger.error(e.getLocalizedMessage());
 		}
-		
+
 		model.addAttribute("folder", new Folder());
+		model.addAttribute("folders",folders);
 		model.addAttribute("mails",mails);
 		return YMailJSPMappings.INBOX_PAGE;
 	}
@@ -256,7 +259,7 @@ public class MailActivitiesController {
 	
 	@RequestMapping(value=YMailURLMappings.CREATE_FOLDER,method=RequestMethod.POST)
 	@ResponseBody
-	public Boolean createFolder(@ModelAttribute("folder") Folder folder, BindingResult bindingResult)
+	public void createFolder(@ModelAttribute("folder") Folder folder, BindingResult bindingResult)
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		String userEmailId= authentication.getName();
@@ -271,8 +274,6 @@ public class MailActivitiesController {
 			ex.printStackTrace();
 			logger.error(ex.getStackTrace().toString());
 		}
-		
-		return successFlag;
 	}
 	
 }
